@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simon Larré — Réalisateur · Motion Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f0e8;
+    --cream: #e8e0d0;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gray: #3a3a3a;
+    --gray-light: #888;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CURSOR */
+  .cursor {
+    width: 10px; height: 10px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease, background 0.2s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor.expanded { width: 36px; height: 36px; background: var(--gold-light); }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.5rem 3rem;
+    mix-blend-mode: normal;
+  }
+  nav::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(10,10,10,0.9) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    color: var(--white);
+    text-decoration: none;
+    position: relative;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; position: relative; }
+  .nav-links a {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    text-decoration: none;
+    transition: color 0.25s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  /* HERO */
+  .hero {
+    height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 70% 40%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 50%);
+  }
+  .hero-noise {
+    position: absolute; inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+  .hero-line {
+    position: absolute; top: 0; left: 3rem;
+    width: 1px; height: 35vh;
+    background: linear-gradient(to bottom, transparent, var(--gold));
+    opacity: 0.4;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 14vw, 13rem);
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    position: relative;
+    animation: fadeUp 1s ease both;
+  }
+  .hero-title em {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    color: var(--gold);
+  }
+  .hero-sub {
+    display: flex; align-items: center; gap: 2rem;
+    margin-top: 2rem;
+    animation: fadeUp 1s 0.2s ease both;
+  }
+  .hero-role {
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+  }
+  .hero-sep { width: 60px; height: 1px; background: var(--gold); opacity: 0.5; }
+  .hero-scroll {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* FILTER */
+  .filter-bar {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    padding: 3rem 3rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .filter-btn {
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: var(--gray-light);
+    cursor: none;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2px;
+    padding: 0;
+  }
+  .card {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--gray);
+    cursor: none;
+  }
+  .card.featured {
+    grid-column: span 2;
+    aspect-ratio: 21/9;
+  }
+  .card-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.5s ease;
+    filter: grayscale(30%) brightness(0.75);
+  }
+  .card:hover .card-img {
+    transform: scale(1.06);
+    filter: grayscale(0%) brightness(0.85);
+  }
+  .card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,10,0.9) 0%, transparent 60%);
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .card:hover .card-overlay { opacity: 1; }
+  .card-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, transparent 100%);
+    transform: translateY(20px);
+    transition: transform 0.4s ease;
+  }
+  .card:hover .card-bottom { transform: translateY(0); }
+  .card-cats {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
+  .cat-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--white);
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+  }
+  .card-date {
+    font-size: 0.65rem;
+    color: var(--gray-light);
+    letter-spacing: 0.1em;
+  }
+  .card-thumb-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  }
+
+  /* ABOUT */
+  .about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-top: 6rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .about-text {
+    padding: 5rem 3rem;
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .section-label::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--gold);
+    display: inline-block;
+  }
+  .about-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1.15;
+    margin-bottom: 2rem;
+    color: var(--white);
+  }
+  .about-heading em { font-style: italic; color: var(--gold); }
+  .about-body {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--gray-light);
+    max-width: 460px;
+  }
+  .about-stats {
+    padding: 5rem 3rem;
+    display: flex; flex-direction: column;
+    justify-content: center; gap: 2.5rem;
+  }
+  .stat {
+    display: flex; align-items: baseline; gap: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 2rem;
+  }
+  .stat:last-child { border-bottom: none; padding-bottom: 0; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    line-height: 1.5;
+  }
+
+  /* CONTACT */
+  .contact {
+    padding: 6rem 3rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  .contact-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 0.9;
+    color: var(--white);
+  }
+  .contact-heading span { color: var(--gold); }
+  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-group input, .form-group textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--white);
+    padding: 1rem 1.25rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.25s;
+    cursor: none;
+  }
+  .form-group input:focus, .form-group textarea:focus {
+    border-color: var(--gold);
+  }
+  .form-group textarea { height: 120px; resize: vertical; }
+  .form-group input::placeholder, .form-group textarea::placeholder {
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+  }
+  .btn-send {
+    align-self: flex-start;
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    padding: 0.9rem 2.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: none;
+    transition: background 0.25s, transform 0.15s;
+  }
+  .btn-send:hover { background: var(--gold-light); transform: translateX(4px); }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem 3rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  footer p { font-size: 0.7rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.2); }
+  .social-links { display: flex; gap: 1.5rem; }
+  .social-links a {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .social-links a:hover { color: var(--gold); }
+
+  /* MODAL */
+  .modal {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.92);
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .modal.open { display: flex; }
+  .modal-inner {
+    max-width: 900px;
+    width: 100%;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: -2.5rem; right: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    cursor: none;
+    background: none;
+    border: none;
+    color: var(--gray-light);
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--gold); }
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--white);
+  }
+  .modal-desc {
+    font-size: 0.9rem;
+    color: var(--gray-light);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+  .modal-video {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-light);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+  }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    overflow: hidden;
+    padding: 1.5rem 0;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    margin: 4rem 0;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    white-space: nowrap;
+    animation: marquee 18s linear infinite;
+  }
+  .marquee-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  .marquee-item.accent { color: rgba(201,168,76,0.2); }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1.25rem 1.5rem; }
+    .hero { padding: 0 1.5rem 3rem; }
+    .filter-bar { padding: 2rem 1.5rem 1.5rem; }
+    .grid { grid-template-columns: 1fr; }
+    .card.featured { grid-column: span 1; aspect-ratio: 16/9; }
+    .about { grid-template-columns: 1fr; }
+    .about-text { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 3rem 1.5rem; }
+    .about-stats { padding: 3rem 1.5rem; }
+    .contact { grid-template-columns: 1fr; padding: 4rem 1.5rem; }
+    footer { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<nav>
+  <a href="#" class="nav-logo">Simon Larré</a>
+  <ul class="nav-links">
+    <li><a href="#works">Portfolio</a></li>
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-noise"></div>
+  <div class="hero-line"></div>
+  <h1 class="hero-title">Simon<br><em>Larré</em></h1>
+  <div class="hero-sub">
+    <span class="hero-role">Réalisateur</span>
+    <span class="hero-sep"></span>
+    <span class="hero-role">Motion Designer</span>
+    <span class="hero-sep"></span>
+    <span class="hero-scroll">Poitiers, France</span>
+  </div>
+</section>
+
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee">
+    <span class="marquee-item">Réalisation</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Motion Design</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">IA Générative</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Clip</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Événementiel</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Culture</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Réalisation</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Motion Design</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">IA Générative</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Clip</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Événementiel</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Culture</span>
+    <span class="marquee-item accent">✦</span>
+  </div>
+</div>
+
+<section id="works">
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">Tout</button>
+    <button class="filter-btn" data-filter="ia">IA</button>
+    <button class="filter-btn" data-filter="clip">Clip</button>
+    <button class="filter-btn" data-filter="événementiel">Événementiel</button>
+    <button class="filter-btn" data-filter="culture">Culture</button>
+    <button class="filter-btn" data-filter="musique">Musique</button>
+    <button class="filter-btn" data-filter="pédagogie">Pédagogie</button>
+  </div>
+
+  <div class="grid" id="grid">
+
+    <div class="card featured" data-cats="ia clip culture musique motion"
+         data-title="Vidéos IA"
+         data-desc="Extraits de projets de vidéos génératives réalisés avec des outils d'IA (Midjourney, Kling AI, Adobe Firefly) et montés sur Adobe Premiere Pro."
+         data-date="Mars 2026">
+      <div class="card-thumb-placeholder">🎬</div>
+      <div class="card-bottom">
+        <div class="card-cats">
+          <span class="cat-tag">IA</span>
+          <span class="cat-tag">· Clip</span>
+          <span class="cat-tag">· Motion Design</span>
+        </div>
+        <div class="card-title">Vidéos IA</div>
+        <div class="card-date">Mars 2026</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="événementiel"
+         data-title="Mariage, mariage…"
+         data-desc="Captation vidéo pour le mariage d'Aurélien et Anne-Sophie. Montage réalisé en collaboration avec aur_crea."
+         data-date="Décembre 2025">
+      <div class="card-thumb-placeholder">💍</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">Mariage, mariage…</div>
+        <div class="card-date">Décembre 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture ia"
+         data-title="Voyage dans le temps"
+         data-desc="Morphing du chasseur-cueilleur au voyageur temporel, réalisé à partir d'une photo et de prompts sur Nanobanana, Midjourney et Kling AI. Bande son Tame Impala."
+         data-date="Novembre 2025">
+      <div class="card-thumb-placeholder">⏳</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· IA</span></div>
+        <div class="card-title">Voyage dans le temps</div>
+        <div class="card-date">Novembre 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture événementiel pédagogie"
+         data-title="Jeunes à Poitiers, Jeunes Engagés"
+         data-desc="Accompagnement à la réalisation d'une courte dystopie autour de l'Union Européenne, destinée aux secteurs Jeunes, lycées et Résidences Habitat Jeunes."
+         data-date="Mars 2025">
+      <div class="card-thumb-placeholder">🇪🇺</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· Pédagogie</span></div>
+        <div class="card-title">Jeunes à Poitiers</div>
+        <div class="card-date">Mars 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture"
+         data-title="Info Jeunes Nouvelle-Aquitaine"
+         data-desc="Vidéo de présentation de La Boussole des Jeunes — 80 secondes de témoignages sur ce service gratuit et anonyme dédié aux jeunes. Réalisé avec IKKI VIDÉO."
+         data-date="Février 2025">
+      <div class="card-thumb-placeholder">📡</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span></div>
+        <div class="card-title">Info Jeunes Nouvelle-Aquitaine</div>
+        <div class="card-date">Février 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture ia"
+         data-title="ai.viator"
+         data-desc="Voyage dans le temps à travers de vieilles cartes postales de Poitiers, Corte, La Rochelle, Naples — recolorisées et réanimées par intelligence artificielle."
+         data-date="Janvier 2025">
+      <div class="card-thumb-placeholder">🗺️</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· IA</span></div>
+        <div class="card-title">ai.viator</div>
+        <div class="card-date">Janvier 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture"
+         data-title="Plage 76 — heure d'hiver"
+         data-desc="Film pour Plage 76, espace regroupant boutique et galerie : arts visuels, artisanat d'art, mode, design & décoration, porté par Consortium Coopérative à Poitiers."
+         data-date="Janvier 2023">
+      <div class="card-thumb-placeholder">🏖️</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· Tiers-lieu</span></div>
+        <div class="card-title">Plage 76 — heure d'hiver</div>
+        <div class="card-date">Janvier 2023</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture"
+         data-title="CRESAM"
+         data-desc="Film de présentation du Centre National de Ressources Handicaps Rares – Surdicécité. Sous-titres disponibles. Voix off et missions de l'équipe."
+         data-date="Décembre 2022">
+      <div class="card-thumb-placeholder">♿</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Santé</span></div>
+        <div class="card-title">Présentation du CRESAM</div>
+        <div class="card-date">Décembre 2022</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="événementiel musique"
+         data-title="Gospel'ère à Notre Dame la Grande"
+         data-desc="Captation de la chorale Gospel'ère (créée en 2004 à Poitiers) lors d'un concert à Notre Dame la Grande. Musique gospel associative ouverte à tous."
+         data-date="Octobre 2022">
+      <div class="card-thumb-placeholder">🎶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span><span class="cat-tag">· Musique</span></div>
+        <div class="card-title">Gospel'ère à Notre Dame</div>
+        <div class="card-date">Octobre 2022</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="ia musique clip"
+         data-title="The Third Machine — Pool of Tears"
+         data-desc="Collaboration entre son et intelligence artificielle : The Third Machine (groupe de musique) et Simon Larré (prompt artist). Pool of Tears Remastered."
+         data-date="Août 2022">
+      <div class="card-thumb-placeholder">🌊</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">IA</span><span class="cat-tag">· Musique</span></div>
+        <div class="card-title">The Third Machine — Pool of Tears</div>
+        <div class="card-date">Août 2022</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="about-text">
+    <p class="section-label">À propos</p>
+    <h2 class="about-heading">Raconter des histoires<br>avec <em>image & son</em></h2>
+    <p class="about-body">
+      Simon Larré est réalisateur et motion designer basé à Poitiers. Il travaille entre la captation événementielle, le clip musical, la vidéo institutionnelle et l'exploration des outils d'intelligence artificielle générative.
+      <br><br>
+      Sous le pseudonyme <strong>Antidatae</strong>, il expérimente l'animation d'images fixes par IA — cartes postales d'époque, morphings temporels, créations sonores — et collabore avec artistes, associations et institutions culturelles.
+      <br><br>
+      Chaque projet est une rencontre entre technique et sens, entre outil et intention.
+    </p>
+  </div>
+  <div class="about-stats">
+    <div class="stat">
+      <span class="stat-num">10+</span>
+      <span class="stat-label">Années<br>d'expérience</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">50+</span>
+      <span class="stat-label">Projets<br>réalisés</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">IA</span>
+      <span class="stat-label">Exploration<br>générative</span>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div>
+    <p class="section-label">Contact</p>
+    <h2 class="contact-heading">Un projet<br>en <span>tête ?</span></h2>
+  </div>
+  <div class="contact-form">
+    <div class="form-group">
+      <input type="text" placeholder="Votre nom" />
+    </div>
+    <div class="form-group">
+      <input type="email" placeholder="Email" />
+    </div>
+    <div class="form-group">
+      <textarea placeholder="Décrivez votre projet…"></textarea>
+    </div>
+    <button class="btn-send">Envoyer →</button>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Simon Larré — Réalisateur · Motion Designer · Poitiers</p>
+  <div class="social-links">
+    <a href="https://www.instagram.com/antidatae/" target="_blank">Instagram</a>
+    <a href="#" target="_blank">Vimeo</a>
+    <a href="#" target="_blank">YouTube</a>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-inner">
+    <button class="modal-close" id="modal-close">← Fermer</button>
+    <h3 class="modal-title" id="modal-title"></h3>
+    <p class="modal-desc" id="modal-desc"></p>
+    <div class="modal-video" id="modal-video">[ Vidéo disponible sur le site original ]</div>
+    <p style="margin-top:0.75rem; font-size:0.65rem; letter-spacing:0.15em; color:rgba(255,255,255,0.2);" id="modal-date"></p>
+  </div>
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .card, .filter-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
+  });
+
+  // Filter
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.card');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      cards.forEach(card => {
+        const cats = card.dataset.cats || '';
+        if (filter === 'all' || cats.includes(filter)) {
+          card.style.display = '';
+          setTimeout(() => card.style.opacity = '1', 10);
+        } else {
+          card.style.opacity = '0';
+          setTimeout(() => card.style.display = 'none', 300);
+        }
+      });
+    });
+  });
+
+  // Modal
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalDesc = document.getElementById('modal-desc');
+  const modalDate = document.getElementById('modal-date');
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      modalTitle.textContent = card.dataset.title || '';
+      modalDesc.textContent = card.dataset.desc || '';
+      modalDate.textContent = card.dataset.date || '';
+      modal.classList.add('open');
+    });
+  });
+  document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('open'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('open'); });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+  cards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(24px)';
+    card.style.transition = `opacity 0.6s ${i * 0.05}s ease, transform 0.6s ${i * 0.05}s ease`;
+    observer.observe(card);
+  });
+</script>
+</body>
+</html>
