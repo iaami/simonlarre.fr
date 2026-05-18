@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA — Simon Larre</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+  :root {
+    --ink: #07090f;
+    --ink2: #0f1520;
+    --cream: #ddd5c0;
+    --cream-dark: #a89f88;
+    --red: #c0392b;
+    --red-dark: #922b21;
+    --silver: #6a7080;
+    --tape: #1a2030;
+    --star-bg: #07090f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--star-bg);
+    color: var(--cream);
+    font-family: 'Space Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  #starfield {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  #comet-cursor {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+  }
+
+  /* ─── GRAIN OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.5;
+    mix-blend-mode: screen;
+  }
+
+  /* ─── HEADER ─── */
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2.5rem;
+    border-bottom: 1px solid rgba(180,80,20,0.3);
+    position: sticky;
+    top: 0;
+    background: rgba(7,9,15,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+  }
+  .site-header a {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    color: var(--cream);
+    text-decoration: none;
+  }
+  .site-header a:hover { color: var(--red); }
+  .header-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.08em;
+  }
+
+  /* ─── FILM STRIP HERO ─── */
+  .filmstrip-hero {
+    position: relative;
+    padding: 4rem 2.5rem 0;
+    overflow: hidden;
+    min-height: 90vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  .hero-text { position: relative; z-index: 10; }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 2rem;
+    height: 2px;
+    background: var(--red);
+  }
+
+  h1.headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 8vw, 7.5rem);
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  h1.headline em {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-size: 0.65em;
+    color: var(--red);
+    display: block;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-desc {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--ink);
+    max-width: 38ch;
+    margin: 1.5rem 0 2.5rem;
+    border-left: 3px solid var(--red);
+    padding-left: 1rem;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    color: var(--cream);
+    background: var(--ink);
+    padding: 0.8rem 2.5rem;
+    text-decoration: none;
+    border: 2px solid var(--ink);
+    transition: all 0.15s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .cta-btn:hover {
+    color: var(--ink);
+    background: var(--red);
+    border-color: var(--red);
+  }
+
+  /* ─── COLLAGE ZONE ─── */
+  .hero-collage {
+    position: relative;
+    height: 80vh;
+    max-height: 700px;
+  }
+
+  /* Effet pellicule cramée 16mm — halo orangé/bleu en pseudo-élément */
+  .cut-img {
+    position: absolute;
+    overflow: visible;
+    border: none;
+    box-shadow: none;
+    transition: transform 0.4s cubic-bezier(.22,.61,.36,1), z-index 0s;
+    cursor: pointer;
+  }
+  .cut-img:hover { z-index: 50 !important; }
+
+  /* Le conteneur image avec clip + bord cramé */
+  .cut-img .frame-wrap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Halo pellicule cramée : orangé chaud + bleu ciel en transparence */
+  .cut-img .frame-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 1px;
+    box-shadow:
+      inset 0 0 12px 4px rgba(220, 120, 30, 0.55),
+      inset 0 0 28px 8px rgba(30, 80, 180, 0.22),
+      inset 0 0 4px 1px rgba(255, 200, 80, 0.35);
+    mix-blend-mode: screen;
+  }
+
+  /* Bord irrégulier cramé — vignette intérieure sombre */
+  .cut-img .frame-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(180,70,10,0.45) 0%, transparent 45%),
+      radial-gradient(ellipse at 100% 0%, rgba(10,40,140,0.35) 0%, transparent 45%),
+      radial-gradient(ellipse at 100% 100%, rgba(200,100,20,0.4) 0%, transparent 40%),
+      radial-gradient(ellipse at 0% 100%, rgba(20,60,160,0.3) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.18) 100%);
+  }
+
+  .cut-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    image-rendering: auto;
+    animation: fps12 0.083s steps(1) infinite;
+  }
+
+  /* Animation 12fps : cycling opacity pour simuler la cadence */
+  @keyframes fps12 {
+    0%   { opacity: 1; }
+    45%  { opacity: 1; }
+    50%  { opacity: 0.92; }
+    95%  { opacity: 0.92; }
+    100% { opacity: 1; }
+  }
+
+  /* Positions et formats variés dans le collage */
+  /* 16:9 */
+  .cut-img:nth-child(1) { width: 50%; aspect-ratio: 16/9; height: auto; top: 2%; left: 3%; transform: rotate(-2.5deg); z-index: 5; }
+  /* 9:16 portrait */
+  .cut-img:nth-child(2) { width: 22%; aspect-ratio: 9/16; height: auto; top: 5%; left: 56%; transform: rotate(2deg); z-index: 8; }
+  /* 4:3 */
+  .cut-img:nth-child(3) { width: 44%; aspect-ratio: 4/3; height: auto; top: 36%; left: 0%; transform: rotate(-1deg); z-index: 6; }
+  /* 1:1 carré */
+  .cut-img:nth-child(4) { width: 28%; aspect-ratio: 1/1; height: auto; top: 30%; left: 66%; transform: rotate(3.5deg); z-index: 9; }
+  /* 16:9 bas */
+  .cut-img:nth-child(5) { width: 42%; aspect-ratio: 16/9; height: auto; top: 64%; left: 12%; transform: rotate(-1.5deg); z-index: 7; }
+  /* 4:3 bas droite */
+  .cut-img:nth-child(6) { width: 30%; aspect-ratio: 4/3; height: auto; top: 58%; left: 62%; transform: rotate(1deg); z-index: 4; }
+
+  /* Tape decoration */
+  .tape-strip {
+    position: absolute;
+    background: rgba(212, 207, 197, 0.7);
+    border: 1px solid rgba(150,140,120,0.4);
+    transform-origin: center;
+  }
+  .tape-h { height: 22px; width: 70px; top: 50%; }
+  .tape-v { height: 70px; width: 22px; }
+
+  /* ─── FILM PERFORATIONS DIVIDER ─── */
+  .perforation-bar {
+    width: 100%;
+    background: var(--ink);
+    padding: 0.6rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow: hidden;
+    margin: 4rem 0 0;
+  }
+  .perf-row {
+    display: flex;
+    gap: 12px;
+    padding: 0 12px;
+    flex: 1;
+  }
+  .perf {
+    width: 18px;
+    height: 22px;
+    background: var(--cream);
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .timecode {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--cream);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding: 0 1rem;
+    opacity: 0.6;
+  }
+
+  /* ─── SCROLLING TICKER ─── */
+  .ticker-wrap {
+    background: var(--red);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 0.6rem 0;
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+  .ticker-content {
+    display: inline-block;
+    animation: ticker 18s linear infinite;
+  }
+  .ticker-content span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    color: var(--cream);
+    padding: 0 2rem;
+  }
+  .ticker-content span::after {
+    content: '✦';
+    padding-left: 2rem;
+    color: rgba(240,235,224,0.5);
+  }
+  @keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ─── SECTION: EXEMPLES GRILLE ─── */
+  .section-header {
+    padding: 5rem 2.5rem 2rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    border-bottom: 1px solid var(--ink);
+    gap: 2rem;
+  }
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--silver);
+    margin-bottom: 0.5rem;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+  .section-sub {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--silver);
+    max-width: 40ch;
+    text-align: right;
+  }
+
+  /* ─── GALLERY GRID ─── */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    padding: 2rem 2.5rem;
+  }
+
+  /* Formats variés via classes */
+  .gallery-item { position: relative; overflow: hidden; cursor: pointer; background: #0d0b08; }
+  .gallery-item.r-169  { aspect-ratio: 16/9; }
+  .gallery-item.r-916  { aspect-ratio: 9/16; grid-row: span 2; }
+  .gallery-item.r-11   { aspect-ratio: 1/1; }
+  .gallery-item.r-43   { aspect-ratio: 4/3; }
+  .gallery-item.r-32   { aspect-ratio: 3/2; }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: contrast(1.05) saturate(0.88);
+    transition: filter 0.3s ease;
+    image-rendering: auto;
+  }
+
+  /* Halo pellicule cramée sur chaque vignette */
+  .gallery-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(200,80,10,0.38) 0%, transparent 50%),
+      radial-gradient(ellipse at 100% 100%, rgba(10,50,160,0.28) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0,0,0,0.22) 100%);
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+  .gallery-item:hover::before { opacity: 1; }
+  .gallery-item:hover img {
+    filter: contrast(1.12) saturate(1.05);
+    animation: fp12g 0.083s steps(1) infinite;
+  }
+
+  @keyframes fp12g {
+    0%   { opacity: 1; }
+    48%  { opacity: 1; }
+    52%  { opacity: 0.93; }
+    100% { opacity: 0.93; }
+  }
+
+  .gallery-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(20,14,8,0.85));
+    color: #e8e0d0;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1.5rem 0.6rem 0.4rem;
+    transform: translateY(100%);
+    transition: transform 0.2s ease;
+    z-index: 3;
+  }
+  .gallery-item:hover .gallery-label { transform: translateY(0); }
+
+  .frame-num {
+    position: absolute;
+    top: 5px;
+    right: 7px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    color: rgba(240,225,200,0.4);
+    letter-spacing: 0.05em;
+    z-index: 3;
+  }
+
+  /* Format badge */
+  .fmt-badge {
+    position: absolute;
+    top: 5px;
+    left: 7px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.45rem;
+    letter-spacing: 0.06em;
+    color: rgba(220,150,60,0.7);
+    z-index: 3;
+  }
+
+  /* Missing / placeholder */
+  .gallery-item.missing { display: flex; align-items: center; justify-content: center; }
+  .missing-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    color: rgba(240,235,224,0.2);
+    text-align: center;
+    padding: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── BANNER CITATION ─── */
+  .quote-banner {
+    margin: 5rem 2.5rem;
+    border: 2px solid var(--ink);
+    padding: 3rem;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  }
+  .quote-banner::before {
+    content: '« ';
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem;
+    color: var(--red);
+    line-height: 1;
+    position: absolute;
+    top: -0.2rem;
+    left: 2rem;
+    opacity: 0.3;
+  }
+  .quote-text {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-size: clamp(1.3rem, 2.5vw, 2rem);
+    line-height: 1.4;
+    max-width: 55ch;
+  }
+  .quote-attr {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-top: 1.5rem;
+  }
+  /* Champignon décoratif SVG */
+  .mushroom-deco {
+    position: absolute;
+    right: 2.5rem;
+    bottom: 1.5rem;
+    opacity: 0.12;
+  }
+
+  /* ─── SPECS BANDE ─── */
+  .specs-strip {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 3rem 2.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2rem;
+  }
+  .spec-item {
+    border-left: 2px solid var(--red);
+    padding-left: 1rem;
+  }
+  .spec-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--silver);
+    margin-bottom: 0.5rem;
+  }
+  .spec-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+  }
+
+  /* ─── CTA FINALE ─── */
+  .cta-section {
+    padding: 6rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: 'RÉALISONS\AVOS IDÉES';
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15vw;
+    color: var(--cream-dark);
+    white-space: nowrap;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    letter-spacing: 0.05em;
+    pointer-events: none;
+    line-height: 0.9;
+  }
+  .cta-inner { position: relative; z-index: 2; }
+  .cta-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    margin-bottom: 1rem;
+  }
+  .cta-headline em {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--red);
+    display: block;
+    font-size: 0.55em;
+  }
+  .cta-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    max-width: 45ch;
+    margin: 0 auto 2.5rem;
+    color: #555;
+  }
+
+  /* ─── BASKET DECO ─── */
+  .basket-deco {
+    position: absolute;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  /* ─── FOOTER ─── */
+  .site-footer {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 2rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+  }
+  .site-footer a { color: var(--red); text-decoration: none; }
+
+  /* ─── PERFO LATÉRALES — halo rouge brûlé ─── */
+  .side-perfs {
+    position: fixed;
+    top: 0;
+    width: 32px;
+    height: 100%;
+    /* pellicule cramée : base chaude orangée avec texture */
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        #2a1005 0px, #1a0a02 8px,
+        #0f0602 8px, #1a0a02 16px
+      );
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 5px;
+    z-index: 80;
+    pointer-events: none;
+    /* grain chaud sur le bord */
+    box-shadow: inset 0 0 12px rgba(180,60,10,0.4);
+  }
+  .side-perfs.left  { left: 0;  box-shadow: inset -2px 0 10px rgba(180,60,10,0.35), inset 0 0 12px rgba(180,60,10,0.2); }
+  .side-perfs.right { right: 0; box-shadow: inset  2px 0 10px rgba(180,60,10,0.35), inset 0 0 12px rgba(180,60,10,0.2); }
+
+  /* Perforation : trou noir entouré d'un halo orangé-rouge diffus */
+  .side-perf {
+    width: 20px;
+    height: 24px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    position: relative;
+    background: #000;
+    /* halo rouge-orangé diffus comme sur la pellicule cramée */
+    box-shadow:
+      0 0 6px 3px rgba(210, 80, 10, 0.75),
+      0 0 14px 5px rgba(180, 40, 5, 0.45),
+      0 0 2px 1px rgba(255,150,50,0.6);
+  }
+
+  /* Barre de perforations horizontale */
+  .perforation-bar {
+    width: 100%;
+    background:
+      repeating-linear-gradient(
+        to right,
+        #1a0a02 0px, #0f0602 6px,
+        #1a0a02 6px, #0f0602 12px
+      );
+    padding: 0.55rem 0;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    margin: 4rem 0 0;
+    box-shadow: inset 0 4px 12px rgba(180,60,10,0.3), inset 0 -4px 12px rgba(180,60,10,0.3);
+  }
+  .perf-row {
+    display: flex;
+    gap: 10px;
+    padding: 0 10px;
+    flex: 1;
+  }
+  .perf {
+    width: 18px;
+    height: 22px;
+    background: #000;
+    border-radius: 3px;
+    flex-shrink: 0;
+    box-shadow:
+      0 0 5px 2px rgba(210,80,10,0.7),
+      0 0 12px 4px rgba(180,40,5,0.4),
+      0 0 2px 1px rgba(255,140,40,0.55);
+  }
+  .timecode {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(220,160,80,0.7);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding: 0 1rem;
+  }
+
+  /* ─── STARFIELD + COMET ─── */
+  #starfield, #comet-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  #comet-canvas { z-index: 2; }
+
+  /* Tout le contenu au-dessus des canvas */
+  body > *:not(#starfield):not(#comet-canvas):not(.side-perfs) {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ─── MARGES POUR LES PERFS LATÉRALES ─── */
+  body > *:not(.side-perfs) { margin-left: 28px; margin-right: 28px; }
+
+  @media (max-width: 768px) {
+    .filmstrip-hero { grid-template-columns: 1fr; }
+    .hero-collage { height: 55vw; max-height: 380px; }
+    .side-perfs { display: none; }
+    body > *:not(.side-perfs) { margin-left: 0; margin-right: 0; }
+    .section-header { grid-template-columns: 1fr; }
+    .section-sub { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<canvas id="comet-canvas"></canvas>
+
+<!-- Perforations latérales -->
+<div class="side-perfs left" id="perfs-left"></div>
+<div class="side-perfs right" id="perfs-right"></div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <a href="index.html" class="header-logo">Simon Larre</a>
+  <nav style="display:flex;gap:2rem">
+    <a href="index.html">Accueil</a>
+    <a href="index.html#contact">Contact</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="filmstrip-hero">
+  <div class="hero-text">
+    <p class="eyebrow">Intelligence Artificielle × Image</p>
+    <h1 class="headline">
+      Réalisons<br>
+      <em>vos idées</em>
+      ensemble.
+    </h1>
+    <p class="hero-desc">
+      Morphings, portraits vivants, scènes impossibles&thinsp;—&thinsp;l'IA comme outil de création visuelle au service de votre projet audiovisuel.
+    </p>
+    <a href="index.html#contact" class="cta-btn">Parlons de votre projet</a>
+  </div>
+
+  <div class="hero-collage" id="collage">
+    <div class="cut-img">
+      <div class="frame-wrap"><img src="IA/antidatae_photo_of_four_different_stylish_grunge_young_women__6ef623af-cbe6-41c3-958e-e57ac4cd307c_3.gif" alt="Femmes grunge" onerror="this.parentElement.parentElement.style.display='none'"></div>
+    </div>
+    <div class="cut-img">
+      <div class="frame-wrap"><img src="IA/antidatae_A_cool_millennial_woman_in_her_mid_thirties_wearing_8d5e0ce8-c782-4630-8de5-9648822511f9_3.gif" alt="Portrait femme" onerror="this.parentElement.parentElement.style.display='none'"></div>
+    </div>
+    <div class="cut-img">
+      <div class="frame-wrap"><img src="IA/antidatae_walking_retro_futurist_procession__hyper-realistic__e03a9ffb-64ae-4660-b380-d072d6e9ea5b_1.gif" alt="Procession" onerror="this.parentElement.parentElement.style.display='none'"></div>
+    </div>
+    <div class="cut-img">
+      <div class="frame-wrap"><img src="IA/antidatae_Film_still_colour_Ang_Lee_Style._1950s_Tokyo_post_w_d25424b0-b871-48bd-bf3d-f7a25a6e85b7_2.gif" alt="Tokyo 1950s" onerror="this.parentElement.parentElement.style.display='none'"></div>
+    </div>
+    <div class="cut-img">
+      <div class="frame-wrap"><img src="IA/antidatae_old_surrealist_movie_zoom_back_the_woman_is_the_hos_c68b96d7-82da-4051-b2a6-b2e49da7eb38_0.gif" alt="Film surréaliste" onerror="this.parentElement.parentElement.style.display='none'"></div>
+    </div>
+    <div class="cut-img">
+      <div class="frame-wrap"><img src="IA/antidatae_Vintage_film_photograph_with_grain_and_scratches_sh_547538c3-2a4b-4320-9a97-35b9fabcb6d1_1.gif" alt="Pellicule vintage" onerror="this.parentElement.parentElement.style.display='none'"></div>
+    </div>
+
+    <!-- Bandes de scotch décoratives -->
+    <div class="tape-strip tape-h" style="left:-20px;transform:rotate(-45deg)"></div>
+    <div class="tape-strip tape-h" style="right:-15px;top:30%;transform:rotate(30deg)"></div>
+    <div class="tape-strip tape-v" style="bottom:10%;left:42%;transform:rotate(12deg)"></div>
+  </div>
+</section>
+
+<!-- PERFORATIONS DIVIDER -->
+<div class="perforation-bar">
+  <div class="perf-row" id="perf-row-top"></div>
+  <span class="timecode">SIMON LARRE — IA VISUELLE — 2024/2025</span>
+  <div class="perf-row" id="perf-row-top2"></div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-content" id="ticker">
+    <span>Midjourney</span><span>Runway ML</span><span>Stable Diffusion</span>
+    <span>After Effects</span><span>Sora</span><span>Kling</span>
+    <span>ComfyUI</span><span>ControlNet</span><span>Poitiers</span>
+    <span>Morphing</span><span>Portraits vivants</span><span>Sound Design</span>
+    <span>Midjourney</span><span>Runway ML</span><span>Stable Diffusion</span>
+    <span>After Effects</span><span>Sora</span><span>Kling</span>
+    <span>ComfyUI</span><span>ControlNet</span><span>Poitiers</span>
+    <span>Morphing</span><span>Portraits vivants</span><span>Sound Design</span>
+  </div>
+</div>
+
+<!-- SECTION GALERIE -->
+<div class="section-header">
+  <div>
+    <p class="section-num">— 001</p>
+    <h2 class="section-title">Exemples<br>de créations</h2>
+  </div>
+  <p class="section-sub">Chaque image est une invitation. Votre projet peut devenir l'une d'elles.</p>
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<!-- CITATION -->
+<div class="quote-banner">
+  <p class="quote-text">
+    L'image animée par l'IA n'est pas une imitation de la réalité — c'est une nouvelle façon d'inventer ce qui n'existe pas encore.
+  </p>
+  <p class="quote-attr">— Simon Larre, réalisateur &amp; illustrateur sonore</p>
+  <!-- Champignon décoratif -->
+  <svg class="mushroom-deco" width="120" height="130" viewBox="0 0 120 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="60" cy="65" rx="42" ry="38" fill="#1a1612"/>
+    <rect x="48" y="95" width="24" height="30" rx="4" fill="#1a1612"/>
+    <circle cx="44" cy="58" r="7" fill="#c0392b" opacity="0.6"/>
+    <circle cx="72" cy="52" r="5" fill="#c0392b" opacity="0.6"/>
+    <circle cx="58" cy="70" r="4" fill="#c0392b" opacity="0.6"/>
+  </svg>
+</div>
+
+<!-- SPECS -->
+<div class="specs-strip">
+  <div class="spec-item">
+    <p class="spec-label">Format livraison</p>
+    <p class="spec-value">MP4 / GIF / MOV / WebM</p>
+  </div>
+  <div class="spec-item">
+    <p class="spec-label">Résolution</p>
+    <p class="spec-value">Jusqu'à 4K</p>
+  </div>
+  <div class="spec-item">
+    <p class="spec-label">Délai moyen</p>
+    <p class="spec-value">48h – 7 jours</p>
+  </div>
+  <div class="spec-item">
+    <p class="spec-label">Usage</p>
+    <p class="spec-value">Clips · Réseaux · Médical · Événementiel</p>
+  </div>
+  <div class="spec-item">
+    <p class="spec-label">Basé à</p>
+    <p class="spec-value">Poitiers &amp; distanciel</p>
+  </div>
+</div>
+
+<!-- CTA FINALE -->
+<section class="cta-section">
+  <!-- Basket déco -->
+  <svg class="basket-deco" style="top:10%;right:5%" width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="90" cy="90" r="82" stroke="#1a1612" stroke-width="5" fill="none"/>
+    <path d="M8 90 Q45 20 90 90 Q135 160 172 90" stroke="#1a1612" stroke-width="4" fill="none"/>
+    <path d="M90 8 Q160 45 90 90 Q20 135 90 172" stroke="#1a1612" stroke-width="4" fill="none"/>
+    <line x1="8" y1="90" x2="172" y2="90" stroke="#1a1612" stroke-width="3"/>
+    <line x1="90" y1="8" x2="90" y2="172" stroke="#1a1612" stroke-width="3"/>
+  </svg>
+
+  <div class="cta-inner">
+    <h2 class="cta-headline">
+      Un projet<br>en tête&nbsp;?
+      <em>Parlons-en.</em>
+    </h2>
+    <p class="cta-sub">
+      Clip, installation, contenus médicaux, documentation artistique — si vous avez l'idée, j'ai les outils pour la rendre visible.
+    </p>
+    <a href="index.html#contact" class="cta-btn" style="font-size:1.3rem;padding:1rem 3rem">
+      Contactez-moi →
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <span>© 2025 Simon Larre — Réalisateur</span>
+  <span>Poitiers, France</span>
+  <a href="index.html">← Retour au portfolio</a>
+</footer>
+
+<script>
+// ─── Perforations latérales dynamiques ───
+function buildPerfs(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const count = Math.ceil(window.innerHeight / 36) + 2;
+  el.innerHTML = Array(count).fill('<div class="side-perf"></div>').join('');
+}
+buildPerfs('perfs-left');
+buildPerfs('perfs-right');
+
+// Perfs barre supérieure
+function buildPerfRow(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const count = 30;
+  el.innerHTML = Array(count).fill('<div class="perf"></div>').join('');
+}
+buildPerfRow('perf-row-top');
+buildPerfRow('perf-row-top2');
+
+// ─── Galerie dynamique ───
+const gifFiles = [
+  'antidatae_Vintage_film_photograph_with_grain_and_scratches_sh_547538c3-2a4b-4320-9a97-35b9fabcb6d1_1.gif',
+  'antidatae_pasta_plate_fork_--ar_3445_--raw_--video_1_--end_lo_c33a1431-6959-4386-ad3c-2d3c09416c35_1.gif',
+  'antidatae_A_Simcity_isometric_aerial_view_of_Poitiers_city_Fr_1900c0dd-5f68-4236-9e66-2c89f3e03d85_0.gif',
+  'antidatae_Two_lively_greec_sisters_chatting_in_Athnes_street__01c70957-090e-4ed7-a07b-312e902ea303_0 (1).gif',
+  'antidatae_Two_young_man_with_dark_hair_wearing_black_performa_1afcdbb0-2109-4841-8532-46f719f9694d_0.gif',
+  'antidatae_a_photograph_of_a_person_with_an_image_of_a_highway_ed026cc1-1f59-433e-b22d-5f015268ca03_3.gif',
+  'antidatae_On_a_sunny_summer_day_a_full-body_photo_shows_two_y_83622caa-cb83-41f2-a535-d468b0ec7140_3.gif',
+  'antidatae_a_photograph_of_the_back_and_shoulder_skin_where_th_064ffcd8-ec02-47bf-975b-6110fb488b11_2.gif',
+  'antidatae_photo_of_four_different_stylish_grunge_young_women__6ef623af-cbe6-41c3-958e-e57ac4cd307c_3.gif',
+  'antidatae_Black_and_white_photo_of_several_young_peoples_stan_2aa57609-4a1b-43bc-8875-eb7bfd9c3712_1.gif',
+  'antidatae_photo_of_four_different_stylish_grunge_young_women__31502359-70d3-424b-b207-0c2029114a7b_0.gif',
+  'antidatae_massive_deep_impression_--ar_5877_--raw_--video_1_b14d4e83-d108-4e95-82eb-2a22619b9f43_1.gif',
+  'antidatae_a_microscopie_photo_of_vascular_desease_with_small__5a972a6b-4dec-4c41-ab67-a804df07f925_2.gif',
+  'antidatae_1970s_photo_showing_quality_of_an_overhead_of_a_qua_0ee7b3be-5f06-45dc-bb38-749bd2c19c0d_3.gif',
+  'antidatae_a_blurry_pink_and_purple_photogram_of_several_float_e9df59a2-271a-4bd1-bad7-485e3a083e20_1.gif',
+  'antidatae_1970s_photo_showing_quality_of_an_overhead_of_a_qua_b4e18a8d-61be-4297-9da2-1870c18940f9_0.gif',
+  'antidatae_walking_retro_futurist_procession__hyper-realistic__e03a9ffb-64ae-4660-b380-d072d6e9ea5b_1.gif',
+  'antidatae_A_footage_mode_magazine_cover_showing_a_man_with_sh_8a75e3de-0005-4e8d-a4db-fff040521193_0.gif',
+  'antidatae_httpss.mj.runfX6zws6ZHo0_zoom_out_smoky_--ar_256143_ac1ad29b-3cc6-4f4a-a8f9-d38ed7dad624_3.gif',
+  'antidatae_close-up_of_an_orange_bubble_with_a_horizontal_huma_c83dadc1-4baf-4a4a-aa67-07db75210575_3.gif',
+  'antidatae_paon_albinos_perch_dans_un_chne_lige_dans_le_maquis_7a2d003f-7eac-4ce2-8938-2227a8a58253_3.gif',
+  'antidatae_Film_still_colour_Ang_Lee_Style._1950s_Tokyo_post_w_d25424b0-b871-48bd-bf3d-f7a25a6e85b7_2.gif',
+  'antidatae_A_cool_millennial_woman_in_her_mid_thirties_wearing_8d5e0ce8-c782-4630-8de5-9648822511f9_3.gif',
+  'antidatae_luxury_wooden_front_couverte_de_flamboyantes_sculpt_3a60b485-46e7-4b81-8421-73da2158be2d_1.gif',
+  'antidatae_arc_slow_dolly_movement_tracked_architecture_keep_j_8893c49e-01bd-4a6f-9b27-58f40151ec4a_1.gif',
+  'antidatae_organic_search_--ar_9151_--video_1_75cbf741-4df6-4d3b-b533-332e3b8c20e1_1.gif',
+  'antidatae_Epic_wide_shot_from_a_distant_side-angle_viewpoint__81ca831f-0764-4bbe-9965-fcabf8044089_1.gif',
+  'antidatae_Epic_wide-angle_composition_with_long-lens_compress_f009b320-6aeb-4788-8cfc-2290e3a8ce0a_1.gif',
+  'antidatae_Realistic_photo_Real_photos_no_oil_painting_real_hu_c9bf3bf0-5a88-499d-9cc0-516d6a2fdeeb_0.gif',
+  'antidatae__--ar_5191_--video_1_d2ce1737-5b64-4db0-9f60-f85379899f62_0.gif',
+  'antidatae_une_toile_filante_passe_dans_le_ciel_alors_que_la_t_5f4125af-4d63-4d89-99ac-1e9b8e7c14df_0.gif',
+  'antidatae_trombone_shot_on_a_space_ship_first-person_perspect_0972732a-d96e-4b3b-bab6-b9a6166b09f5_0.gif',
+  'antidatae_ultra_slow_motion_car_is_burning_with_flames_shooti_7fd35acb-300a-46bc-94cf-e70894d912db_3.gif',
+  'antidatae_ultra_slow_motion_car_is_burning_with_flames_shooti_224d621a-9854-4ca7-afd2-cc0c5e8aad52_1.gif',
+  'antidatae_httpss.mj.runFVWKcldhp0c_pasta_plate_fork_--ar_1932_5b33060f-f1e8-472a-87a6-d9949988f515_3.gif',
+  'antidatae_httpss.mj.runZEArb5J6oTU_23h_statue._black_and_whit_1cf0dd27-0f1b-469f-9605-f7d536ab4916_2.gif',
+  'antidatae_12fps_animation._stop_motion_tv_showing_news_zappin_14cb2016-5f1f-404a-b0b1-10b15ac10fbc_1.gif',
+  'antidatae_12fps_animation._stop_motion_the_two_characters_mov_5b5a0c73-3018-43b3-974f-402cfcf06aca_3.gif',
+  'antidatae_old_surrealist_movie_zoom_back_the_woman_is_the_hos_c68b96d7-82da-4051-b2a6-b2e49da7eb38_0.gif',
+  'antidatae_The_man_wakes_up_with_a_start._He_sits_up_and_looks_db50edb9-7ece-4834-b950-b72a222e48d5_1.gif',
+  'antidatae_httpss.mj.runX2HT1_4vFZc_Dolly_out_woman_walks_grac_fda75662-7adb-4ae9-9533-c77d538bd01b_2.gif',
+  'antidatae_httpss.mj.runz5KTW70a7EU_vue_arienne_fixe_dun_amphi_7551002f-81f1-4b98-b9b9-9ceaa49e6188_0.gif',
+  'antidatae_a_photo_of_the_complete_ruins_of_a_garden_city_with_435c16ce-9730-42c3-9068-59e8828d43ac_0 (1).gif',
+  'antidatae_slow_motion_arc_shot_very_low_angle_--ar_2719_--raw_f94c5fcc-eebe-44b7-a950-fdf6cdba4662_0.gif',
+  'antidatae_artistic_undrwater_photo_--ar_11_--motion_low_--raw_70159d87-b78f-4ca3-b6cf-7901f69bfd23_3.gif',
+  'antidatae_photo_of_a_beautiful_woman_standing_in_studio_tankt_fce766f6-b46f-40a4-b94c-cb2edf626f56_2.gif',
+  'antidatae_slow_motion_lateral_camera_movement_left_rock_in_th_e53eab1e-69eb-4d87-bd69-80398ec413a1_1.gif',
+  'antidatae_atmophere_calm_motionless_charater_camel_tale_moves_5d81bcda-d2d5-4ab0-b465-2c96da580075_1.gif',
+  'antidatae_woman_facing_camera_--ar_1829_--raw_--video_1_191210fd-2cf8-4892-88bc-9ede1d106c83_0.gif',
+  'antidatae_a_photo_of_the_complete_ruins_of_a_garden_city_with_435c16ce-9730-42c3-9068-59e8828d43ac_0.gif',
+];
+
+const labels = [
+  'Pellicule vintage grain & rayures',
+  'Assiette de pâtes — fourchette',
+  'Poitiers vue isométrique SimCity',
+  'Sœurs grecques — rue d\'Athènes',
+  'Deux jeunes hommes — performance',
+  'Portrait autoroute superposée',
+  'Journée d\'été — plein corps',
+  'Peau dos & épaule — detail',
+  'Quatre femmes grunge stylisées',
+  'Jeunes gens noir et blanc',
+  'Femmes grunge — variante',
+  'Impression profonde — plan large',
+  'Microscopie vasculaire',
+  'Vue aérienne années 70 — overhead',
+  'Photogramme rose & violet flottant',
+  'Vue aérienne années 70 — variante',
+  'Procession rétro-futuriste',
+  'Couverture magazine — homme',
+  'Zoom arrière fumée — plan large',
+  'Bulle orange — visage horizontal',
+  'Paon albinos — chêne-liège',
+  'Film Ang Lee — Tokyo 1950s',
+  'Femme millennial — portrait cool',
+  'Façade bois sculptée flamboyante',
+  'Dolly lent — architecture',
+  'Recherche organique — plan large',
+  'Plan large épique — angle latéral',
+  'Grand angle épique — longue focale',
+  'Photo réaliste — personnage',
+  'Plan vertical — abstraction',
+  'Étoile filante — nuit tombante',
+  'Trombone — vaisseau spatial POV',
+  'Voiture en feu — slow motion',
+  'Voiture en feu — slow motion v2',
+  'Assiette pâtes fourchette — variante',
+  'Statue noir & blanc',
+  '12fps — TV zapping stop motion',
+  '12fps — deux personnages stop motion',
+  'Film surréaliste — zoom arrière',
+  'L\'homme se réveille — sursaut',
+  'Dolly arrière — femme marche',
+  'Vue aérienne fixe — amphithéâtre',
+  'Ruines cité-jardin — variante',
+  'Arc slow motion — très bas angle',
+  'Photo sous-marine artistique',
+  'Femme en studio — tank top',
+  'Mouvement latéral — rocher',
+  'Atmosphère calme — chameau',
+  'Femme face caméra — portrait',
+  'Ruines cité-jardin',
+];
+
+const formats = [
+  { cls: 'r-169', label: '16:9' },
+  { cls: 'r-43',  label: '4:3'  },
+  { cls: 'r-11',  label: '1:1'  },
+  { cls: 'r-916', label: '9:16' },
+  { cls: 'r-32',  label: '3:2'  },
+  { cls: 'r-169', label: '16:9' },
+  { cls: 'r-43',  label: '4:3'  },
+  { cls: 'r-11',  label: '1:1'  },
+  { cls: 'r-32',  label: '3:2'  },
+  { cls: 'r-169', label: '16:9' },
+];
+
+const gallery = document.getElementById('gallery');
+gifFiles.forEach((file, i) => {
+  const fmt = formats[i % formats.length];
+  const encoded = 'IA/' + file.split('').map(c => {
+    // encode espaces et parenthèses uniquement, garder les autres chars
+    if (c === ' ') return '%20';
+    if (c === '(') return '%28';
+    if (c === ')') return '%29';
+    return c;
+  }).join('');
+  const item = document.createElement('div');
+  item.className = `gallery-item ${fmt.cls}`;
+  const num = String(i+1).padStart(3,'0');
+  const label = (labels[i] || file.replace('.gif','')).replace(/'/g, '&#39;');
+  const fmtLabel = fmt.label;
+  item.innerHTML = `
+    <img src="${encoded}" alt="${label}" loading="lazy"
+      onerror="this.parentElement.classList.add('missing');this.outerHTML='<div class=missing-text>FRAME ${String(i+1).padStart(2,'0')}</div>'">
+    <span class="frame-num">${num}</span>
+    <span class="fmt-badge">${fmtLabel}</span>
+    <div class="gallery-label">${label}</div>
+  `;
+  gallery.appendChild(item);
+});
+
+// ─── STARFIELD ───
+(function() {
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars(n) {
+    stars = [];
+    for (let i = 0; i < n; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() < 0.15 ? 2 : 1,         // majorité 1px, quelques 2px
+        baseX: 0, baseY: 0,                         // rempli après
+        brightness: 0.3 + Math.random() * 0.7,
+        twinkle: Math.random() * Math.PI * 2,
+        twinkleSpeed: 0.01 + Math.random() * 0.03,
+        // couleur : blanc froid ou légèrement bleuté
+        hue: Math.random() < 0.3 ? 210 : 0,
+        sat: Math.random() < 0.3 ? 60 : 0,
+        vx: 0, vy: 0,                               // vélocité répulsion
+      });
+      stars[i].baseX = stars[i].x;
+      stars[i].baseY = stars[i].y;
+    }
+  }
+
+  let mouseX = -9999, mouseY = -9999;
+  const REPEL_R = 90;
+  const REPEL_FORCE = 3.5;
+  const RETURN_SPEED = 0.06;
+
+  window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  function drawStars() {
+    ctx.clearRect(0, 0, W, H);
+    const now = Date.now() * 0.001;
+
+    for (const s of stars) {
+      // répulsion souris
+      const dx = s.x - mouseX;
+      const dy = s.y - mouseY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < REPEL_R && dist > 0) {
+        const force = (REPEL_R - dist) / REPEL_R * REPEL_FORCE;
+        s.vx += (dx / dist) * force;
+        s.vy += (dy / dist) * force;
+      }
+      // retour à la position de base
+      s.vx += (s.baseX - s.x) * RETURN_SPEED;
+      s.vy += (s.baseY - s.y) * RETURN_SPEED;
+      s.vx *= 0.78;
+      s.vy *= 0.78;
+      s.x += s.vx;
+      s.y += s.vy;
+
+      // scintillement
+      s.twinkle += s.twinkleSpeed;
+      const alpha = s.brightness * (0.6 + 0.4 * Math.sin(s.twinkle));
+
+      ctx.beginPath();
+      ctx.arc(Math.round(s.x), Math.round(s.y), s.r, 0, Math.PI * 2);
+      if (s.hue) {
+        ctx.fillStyle = `hsla(${s.hue},${s.sat}%,90%,${alpha})`;
+      } else {
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      }
+      ctx.fill();
+
+      // halo doux sur les étoiles 2px
+      if (s.r === 2) {
+        const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, 5);
+        g.addColorStop(0, `rgba(180,210,255,${alpha * 0.4})`);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+      }
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  resize();
+  initStars(320);
+  drawStars();
+  window.addEventListener('resize', () => { resize(); initStars(320); });
+})();
+
+// ─── COMÈTE PIXEL + EXPLOSION ───
+(function() {
+  const canvas = document.getElementById('comet-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  window.addEventListener('resize', () => {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+
+  let mx = window.innerWidth  / 2;
+  let my = window.innerHeight / 2;
+  let px = mx, py = my;  // position précédente (pour la traînée)
+  const trail = [];       // traînée de la comète
+  const particles = [];   // particules d'explosion
+
+  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+  // Explosion au clic
+  window.addEventListener('click', e => {
+    const colors = ['#ff6010','#ff3000','#ffaa30','#ffe060','#a0c8ff','#ffffff'];
+    for (let i = 0; i < 28; i++) {
+      const angle = (i / 28) * Math.PI * 2 + Math.random() * 0.3;
+      const speed = 2 + Math.random() * 5;
+      particles.push({
+        x: e.clientX, y: e.clientY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 2 + Math.floor(Math.random() * 4) * 2,  // gros pixels
+        color: colors[Math.floor(Math.random() * colors.length)],
+        life: 1, decay: 0.03 + Math.random() * 0.04,
+      });
+    }
+    // flash central
+    particles.push({
+      x: e.clientX, y: e.clientY,
+      vx: 0, vy: 0, size: 18,
+      color: '#ffffff', life: 1, decay: 0.12,
+    });
+  });
+
+  function drawPixel(x, y, size, color, alpha) {
+    ctx.fillStyle = color;
+    ctx.globalAlpha = alpha;
+    ctx.fillRect(Math.round(x - size/2), Math.round(y - size/2), size, size);
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1;
+
+    // ── Traînée comète ──
+    // ajouter point courant
+    trail.push({ x: mx, y: my, life: 1 });
+    if (trail.length > 18) trail.shift();
+
+    // dessiner traînée en gros pixels dégradés
+    trail.forEach((p, i) => {
+      p.life -= 0.04;
+      if (p.life <= 0) return;
+      const t = i / trail.length;
+      const size = Math.max(2, Math.round(t * 8));
+      // couleur : blanc → orange → rouge → transparent
+      let r = 255, g = Math.round(200 * t + 50 * (1-t)), b = Math.round(80 * t);
+      drawPixel(p.x, p.y, size, `rgb(${r},${g},${b})`, p.life * t * 0.85);
+    });
+
+    // ── Tête comète (curseur) ──
+    // pixel blanc 4×4 avec halo orangé
+    const gHead = ctx.createRadialGradient(mx, my, 0, mx, my, 10);
+    gHead.addColorStop(0, 'rgba(255,220,150,0.9)');
+    gHead.addColorStop(0.4, 'rgba(255,100,20,0.4)');
+    gHead.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = gHead;
+    ctx.beginPath();
+    ctx.arc(mx, my, 10, 0, Math.PI*2);
+    ctx.fill();
+    // pixel central net
+    drawPixel(mx, my, 4, '#ffffff', 1);
+
+    // ── Particules explosion ──
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.12;  // gravité légère
+      p.vx *= 0.95;
+      p.vy *= 0.95;
+      p.life -= p.decay;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      drawPixel(p.x, p.y, p.size, p.color, p.life);
+    }
+
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+})();
+
+// ─── Test diagnostic au chargement ───
+window.addEventListener('load', () => {
+  const testImg = new Image();
+  const testFile = 'IA/antidatae_Vintage_film_photograph_with_grain_and_scratches_sh_547538c3-2a4b-4320-9a97-35b9fabcb6d1_1.gif';
+  testImg.onload = () => console.log('✅ GIF OK');
+  testImg.onerror = () => {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#c0392b;color:#fff;padding:1rem 2rem;font-family:monospace;font-size:13px;z-index:99999;border-radius:4px;text-align:center;';
+    banner.innerHTML = '⚠️ Dossier IA/ introuvable — vérifiez le placement des fichiers';
+    document.body.appendChild(banner);
+  };
+  testImg.src = testFile;
+});
+
+// ─── Parallax collage au scroll ───
+window.addEventListener('scroll', () => {
+  const imgs = document.querySelectorAll('.cut-img');
+  const sy = window.scrollY;
+  imgs.forEach((el, i) => {
+    const dir = i % 2 === 0 ? 1 : -1;
+    const speed = 0.04 + i * 0.01;
+    const base = ['-2.5deg','2deg','-1deg','3.5deg','-1.5deg','1deg'][i] || '0deg';
+    el.style.transform = `translateY(${sy * speed * dir}px) rotate(${base})`;
+  });
+});
+</script>
+</body>
+</html>
