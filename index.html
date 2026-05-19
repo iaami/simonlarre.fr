@@ -37,7 +37,7 @@
     pointer-events: none;
   }
   #starfield  { z-index: 1; }
-  #comet-canvas { z-index: 9999; pointer-events: none; }
+  #comet-canvas { z-index: 2; }
 
   /* Grain overlay argentique */
   body::after {
@@ -51,11 +51,26 @@
   }
 
   /* ─── PERFORATIONS LATÉRALES ─── */
-
+  .side-perfs {
+    position: fixed; top: 0;
+    width: 32px; height: 100%;
+    background: repeating-linear-gradient(to bottom, #2a1005 0px, #1a0a02 8px, #0f0602 8px, #1a0a02 16px);
+    display: flex; flex-direction: column;
+    gap: 10px; padding: 10px 5px;
+    z-index: 80; pointer-events: none;
+  }
+  .side-perfs.left  { left: 0;  box-shadow: inset -2px 0 10px rgba(180,60,10,0.35); }
+  .side-perfs.right { right: 0; box-shadow: inset  2px 0 10px rgba(180,60,10,0.35); }
+  .side-perf {
+    width: 20px; height: 24px; border-radius: 4px;
+    flex-shrink: 0; background: #000;
+    box-shadow: 0 0 6px 3px rgba(210,80,10,0.75), 0 0 14px 5px rgba(180,40,5,0.45), 0 0 2px 1px rgba(255,150,50,0.6);
+  }
 
   /* Tout contenu au-dessus des canvas */
-  body > *:not(#starfield):not(#comet-canvas):not(.cursor) {
+  body > *:not(#starfield):not(#comet-canvas):not(.side-perfs):not(.cursor) {
     position: relative; z-index: 10;
+    margin-left: 32px; margin-right: 32px;
   }
 
   /* CURSOR — masqué, remplacé par comète */
@@ -190,10 +205,6 @@
     gap: 2px;
     padding: 0;
   }
-  /* Empêcher la dernière card de s'étirer si elle est seule */
-  .card:last-child:nth-child(odd):not(.featured) {
-    grid-column: span 1;
-  }
   .card {
     position: relative;
     aspect-ratio: 16/9;
@@ -271,12 +282,6 @@
     font-size: 0.65rem;
     color: var(--gray-light);
     letter-spacing: 0.1em;
-  }
-  .card-thumb {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    background: linear-gradient(135deg, #0f1520 0%, #1a2535 50%, #0d1018 100%);
   }
   .card-thumb-placeholder {
     width: 100%; height: 100%;
@@ -524,6 +529,8 @@
 
 <canvas id="starfield"></canvas>
 <canvas id="comet-canvas"></canvas>
+<div class="side-perfs left"  id="perfs-left"></div>
+<div class="side-perfs right" id="perfs-right"></div>
 <div class="cursor" id="cursor"></div>
 
 <nav>
@@ -591,235 +598,522 @@
 
   <div class="grid" id="grid">
 
-    <div class="card featured" data-cats="ia clip culture musique motion"
-         data-title="Vidéos IA" data-url="https://simonlarre.fr/archives/667"
-         data-desc="Extraits de projets de vidéos génératives réalisés avec des outils d'IA (Midjourney, Kling AI, Adobe Firefly) et montés sur Adobe Premiere Pro."
-         data-date="Mars 2026"
-         data-video="">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2026/03/antidatae_artistic_undrwater_photo_-ar_11_-motion_low_-raw_70159d87-b78f-4ca3-b6cf-7901f69bfd23_3.webp" alt="Vidéos IA" loading="lazy">
-      </div>
+    <div class="card featured" data-cats="culture ia" data-title="ai.viator" data-url="https://simonlarre.fr/archives/615" data-desc="https://www.instagram.com/ai.viator?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0MzIxNw== Voyagez dans le temps à travers de vieilles cartes " data-date="Janvier 2025" data-video="">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2025-02-07-165011.webp" alt="ai.viator" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
-        <div class="card-cats"><span class="cat-tag">IA</span><span class="cat-tag">· Clip</span><span class="cat-tag">· Motion</span></div>
-        <div class="card-title">Vidéos IA</div>
-        <div class="card-date">Mars 2026</div>
-      </div>
-    </div>
-
-    <div class="card" data-cats="événementiel"
-         data-title="Mariage, mariage…"
-         data-desc="Captation vidéo pour le mariage d'Aurélien et Anne-Sophie. Montage réalisé en collaboration avec aur_crea."
-         data-date="Décembre 2025"
-         data-video="https://www.instagram.com/p/DPHR-I-CSrn/?hl=fr">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/12/Capture-decran-2025-12-09-120838-1-768x400.webp" alt="Mariage" loading="lazy">
-      </div>
-      <div class="play-icon">▶</div>
-      <div class="card-bottom">
-        <div class="card-cats"><span class="cat-tag">Événementiel</span></div>
-        <div class="card-title">Mariage, mariage…</div>
-        <div class="card-date">Décembre 2025</div>
-      </div>
-    </div>
-
-    <div class="card" data-cats="culture ia"
-         data-title="Voyage dans le temps" data-url="https://simonlarre.fr/archives/635"
-         data-desc="Morphing du chasseur-cueilleur au voyageur temporel, réalisé à partir d'une photo et de prompts sur Nanobanana, Midjourney et Kling AI. Bande son Tame Impala."
-         data-date="Novembre 2025"
-         data-video="https://simonlarre.fr/wp-content/uploads/2025/11/VIDEO-2025-10-31-19-55-02.mp4">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/11/5d7ee173aaafe1a15e0157e5f2fcbc3abcd5fdb040ee46e3182634257cb03a19-768x439.webp" alt="Voyage dans le temps" loading="lazy">
-      </div>
-      <div class="play-icon">▶</div>
-      <div class="card-bottom">
-        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· IA</span></div>
-        <div class="card-title">Voyage dans le temps</div>
-        <div class="card-date">Novembre 2025</div>
-      </div>
-    </div>
-
-    <div class="card" data-cats="culture événementiel pédagogie"
-         data-title="Jeunes à Poitiers, Jeunes Engagés"
-         data-desc="Accompagnement à la réalisation d'une courte dystopie autour de l'Union Européenne, destinée aux secteurs Jeunes, lycées et Résidences Habitat Jeunes."
-         data-date="Mars 2025"
-         data-video="https://www.youtube.com/watch?v=F4z_VjunSHs">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/03/Capture-decran-2026-03-26-161211-768x431.png" onerror="this.src='https://img.youtube.com/vi/F4z_VjunSHs/hqdefault.jpg'" alt="Jeunes à Poitiers" loading="lazy">
-      </div>
-      <div class="play-icon">▶</div>
-      <div class="card-bottom">
-        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· Pédagogie</span></div>
-        <div class="card-title">Jeunes à Poitiers</div>
-        <div class="card-date">Mars 2025</div>
-      </div>
-    </div>
-
-    <div class="card" data-cats="culture"
-         data-title="Info Jeunes Nouvelle-Aquitaine" data-url="https://simonlarre.fr/archives/626"
-         data-desc="Vidéo de présentation de La Boussole des Jeunes — 80 secondes de témoignages sur ce service gratuit et anonyme dédié aux jeunes. Réalisé avec IKKI VIDÉO."
-         data-date="Février 2025"
-         data-video="https://www.youtube.com/watch?v=ac33WrYohfQ">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/02/Capture-decran-2026-03-26-161211-1-768x431.png" onerror="this.src='https://img.youtube.com/vi/ac33WrYohfQ/hqdefault.jpg';this.onerror=null" alt="Info Jeunes" loading="lazy">
-      </div>
-      <div class="play-icon">▶</div>
-      <div class="card-bottom">
-        <div class="card-cats"><span class="cat-tag">Culture</span></div>
-        <div class="card-title">Info Jeunes Nouvelle-Aquitaine</div>
-        <div class="card-date">Février 2025</div>
-      </div>
-    </div>
-
-    <div class="card" data-cats="culture ia"
-         data-title="ai.viator" data-url="https://simonlarre.fr/archives/615"
-         data-desc="Voyage dans le temps à travers de vieilles cartes postales de Poitiers, Corte, La Rochelle, Naples — recolorisées et réanimées par intelligence artificielle."
-         data-date="Janvier 2025"
-         data-video="https://www.instagram.com/ai.viator">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/01/Capture-decran-2025-02-07-165011.webp" alt="ai.viator" loading="lazy">
-      </div>
-      <div class="play-icon">▶</div>
-      <div class="card-bottom">
-        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· IA</span></div>
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">ia</span></div>
         <div class="card-title">ai.viator</div>
         <div class="card-date">Janvier 2025</div>
       </div>
     </div>
-
-    <div class="card" data-cats="culture"
-         data-title="Plage 76 — heure d'hiver"
-         data-desc="Film pour Plage 76, espace regroupant boutique et galerie : arts visuels, artisanat d'art, mode, design & décoration, porté par Consortium Coopérative à Poitiers."
-         data-date="Janvier 2023"
-         data-video="https://www.youtube.com/watch?v=I-w6ksnlb28">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2023/02/Capture-decran-2023-02-22-a-17.22.47-768x708.webp" onerror="this.src='https://img.youtube.com/vi/I-w6ksnlb28/hqdefault.jpg';this.onerror=null" alt="Plage 76" loading="lazy">
-      </div>
+    <div class="card" data-cats="culture économie santé" data-title="Info Jeunes Nouvelle-Aquitaine" data-url="https://simonlarre.fr/archives/626" data-desc="🤩 🎥 La Boussole des Jeunes a une nouvelle vidéo de présentation, 100% locale, made in Poitiers ! ⏱80 secondes de témoignages sur le service rendu aux " data-date="Février 2025" data-video="https://www.youtube.com/watch?v=ac33WrYohfQ">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2025-02-07-165011.webp" alt="Info Jeunes Nouvelle-Aquitaine" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
-        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· Tiers-lieu</span></div>
-        <div class="card-title">Plage 76 — heure d'hiver</div>
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Économie</span></div>
+        <div class="card-title">Info Jeunes Nouvelle-Aquitaine</div>
+        <div class="card-date">Février 2025</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture ia" data-title="Voyage dans le temps" data-url="https://simonlarre.fr/archives/635" data-desc="Morphing du chasseur-cueilleur au voyageur temporel, réalisé à partir d’une photo et de quelques prompts sur #nanobanana en modèle dans #adobe #firefl" data-date="Novembre 2025" data-video="https://simonlarre.fr/wp-content/uploads/2025/11/VIDEO-2025-10-31-19-55-02.mp4">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/5d7ee173aaafe1a15e0157e5f2fcbc3abcd5fdb040ee46e3182634257cb03a19-768x439.webp" alt="Voyage dans le temps" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">ia</span></div>
+        <div class="card-title">Voyage dans le temps</div>
+        <div class="card-date">Novembre 2025</div>
+      </div>
+    </div>
+    <div class="card" data-cats="événementiel" data-title="Mariage, mariage..." data-url="https://simonlarre.fr/archives/650" data-desc="Captation pour Aurélien et Anne-Sophie, montage aur_crea ! https://www.instagram.com/aur_crea?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0Mz" data-date="Décembre 2025" data-video="">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2025-12-09-120838-1-768x400.webp" alt="Mariage, mariage..." loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">Mariage, mariage...</div>
+        <div class="card-date">Décembre 2025</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture économie tiers-lieu" data-title="Plage 76 passe à l’heure d’hiver ❄️⛄" data-url="https://simonlarre.fr/archives/569" data-desc="https://youtu.be/I-w6ksnlb28 Plage 76 est un projet porté les entrepreneur·es, artistes, créateurs et créatrices de Consortium Coopérative ( https://c" data-date="Janvier 2023" data-video="https://www.youtube.com/watch?v=I-w6ksnlb28">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/5d7ee173aaafe1a15e0157e5f2fcbc3abcd5fdb040ee46e3182634257cb03a19-768x439.webp" alt="Plage 76 passe à l’heure d’hiver ❄️⛄" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Économie</span></div>
+        <div class="card-title">Plage 76 passe à l’heure d’hiver ❄️⛄</div>
         <div class="card-date">Janvier 2023</div>
       </div>
     </div>
-
-    <div class="card" data-cats="culture santé"
-         data-title="Présentation du CRESAM"
-         data-desc="Film de présentation du Centre National de Ressources Handicaps Rares – Surdicécité. Sous-titres disponibles. Voix off et missions de l'équipe."
-         data-date="Décembre 2022"
-         data-video="https://www.youtube.com/watch?v=uxd9MvBdU3U">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2023/02/Capture-decran_20230206_161012-e1675696328716-768x767.png" onerror="this.src='https://img.youtube.com/vi/uxd9MvBdU3U/hqdefault.jpg';this.onerror=null" alt="CRESAM" loading="lazy">
-      </div>
+    <div class="card" data-cats="santé" data-title="Présentation du CRESAM (Centre National de Ressources Handicaps Rares - Surdicécité)" data-url="https://simonlarre.fr/archives/20" data-desc="https://www.youtube.com/watch?v=uxd9MvBdU3U&amp;t=38s&amp;ab_channel=CRESAMCNRHR-Surdic%C3%A9cit%C3%A9 Réalisé par Simon Larré Film de présentation du" data-date="Décembre 2022" data-video="https://www.youtube.com/watch?v=uxd9MvBdU3U">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230206_161012-e1675696328716-768x767.png" alt="Présentation du CRESAM (Centre National de Ressources Handicaps Rares - Surdicécité)" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
         <div class="card-cats"><span class="cat-tag">Santé</span></div>
-        <div class="card-title">Présentation du CRESAM</div>
+        <div class="card-title">Présentation du CRESAM (Centre National de Ressources Handicaps Rares - Surdicécité)</div>
         <div class="card-date">Décembre 2022</div>
       </div>
     </div>
-
-    <div class="card" data-cats="événementiel musique"
-         data-title="Gospel'ère à Notre Dame la Grande"
-         data-desc="Captation de la chorale Gospel'ère lors d'un concert à Notre Dame la Grande. Chorale gospel associative ouverte à tous, créée en 2004 à Poitiers."
-         data-date="Octobre 2022"
-         data-video="https://www.youtube.com/watch?v=A42xStw0l_g">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2023/02/Capture-decran_20230206_155754-768x677.png" onerror="this.src='https://img.youtube.com/vi/A42xStw0l_g/hqdefault.jpg';this.onerror=null" alt="Gospel'ère" loading="lazy">
-      </div>
+    <div class="card" data-cats="événementiel musique" data-title="La chorale Gospel&#39;ère à Notre Dame la Grande" data-url="https://simonlarre.fr/archives/151" data-desc="https://www.youtube.com/watch?v=A42xStw0l_g&amp;ab_channel=ChoraleGospel%27%C3%A8re Créée en 2004,&nbsp; la chorale Gospel’ère&nbsp; est une chorale g" data-date="Octobre 2022" data-video="https://www.youtube.com/watch?v=A42xStw0l_g">
+      <div class="card-thumb"><img class="card-img" src="https://img.youtube.com/vi/A42xStw0l_g/hqdefault.jpg" alt="La chorale Gospel&#39;ère à Notre Dame la Grande" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
-        <div class="card-cats"><span class="cat-tag">Événementiel</span><span class="cat-tag">· Musique</span></div>
-        <div class="card-title">Gospel'ère à Notre Dame</div>
+        <div class="card-cats"><span class="cat-tag">Événementiel</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">La chorale Gospel&#39;ère à Notre Dame la Grande</div>
         <div class="card-date">Octobre 2022</div>
       </div>
     </div>
-
-    <div class="card" data-cats="ia musique"
-         data-title="The Third Machine — Pool of Tears"
-         data-desc="Collaboration entre son et intelligence artificielle : The Third Machine (groupe de musique) et Simon Larré (prompt artist). Pool of Tears Remastered."
-         data-date="Août 2022"
-         data-video="https://www.youtube.com/watch?v=FzhR9_gnC1s">
-      <div class="card-thumb">
-        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2022/08/Capture-decran-2025-02-07-165309-768x624.webp" onerror="this.src='https://img.youtube.com/vi/FzhR9_gnC1s/hqdefault.jpg';this.onerror=null" alt="The Third Machine" loading="lazy">
-      </div>
+    <div class="card" data-cats="pédagogie santé" data-title="Formation en Médecine et Pharmacie à l&#39;Université de Tours (PACES)" data-url="https://simonlarre.fr/archives/202" data-desc="En janvier 2021, la crise sanitaire m&#39;empêche de réaliser un grand nombre de prestations avec mes partenaires dans la Culture et la Santé. L&#39;Universit" data-date="Juin 2022" data-video="https://www.youtube.com/watch?v=BiWp1g6cs_Y">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230210_111250-768x432.png" alt="Formation en Médecine et Pharmacie à l&#39;Université de Tours (PACES)" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
-        <div class="card-cats"><span class="cat-tag">IA</span><span class="cat-tag">· Musique</span></div>
-        <div class="card-title">The Third Machine — Pool of Tears</div>
+        <div class="card-cats"><span class="cat-tag">Pédagogie</span> <span class="cat-tag">Santé</span></div>
+        <div class="card-title">Formation en Médecine et Pharmacie à l&#39;Université de Tours (PACES)</div>
+        <div class="card-date">Juin 2022</div>
+      </div>
+    </div>
+    <div class="card" data-cats="ia musique" data-title="The Third Machine - Pool of Tears" data-url="https://simonlarre.fr/archives/622" data-desc="This is a collaboration between sound and artificial intelligence: The Third Machine, music group, and Simon Larré, prompt artist. Pool of Tears (Rema" data-date="Août 2022" data-video="https://www.youtube.com/watch?v=FzhR9_gnC1s">
+      <div class="card-thumb"><img class="card-img" src="https://img.youtube.com/vi/FzhR9_gnC1s/hqdefault.jpg" alt="The Third Machine - Pool of Tears" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">ia</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">The Third Machine - Pool of Tears</div>
         <div class="card-date">Août 2022</div>
       </div>
     </div>
+    <div class="card" data-cats="événementiel musique" data-title="Reportages Street Culture pour Fr3 Nouvelle Aquitaine" data-url="https://simonlarre.fr/archives/268" data-desc="Voici quelques épisodes de Street Culture réalisés pour Fr3 Nouvelle Aquitaine autour de la Compagnie Arlette Moreau et de l&#39;Espace Kennedy. https://y" data-date="Juin 2021" data-video="https://www.youtube.com/watch?v=WveKoooCspI">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/fr3.png" alt="Reportages Street Culture pour Fr3 Nouvelle Aquitaine" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">Reportages Street Culture pour Fr3 Nouvelle Aquitaine</div>
+        <div class="card-date">Juin 2021</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip musique" data-title="CLIP One spliff a day" data-url="https://simonlarre.fr/archives/505" data-desc="https://youtu.be/FYbGsF67IWE" data-date="Mars 2021" data-video="https://www.youtube.com/watch?v=FYbGsF67IWE">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-15.24.40-768x555.png" alt="CLIP One spliff a day" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">CLIP One spliff a day</div>
+        <div class="card-date">Mars 2021</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip musique" data-title="CLIP MOTION WAVE - Empty bottle" data-url="https://simonlarre.fr/archives/510" data-desc="https://youtu.be/qxUU2jr7pnI Clip released during the Pilinator Festiva l on December 16, 2021. Many thanks to the great team behind, Katarina Emelien" data-date="Décembre 2021" data-video="https://www.youtube.com/watch?v=qxUU2jr7pnI">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-15.44.28-768x628.png" alt="CLIP MOTION WAVE - Empty bottle" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">CLIP MOTION WAVE - Empty bottle</div>
+        <div class="card-date">Décembre 2021</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip musique" data-title="CLIP La guerre du feu Calliphonists" data-url="https://simonlarre.fr/archives/518" data-desc="https://www.youtube.com/watch?v=9nYBIxFjmCA&amp;ab_channel=Calliphonists" data-date="Novembre 2021" data-video="https://www.youtube.com/watch?v=9nYBIxFjmCA">
+      <div class="card-thumb"><img class="card-img" src="https://img.youtube.com/vi/9nYBIxFjmCA/hqdefault.jpg" alt="CLIP La guerre du feu Calliphonists" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">CLIP La guerre du feu Calliphonists</div>
+        <div class="card-date">Novembre 2021</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture événementiel théâtre" data-title="Compagnie Arlette Moreau" data-url="https://simonlarre.fr/archives/563" data-desc="https://youtu.be/B2eZyRJAxcM Chante la vie chante ! Compagnie Arlette Moreau https://youtu.be/5zGFR0bvOEc Enfilez votre casque de protection, allongez" data-date="Mai 2021" data-video="https://www.youtube.com/watch?v=B2eZyRJAxcM">
+      <div class="card-thumb"><img class="card-img" src="https://img.youtube.com/vi/B2eZyRJAxcM/hqdefault.jpg" alt="Compagnie Arlette Moreau" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">Compagnie Arlette Moreau</div>
+        <div class="card-date">Mai 2021</div>
+      </div>
+    </div>
+    <div class="card" data-cats="événementiel musique" data-title="En 2021-2022, je vous dévoile les résidences d&#39;artistes, concerts et vernissages au Confort Moderne." data-url="https://simonlarre.fr/archives/211" data-desc="https://www.youtube.com/watch?v=qTBeX808XwY&amp;t=2s&amp;ab_channel=LeConfortModerne A l&#39;occasion de son exposition CRAUSH du 12 février au 09 mai 202" data-date="Février 2020" data-video="https://www.youtube.com/watch?v=qTBeX808XwY">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230210_1553472-768x456.png" alt="En 2021-2022, je vous dévoile les résidences d&#39;artistes, concerts et vernissages au Confort Moderne." loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">En 2021-2022, je vous dévoile les résidences d&#39;artistes, concerts et vernissages au Confort Moderne.</div>
+        <div class="card-date">Février 2020</div>
+      </div>
+    </div>
+    <div class="card" data-cats="événementiel motion design santé" data-title="Motion design autour des mesures visiteurs et de la Covid 19 au Futuroscope" data-url="https://simonlarre.fr/archives/249" data-desc="https://youtu.be/x6o99YadQvY Depuis le 14 mars 2022 le pass vaccinal et le pass sanitaire ne sont plus exigés pour accéder au Futuroscope, conformémen" data-date="Novembre 2020" data-video="https://www.youtube.com/watch?v=x6o99YadQvY">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/futuro2.png" alt="Motion design autour des mesures visiteurs et de la Covid 19 au Futuroscope" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span> <span class="cat-tag">Motion design</span></div>
+        <div class="card-title">Motion design autour des mesures visiteurs et de la Covid 19 au Futuroscope</div>
+        <div class="card-date">Novembre 2020</div>
+      </div>
+    </div>
+    <div class="card" data-cats="événementiel musique" data-title="Colours in the street, Mada & Mathilde & David Henry, Sylvain DIEMS en live au Futuroscope" data-url="https://simonlarre.fr/archives/255" data-desc="https://youtu.be/Y9HnFUixfnk https://youtu.be/j8WNVfqc1f0 https://youtu.be/HuCp6kRSNOc" data-date="Novembre 2020" data-video="https://www.youtube.com/watch?v=Y9HnFUixfnk">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230210_162248-768x432.png" alt="Colours in the street, Mada & Mathilde & David Henry, Sylvain DIEMS en live au Futuroscope" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">Colours in the street, Mada & Mathilde & David Henry, Sylvain DIEMS en live au Futuroscope</div>
+        <div class="card-date">Novembre 2020</div>
+      </div>
+    </div>
+    <div class="card" data-cats="motion design musique non classé teaser" data-title="Motion design pour Radio Pulsar" data-url="https://simonlarre.fr/archives/260" data-desc="Radio Pulsar est une radio FM associative, universitaire, citoyenne, musicale et culturelle basée à Poitiers et diffusant ses programmes dans le dépar" data-date="Novembre 2020" data-video="https://www.youtube.com/watch?v=l4LzCXtsUYY">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230221_121925-768x432.webp" alt="Motion design pour Radio Pulsar" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Motion design</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">Motion design pour Radio Pulsar</div>
+        <div class="card-date">Novembre 2020</div>
+      </div>
+    </div>
+    <div class="card" data-cats="événementiel motion design musique teaser" data-title="Motion design pour Victoire 2 à Montpellier" data-url="https://simonlarre.fr/archives/264" data-desc="Programmation SEPT-DEC 2020 Programmation Janvier-Mars 2021 https://youtu.be/3nwAhasO8hU [PROGRAMMATION PARTICULIÈRE] Délocalisation, reports, annulat" data-date="Septembre 2020" data-video="https://www.youtube.com/watch?v=3nwAhasO8hU">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230210_164344-768x432.png" alt="Motion design pour Victoire 2 à Montpellier" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span> <span class="cat-tag">Motion design</span></div>
+        <div class="card-title">Motion design pour Victoire 2 à Montpellier</div>
+        <div class="card-date">Septembre 2020</div>
+      </div>
+    </div>
+    <div class="card" data-cats="360° culture" data-title="Le Forum Entreprendre dans la Culture 2019 à Mont-de-Marsan" data-url="https://simonlarre.fr/archives/286" data-desc="https://www.youtube.com/watch?v=xUW5aNZqO7Q&amp;t=3s&amp;ab_channel=L%27A.AgenceculturelleNouvelle-Aquitaine Durant deux jours, le Forum 2019 #Entrepr" data-date="Janvier 2020" data-video="https://www.youtube.com/watch?v=xUW5aNZqO7Q">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230214_130554-768x657.png" alt="Le Forum Entreprendre dans la Culture 2019 à Mont-de-Marsan" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">360°</span> <span class="cat-tag">Culture</span></div>
+        <div class="card-title">Le Forum Entreprendre dans la Culture 2019 à Mont-de-Marsan</div>
+        <div class="card-date">Janvier 2020</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture économie tiers-lieu" data-title="Fablab Solidaire &quot;Les usines&quot;" data-url="https://simonlarre.fr/archives/515" data-desc="https://youtu.be/ID-OKrxfYec" data-date="Janvier 2020" data-video="https://www.youtube.com/watch?v=ID-OKrxfYec">
+      <div class="card-thumb"><img class="card-img" src="https://img.youtube.com/vi/ID-OKrxfYec/hqdefault.jpg" alt="Fablab Solidaire &quot;Les usines&quot;" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Économie</span></div>
+        <div class="card-title">Fablab Solidaire &quot;Les usines&quot;</div>
+        <div class="card-date">Janvier 2020</div>
+      </div>
+    </div>
+    <div class="card" data-cats="pédagogie santé" data-title="Sim Cup 2019 - Poitiers ABS Lab" data-url="https://simonlarre.fr/archives/298" data-desc="https://youtu.be/xCGtXOLgdWE Le 11/05/2019 se déroulait à ABS Lab, à Poitiers, une Sim Cup . Cette rencontre amicale mettait en compétition huit équip" data-date="Mai 2019" data-video="https://www.youtube.com/watch?v=xCGtXOLgdWE">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/simcup-768x432.webp" alt="Sim Cup 2019 - Poitiers ABS Lab" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Pédagogie</span> <span class="cat-tag">Santé</span></div>
+        <div class="card-title">Sim Cup 2019 - Poitiers ABS Lab</div>
+        <div class="card-date">Mai 2019</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture interview" data-title="Forum Entreprendre dans la culture en Nouvelle-Aquitaine 2018" data-url="https://simonlarre.fr/archives/354" data-desc="https://youtu.be/0rWYmoCzuLs Durant deux jours, le Forum #EntreprendreCulture vous a proposé des temps d’information, des témoignages autour de la not" data-date="Février 2019" data-video="https://www.youtube.com/watch?v=0rWYmoCzuLs">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_141302-768x634.png" alt="Forum Entreprendre dans la culture en Nouvelle-Aquitaine 2018" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Interview</span></div>
+        <div class="card-title">Forum Entreprendre dans la culture en Nouvelle-Aquitaine 2018</div>
+        <div class="card-date">Février 2019</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture tiers-lieu" data-title="La Landebaudière se dote d&#39;un tiers-lieu" data-url="https://simonlarre.fr/archives/364" data-desc="Depuis le 1 er septembre 2017, la Communauté de Communes du Pays de Mortagne est devenue propriétaire du Château de Landebaudière situé à la Gaubretiè" data-date="Janvier 2019" data-video="https://www.youtube.com/watch?v=95cHEs4OO2U">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_150330-768x590.png" alt="La Landebaudière se dote d&#39;un tiers-lieu" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Tiers-lieu</span></div>
+        <div class="card-title">La Landebaudière se dote d&#39;un tiers-lieu</div>
+        <div class="card-date">Janvier 2019</div>
+      </div>
+    </div>
+    <div class="card" data-cats="concert événementiel musique" data-title="LIVE Lemon Furia" data-url="https://simonlarre.fr/archives/576" data-desc="https://youtu.be/F4z_VjunSHs Réalisation : Simon Antidatae Production : Lemon Furia Titre : Mishkina Album : Le Lavoir des Consciences Tourné le 05 Oc" data-date="Octobre 2019" data-video="https://www.youtube.com/watch?v=F4z_VjunSHs">
+      <div class="card-thumb"><img class="card-img" src="https://img.youtube.com/vi/F4z_VjunSHs/hqdefault.jpg" alt="LIVE Lemon Furia" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Concert</span> <span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">LIVE Lemon Furia</div>
+        <div class="card-date">Octobre 2019</div>
+      </div>
+    </div>
+    <div class="card" data-cats="motion design pédagogie" data-title="L&#39;analyse financière pour quoi faire ?" data-url="https://simonlarre.fr/archives/291" data-desc="https://www.youtube.com/watch?v=MGM-RQN6gUc&amp;ab_channel=CCINouvelle-Aquitaine Besoin d&#39;aide sur les outils financiers essentiels à maîtriser pour m" data-date="Octobre 2018" data-video="https://www.youtube.com/watch?v=MGM-RQN6gUc">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230214_132257-768x639.png" alt="L&#39;analyse financière pour quoi faire ?" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Motion design</span> <span class="cat-tag">Pédagogie</span></div>
+        <div class="card-title">L&#39;analyse financière pour quoi faire ?</div>
+        <div class="card-date">Octobre 2018</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture interview tiers-lieu" data-title="Inauguration du fablab des Usines" data-url="https://simonlarre.fr/archives/369" data-desc="Retrouvez l&#39; inauguration du fablab en video avec les témoignages d&#39; Alexandre Rousselet représentant du réseaux français des fablabs, Mme Léonore Mon" data-date="Février 2018" data-video="https://www.youtube.com/watch?v=xiyRcAKLtpg">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_154530-768x537.png" alt="Inauguration du fablab des Usines" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Interview</span></div>
+        <div class="card-title">Inauguration du fablab des Usines</div>
+        <div class="card-date">Février 2018</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip musique" data-title="FURY" data-url="https://simonlarre.fr/archives/461" data-desc="https://youtu.be/Ljm5UiFJ5E8 Version acoustique de Fury par BS et ONZ Version originale : https://soundcloud.com/user-353171425... En concert au Confo" data-date="Avril 2018" data-video="https://www.youtube.com/watch?v=Ljm5UiFJ5E8">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-11.23.12-768x602.png" alt="FURY" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">FURY</div>
+        <div class="card-date">Avril 2018</div>
+      </div>
+    </div>
+    <div class="card" data-cats="motion design santé" data-title="Les bons gestes santé par HSEN et l&#39;ARS" data-url="https://simonlarre.fr/archives/376" data-desc="Entretenir une bonne santé passe par des gestes simple, Habitat Santé Environnement et l&#39; Agence Régionale de la Santé vous y encouragent. Afin de pro" data-date="Octobre 2017" data-video="https://www.youtube.com/watch?v=0-myC88BCUY">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/hsen2.webp" alt="Les bons gestes santé par HSEN et l&#39;ARS" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Motion design</span> <span class="cat-tag">Santé</span></div>
+        <div class="card-title">Les bons gestes santé par HSEN et l&#39;ARS</div>
+        <div class="card-date">Octobre 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture" data-title="“Giotto” / Marine Antony / 2017" data-url="https://simonlarre.fr/archives/380" data-desc="https://vimeo.com/241504078 Cette pièce est le fruit de la résidence d’artiste de Marine Antony au Centre cardio-vasculaire du Centre Hospitalier Univ" data-date="Novembre 2017" data-video="https://vimeo.com/241504078">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_153336-768x432.png" alt="“Giotto” / Marine Antony / 2017" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span></div>
+        <div class="card-title">“Giotto” / Marine Antony / 2017</div>
+        <div class="card-date">Novembre 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="économie motion design" data-title="Caisse d&#39;Epargne - Chiffres clés 2016" data-url="https://simonlarre.fr/archives/383" data-desc="Visionnez le bilan financier réalisé pour la Caisse d&#39;Épargne Aquitaine Poitou Charentes par le Studio db (graphisme) et animé par Simon Larré (motion" data-date="Juin 2017" data-video="https://www.youtube.com/watch?v=tCPDcEBccSY">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_153910-768x497.png" alt="Caisse d&#39;Epargne - Chiffres clés 2016" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Économie</span> <span class="cat-tag">Motion design</span></div>
+        <div class="card-title">Caisse d&#39;Epargne - Chiffres clés 2016</div>
+        <div class="card-date">Juin 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="santé" data-title="Les dispositifs MAIA en Nouvelle Aquitaine" data-url="https://simonlarre.fr/archives/390" data-desc="Leur objectif est de permettre aux professionnels de la santé d&#39;améliorer leur connaissance des ressources du territoire et leur lisibilité pour facil" data-date="Avril 2017" data-video="https://www.youtube.com/watch?v=-7ZGjmXiddk">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_160407-768x587.png" alt="Les dispositifs MAIA en Nouvelle Aquitaine" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Santé</span></div>
+        <div class="card-title">Les dispositifs MAIA en Nouvelle Aquitaine</div>
+        <div class="card-date">Avril 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture teaser" data-title="Zoye, le chic Coréen sur le marché de Noël de la défense" data-url="https://simonlarre.fr/archives/395" data-desc="L&#39;an dernier à New York nous réalisions avec Mme Kim et Mr Gourlois des images de leur minutieux travail. Cette année c&#39;est à Paris que nous avons pro" data-date="Avril 2017" data-video="https://www.youtube.com/watch?v=g6ojebIOtWU">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_161918-768x687.png" alt="Zoye, le chic Coréen sur le marché de Noël de la défense" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Teaser</span></div>
+        <div class="card-title">Zoye, le chic Coréen sur le marché de Noël de la défense</div>
+        <div class="card-date">Avril 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture tiers-lieu" data-title="As we are blind" data-url="https://simonlarre.fr/archives/405" data-desc="Les Usines Nouvelles, Rurart , et le Lieu Multiple /EMF, vous invitent à découvrir une installation interactive pour aura et piano mécanique de Veroni" data-date="Mars 2017" data-video="https://vimeo.com/191494881">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_180927-768x435.png" alt="As we are blind" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Tiers-lieu</span></div>
+        <div class="card-title">As we are blind</div>
+        <div class="card-date">Mars 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture motion design" data-title="Radio Pulsar teaser 2017" data-url="https://simonlarre.fr/archives/408" data-desc="https://youtu.be/4oF8Po5cXhI Vous pouvez voir ce teaser au cinéma d&#39;art et d&#39;essai Le Dietrich avant votre film, réalisé en collaboration avec Sylvain" data-date="Février 2017" data-video="https://www.youtube.com/watch?v=4oF8Po5cXhI">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_181539-768x530.png" alt="Radio Pulsar teaser 2017" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Motion design</span></div>
+        <div class="card-title">Radio Pulsar teaser 2017</div>
+        <div class="card-date">Février 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture non classé tiers-lieu" data-title="Inauguration Cobalt" data-url="https://simonlarre.fr/archives/411" data-desc="Alain Claeys , Député-Maire de Poitiers et Alain Rousset , Président de la Région Nouvelle-Aquitaine inaugurent et visitent Cobalt - Poitiers , le tie" data-date="Janvier 2017" data-video="https://vimeo.com/199124631">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_182306-768x432.png" alt="Inauguration Cobalt" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Non classé</span></div>
+        <div class="card-title">Inauguration Cobalt</div>
+        <div class="card-date">Janvier 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture événementiel musique" data-title="Gospel’ère" data-url="https://simonlarre.fr/archives/438" data-desc="https://vimeo.com/175553444 La chorale Gospel’ère est une association qui se situe à Poitiers (86). Elle a pour but de promouvoir la pratique du chant" data-date="Mai 2017" data-video="https://vimeo.com/175553444">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-10.33.37-768x650.png" alt="Gospel’ère" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">Gospel’ère</div>
+        <div class="card-date">Mai 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture événementiel teaser" data-title="La Session Verte" data-url="https://simonlarre.fr/archives/458" data-desc="https://youtu.be/VOBaU4iOAbQ" data-date="Septembre 2017" data-video="https://www.youtube.com/watch?v=VOBaU4iOAbQ">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-11.20.27-768x618.png" alt="La Session Verte" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">La Session Verte</div>
+        <div class="card-date">Septembre 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip musique" data-title="CLIP Kushez-vous" data-url="https://simonlarre.fr/archives/497" data-desc="https://youtu.be/AMFObQk6YvE" data-date="Juin 2017" data-video="https://www.youtube.com/watch?v=AMFObQk6YvE">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/kush.webp" alt="CLIP Kushez-vous" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">CLIP Kushez-vous</div>
+        <div class="card-date">Juin 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture musique" data-title="LIVE Chiennes HIFI" data-url="https://simonlarre.fr/archives/499" data-desc="https://studio.youtube.com/video/HGXghUhFJLY/edit https://studio.youtube.com/video/XPKWq4X_H9s/edit https://studio.youtube.com/video/MRPkaLBrqFs/edit " data-date="Octobre 2017" data-video="">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/CHF.webp" alt="LIVE Chiennes HIFI" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">LIVE Chiennes HIFI</div>
+        <div class="card-date">Octobre 2017</div>
+      </div>
+    </div>
+    <div class="card" data-cats="teaser" data-title="Les Usines (Nouvelles) à Ligugé" data-url="https://simonlarre.fr/archives/179" data-desc="J&#39;ai réalisé pour les Usines Nouvelles, une vidéo de présentation des locaux. J&#39;ai capté et monter les images (sauf celles en drone pour lesquelles je" data-date="Avril 2016" data-video="https://vimeo.com/116693448">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230210_110359.png" alt="Les Usines (Nouvelles) à Ligugé" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Teaser</span></div>
+        <div class="card-title">Les Usines (Nouvelles) à Ligugé</div>
+        <div class="card-date">Avril 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="musique" data-title="Colours in the street" data-url="https://simonlarre.fr/archives/418" data-desc="Avec Ronan Le Tinier , nous participons à la campagne de communication de Radio Pulsar et en plus de faire plaisir, ça ne fait que commencer. Vous pou" data-date="Décembre 2016" data-video="https://www.youtube.com/watch?v=GBjHpsg9U64">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran_20230216_183118-768x702.png" alt="Colours in the street" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Musique</span></div>
+        <div class="card-title">Colours in the street</div>
+        <div class="card-date">Décembre 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture événementiel" data-title="Battle &quot;Le Ring&quot; 2016" data-url="https://simonlarre.fr/archives/424" data-desc="Avec Domshine Homardpayette et Fang Wycher nous avons couvert les battles de danse (Break, popping, locking, hiphop) organisés par secteur 7 à Maubeug" data-date="Octobre 2016" data-video="https://www.youtube.com/watch?v=PplsF-YUiSM">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-10.02.26-768x637.png" alt="Battle &quot;Le Ring&quot; 2016" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">Battle &quot;Le Ring&quot; 2016</div>
+        <div class="card-date">Octobre 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="événementiel" data-title="Benjamin et Delphine se marient !" data-url="https://simonlarre.fr/archives/430" data-desc="https://vimeo.com/185245025 Benjamin Destombes et Delphine Buis se mariaient le 17/09/2016 à Carcan-Maubuisson&nbsp;au bord du lac d&#39;Hourtin dans le M" data-date="Septembre 2016" data-video="https://vimeo.com/185245025">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-10.18.56-768x683.png" alt="Benjamin et Delphine se marient !" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">Benjamin et Delphine se marient !</div>
+        <div class="card-date">Septembre 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture événementiel musique teaser" data-title="Lemon Furia à Yzeures N&#39; Rock" data-url="https://simonlarre.fr/archives/433" data-desc="https://youtu.be/l91nvN2IlaE Lemon Furia partageait l&#39;affiche du festival Yzeures N&#39; Rock avec Taïro, Tiken Jah Fakoly, Birdy Nam Nam, Alborosie, Delu" data-date="Août 2016" data-video="https://www.youtube.com/watch?v=l91nvN2IlaE">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-10.24.05-768x711.png" alt="Lemon Furia à Yzeures N&#39; Rock" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">Lemon Furia à Yzeures N&#39; Rock</div>
+        <div class="card-date">Août 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture événementiel musique" data-title="Festival Jokeboxon 2016" data-url="https://simonlarre.fr/archives/441" data-desc="https://youtu.be/0CzSrEu01I0 Cette année là, le festival Jokeboxon accueillait à Zo, 1600 personnes qui venaient voir Roméo Elvis, Big Budha Cheez, Le" data-date="Juin 2016" data-video="https://www.youtube.com/watch?v=0CzSrEu01I0">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-10.40.47-768x705.png" alt="Festival Jokeboxon 2016" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">Festival Jokeboxon 2016</div>
+        <div class="card-date">Juin 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip culture danse" data-title="Phorm x Homardpayette" data-url="https://simonlarre.fr/archives/444" data-desc="https://youtu.be/H8ZPrg4TuMs Réalisation HOMARDPAYETTE &amp; CIE PHORM Chorégraphes/danseurs David Colas &amp; Santiago Codon Gras Montage Version 201" data-date="Mars 2016" data-video="https://www.youtube.com/watch?v=H8ZPrg4TuMs">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-10.47.57-768x596.png" alt="Phorm x Homardpayette" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Culture</span></div>
+        <div class="card-title">Phorm x Homardpayette</div>
+        <div class="card-date">Mars 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="culture économie musique" data-title="Plexus Records" data-url="https://simonlarre.fr/archives/483" data-desc="https://vimeo.com/93009449 Plexus Records est un disquaire indépendant spécialisé dans le disque vinyle neuf et d&#39;occasion, 33 et 45 trs : jazz, soul," data-date="Avril 2016" data-video="https://vimeo.com/93009449">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-12.48.46-768x568.png" alt="Plexus Records" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Économie</span></div>
+        <div class="card-title">Plexus Records</div>
+        <div class="card-date">Avril 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="non classé" data-title="PTK Beatbox" data-url="https://simonlarre.fr/archives/493" data-desc="https://www.youtube.com/watch?v=xxUy_SY7q24 https://www.youtube.com/watch?v=traSs5MGMI8 https://www.youtube.com/watch?v=OCk0z3Rgs5w https://www.youtub" data-date="Novembre 2016" data-video="https://www.youtube.com/watch?v=xxUy_SY7q24">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/PTK.webp" alt="PTK Beatbox" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Non classé</span></div>
+        <div class="card-title">PTK Beatbox</div>
+        <div class="card-date">Novembre 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="motion design" data-title="Motion design" data-url="https://simonlarre.fr/archives/503" data-desc="Quelques logos animés sous After effect." data-date="Avril 2016" data-video="">
+      <div class="card-thumb"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Motion design</span></div>
+        <div class="card-title">Motion design</div>
+        <div class="card-date">Avril 2016</div>
+      </div>
+    </div>
+    <div class="card" data-cats="non classé" data-title="CLIP Technogramma" data-url="https://simonlarre.fr/archives/489" data-desc="https://vimeo.com/110716510?embedded=true&amp;source=vimeo_logo&amp;owner=27240577 https://youtu.be/aNFFX128lKo" data-date="Avril 2015" data-video="https://www.youtube.com/watch?v=aNFFX128lKo">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-13.12.24-768x634.png" alt="CLIP Technogramma" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Non classé</span></div>
+        <div class="card-title">CLIP Technogramma</div>
+        <div class="card-date">Avril 2015</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip musique" data-title="CLIP L&#39;antidote" data-url="https://simonlarre.fr/archives/467" data-desc="https://youtu.be/ZULS_xwx7dg Extrait de l&#39;EP &quot;20 ans après&quot; - Arkanson - Réal : Antidatae Production : Dared Facebook : https://www.facebook.com/joke." data-date="Octobre 2014" data-video="https://www.youtube.com/watch?v=ZULS_xwx7dg">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-11.36.53-768x551.png" alt="CLIP L&#39;antidote" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">CLIP L&#39;antidote</div>
+        <div class="card-date">Octobre 2014</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip musique" data-title="CLIP des Master de l&#39;Univers - Mc Monchien" data-url="https://simonlarre.fr/archives/478" data-desc="https://youtu.be/WWlH91l2xXI Le clip https://youtu.be/vGGhemrlblQ Le teaser" data-date="Mai 2014" data-video="https://www.youtube.com/watch?v=WWlH91l2xXI">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/MC-mon-chien.webp" alt="CLIP des Master de l&#39;Univers - Mc Monchien" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">CLIP des Master de l&#39;Univers - Mc Monchien</div>
+        <div class="card-date">Mai 2014</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip culture musique" data-title="CLIP Peuple de Requiem" data-url="https://simonlarre.fr/archives/451" data-desc="https://youtu.be/XMoWOKTJeL0 Réalisé pour Stentor et THK sur une production de Meyso (beatmaker), voici le clip Peuple de Requiem&nbsp; en noir, blanc" data-date="Octobre 2012" data-video="https://www.youtube.com/watch?v=XMoWOKTJeL0">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-11.00.05-768x664.png" alt="CLIP Peuple de Requiem" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Culture</span></div>
+        <div class="card-title">CLIP Peuple de Requiem</div>
+        <div class="card-date">Octobre 2012</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip musique" data-title="CLIP Comptes de Noël" data-url="https://simonlarre.fr/archives/464" data-desc="https://youtu.be/cSvrBAv9III Comptes de Noël - Calliphonists Mc&#39;s : Keuspar - Bed - Majin Seed - Antidatae Prod : Keuspar Scratch : Dj Nogg Mixage : L" data-date="Décembre 2012" data-video="https://www.youtube.com/watch?v=cSvrBAv9III">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/comptes-de-noel.jpg" alt="CLIP Comptes de Noël" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Musique</span></div>
+        <div class="card-title">CLIP Comptes de Noël</div>
+        <div class="card-date">Décembre 2012</div>
+      </div>
+    </div>
+    <div class="card" data-cats="non classé" data-title="CLIP J&#39;irai sur les chemins - Isaac Tankaa" data-url="https://simonlarre.fr/archives/470" data-desc="https://youtu.be/WAbdrRE5K7k Réalisation : Antidatae Prod : Therm Avec l&#39;aimable participation de Keuspar et Mike. Tourné quelque part entre Poitiers " data-date="Mars 2012" data-video="https://www.youtube.com/watch?v=WAbdrRE5K7k">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/tankaa.jpg" alt="CLIP J&#39;irai sur les chemins - Isaac Tankaa" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Non classé</span></div>
+        <div class="card-title">CLIP J&#39;irai sur les chemins - Isaac Tankaa</div>
+        <div class="card-date">Mars 2012</div>
+      </div>
+    </div>
+    <div class="card" data-cats="clip culture musique" data-title="Clip d&#39;Arkanson" data-url="https://simonlarre.fr/archives/454" data-desc="https://youtu.be/e4HZfLC9aa4" data-date="Novembre 2011" data-video="https://www.youtube.com/watch?v=e4HZfLC9aa4">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/Capture-decran-2023-02-20-a-11.06.20-768x673.png" alt="Clip d&#39;Arkanson" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Clip</span> <span class="cat-tag">Culture</span></div>
+        <div class="card-title">Clip d&#39;Arkanson</div>
+        <div class="card-date">Novembre 2011</div>
+      </div>
+    </div>
 
   </div>
 </section>
-
-<section class="about" id="about">
-  <div class="about-text">
-    <p class="section-label">À propos</p>
-    <h2 class="about-heading">Raconter des histoires<br>avec <em>image & son</em></h2>
-    <p class="about-body">
-      Simon Larré est réalisateur et motion designer basé à Poitiers. Il travaille entre la captation événementielle, le clip musical, la vidéo institutionnelle et l'exploration des outils d'intelligence artificielle générative.
-      <br><br>
-      Sous le pseudonyme <strong>Antidatae</strong>, il expérimente l'animation d'images fixes par IA — cartes postales d'époque, morphings temporels, créations sonores — et collabore avec artistes, associations et institutions culturelles.
-      <br><br>
-      Chaque projet est une rencontre entre technique et sens, entre outil et intention.
-    </p>
-  </div>
-  <div class="about-stats">
-    <div class="stat">
-      <span class="stat-num">10+</span>
-      <span class="stat-label">Années<br>d'expérience</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">50+</span>
-      <span class="stat-label">Projets<br>réalisés</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">IA</span>
-      <span class="stat-label">Exploration<br>générative</span>
-    </div>
-  </div>
-</section>
-
-<section class="contact" id="contact">
-  <div>
-    <p class="section-label">Contact</p>
-    <h2 class="contact-heading">Un projet<br>en <span>tête ?</span></h2>
-  </div>
-  <div class="contact-form">
-    <div class="form-group">
-      <input type="text" placeholder="Votre nom" />
-    </div>
-    <div class="form-group">
-      <input type="email" placeholder="Email" />
-    </div>
-    <div class="form-group">
-      <textarea placeholder="Décrivez votre projet…"></textarea>
-    </div>
-    <button class="btn-send">Envoyer →</button>
-  </div>
-</section>
-
-<footer>
-  <p>© 2026 Simon Larré — Réalisateur · Motion Designer · Poitiers</p>
-  <div class="social-links">
-    <a href="https://www.instagram.com/antidatae/" target="_blank">Instagram</a>
-    <a href="#" target="_blank">Vimeo</a>
-    <a href="#" target="_blank">YouTube</a>
-  </div>
-</footer>
-
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-inner">
-    <button class="modal-close" id="modal-close">← Fermer</button>
-    <h3 class="modal-title" id="modal-title"></h3>
-    <p class="modal-desc" id="modal-desc"></p>
-    <div class="modal-video" id="modal-video"></div>
-    <p style="margin-top:0.75rem; font-size:0.65rem; letter-spacing:0.15em; color:rgba(255,255,255,0.2);" id="modal-date"></p>
-  </div>
-</div>
 
 <script>
   // Cursor
@@ -869,9 +1163,7 @@
     // Vimeo
     const vm = videoSrc.match(/vimeo\.com\/(\d+)/);
     if (vm) return `<iframe src="https://player.vimeo.com/video/${vm[1]}?autoplay=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;aspect-ratio:16/9;display:block"></iframe>`;
-    // Instagram — lien cliquable
-    if (videoSrc.match(/instagram\.com/)) return `<div style="padding:2rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1rem"><div style="opacity:0.5;font-size:0.7rem;letter-spacing:0.15em">VIDÉO DISPONIBLE SUR INSTAGRAM</div><a href="${videoSrc}" target="_blank" rel="noopener" style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.1em;color:#c9a84c;border:1px solid rgba(201,168,76,0.4);padding:0.7rem 2rem;text-decoration:none">Voir sur Instagram →</a></div>`;
-    // MP4 local ou distant
+    // MP4 local
     if (videoSrc.match(/\.mp4$/i)) return `<video src="${videoSrc}" controls autoplay style="width:100%;aspect-ratio:16/9;display:block;background:#000"></video>`;
     return '<div style="padding:2rem;text-align:center;opacity:0.3;font-size:0.75rem;letter-spacing:0.15em">VIDÉO BIENTÔT DISPONIBLE</div>';
   }
@@ -882,36 +1174,23 @@
       modalDesc.textContent  = card.dataset.desc  || '';
       modalDate.textContent  = card.dataset.date  || '';
       modalVideo.innerHTML   = buildVideoEmbed(card.dataset.video || '');
-      // Lien vers l'article WordPress
-      const articleUrl = card.dataset.url || '';
-      let linkEl = document.getElementById('modal-article-link');
-      if (!linkEl) {
-        linkEl = document.createElement('a');
-        linkEl.id = 'modal-article-link';
-        linkEl.target = '_blank';
-        linkEl.rel = 'noopener';
-        linkEl.style.cssText = 'display:inline-block;margin-top:1rem;font-family:"Bebas Neue",sans-serif;font-size:1rem;letter-spacing:0.12em;color:var(--gold);border:1px solid rgba(201,168,76,0.4);padding:0.5rem 1.5rem;text-decoration:none;transition:background 0.2s;';
-        linkEl.onmouseover = () => linkEl.style.background = 'rgba(201,168,76,0.1)';
-        linkEl.onmouseout  = () => linkEl.style.background = 'transparent';
-        document.querySelector('.modal-inner').appendChild(linkEl);
-      }
-      if (articleUrl) {
-        linkEl.href = articleUrl;
-        linkEl.textContent = 'Voir l\'article complet →';
-        linkEl.style.display = 'inline-block';
-      } else {
-        linkEl.style.display = 'none';
-      }
       modal.classList.add('open');
     });
   });
-  function closeModal() {
-    modal.classList.remove('open');
-    modalVideo.innerHTML = '';
+  document.getElementById('modal-close').addEventListener('click', () => { modal.classList.remove('open'); modalVideo.innerHTML = ''; });
+  modal.addEventListener('click', e => { if (e.target === modal) { modal.classList.remove('open'); modalVideo.innerHTML = ''; }});
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { modal.classList.remove('open'); modalVideo.innerHTML = ''; }});
+
+  // ─── PERFORATIONS LATÉRALES ───
+  function buildPerfs(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const count = Math.ceil(window.innerHeight / 34) + 2;
+    el.innerHTML = Array(count).fill('<div class="side-perf"></div>').join('');
   }
-  document.getElementById('modal-close').addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  buildPerfs('perfs-left');
+  buildPerfs('perfs-right');
+  window.addEventListener('resize', () => { buildPerfs('perfs-left'); buildPerfs('perfs-right'); });
 
   // ─── STARFIELD ───
   (function() {
@@ -1015,6 +1294,47 @@
     card.style.transition = `opacity 0.6s ${i * 0.05}s ease, transform 0.6s ${i * 0.05}s ease`;
     observer.observe(card);
   });
+
+// ─── TRACKING CLICS + FEATURED DYNAMIQUE ───
+(function() {
+  const STORAGE_KEY = 'sl_card_clicks';
+  function getClicks() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) { return {}; }
+  }
+  function saveClick(title) {
+    const clicks = getClicks();
+    clicks[title] = (clicks[title] || 0) + 1;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clicks));
+    if (window.goatcounter && window.goatcounter.count) {
+      window.goatcounter.count({ path: '/card/' + encodeURIComponent(title), title: title, event: true });
+    }
+    updateFeatured();
+  }
+  function updateFeatured() {
+    const clicks = getClicks();
+    const allCards = Array.from(document.querySelectorAll('.card'));
+    const sorted = allCards
+      .map(c => ({ el: c, title: c.dataset.title || '', clicks: clicks[c.dataset.title] || 0 }))
+      .sort((a, b) => b.clicks - a.clicks);
+    allCards.forEach(c => { if (!c.classList.contains('featured')) return; });
+    if (sorted[0] && sorted[0].clicks > 0) {
+      allCards.forEach(c => c.classList.remove('featured'));
+      sorted[0].el.classList.add('featured');
+      if (sorted[1] && sorted[1].clicks > 0) sorted[1].el.classList.add('featured');
+    }
+  }
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', function() {
+      const title = this.dataset.title;
+      if (title) saveClick(title);
+    });
+  });
+  updateFeatured();
+})();
 </script>
+
+<!-- GoatCounter -->
+<script data-goatcounter="https://simonlarre.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
 </body>
 </html>
