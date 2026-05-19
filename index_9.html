@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simon Larré — Réalisateur · Motion Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #07090f;
+    --white: #ddd5c0;
+    --cream: #ddd5c0;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gray: #1a1f2e;
+    --gray-light: #7a8090;
+    --red: #c0392b;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ─── CANVAS STARFIELD + COMÈTE ─── */
+  #starfield, #comet-canvas {
+    position: fixed; inset: 0;
+    pointer-events: none;
+  }
+  #starfield  { z-index: 1; }
+  #comet-canvas { z-index: 9999; pointer-events: none; }
+
+  /* Grain overlay argentique */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.4;
+    mix-blend-mode: screen;
+  }
+
+  /* ─── PERFORATIONS LATÉRALES ─── */
+
+
+  /* Tout contenu au-dessus des canvas */
+  body > *:not(#starfield):not(#comet-canvas):not(.cursor) {
+    position: relative; z-index: 10;
+  }
+
+  /* CURSOR — masqué, remplacé par comète */
+  .cursor { display: none; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.5rem 3rem;
+    mix-blend-mode: normal;
+  }
+  nav::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(10,10,10,0.9) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    color: var(--white);
+    text-decoration: none;
+    position: relative;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; position: relative; }
+  .nav-links a {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    text-decoration: none;
+    transition: color 0.25s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  /* HERO */
+  .hero {
+    height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 70% 40%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 50%);
+  }
+  .hero-noise {
+    position: absolute; inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+  .hero-line {
+    position: absolute; top: 0; left: 3rem;
+    width: 1px; height: 35vh;
+    background: linear-gradient(to bottom, transparent, var(--gold));
+    opacity: 0.4;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 14vw, 13rem);
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    position: relative;
+    animation: fadeUp 1s ease both;
+  }
+  .hero-title em {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    color: var(--gold);
+  }
+  .hero-sub {
+    display: flex; align-items: center; gap: 2rem;
+    margin-top: 2rem;
+    animation: fadeUp 1s 0.2s ease both;
+  }
+  .hero-role {
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+  }
+  .hero-sep { width: 60px; height: 1px; background: var(--gold); opacity: 0.5; }
+  .hero-scroll {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* FILTER */
+  .filter-bar {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    padding: 3rem 3rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .filter-btn {
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: var(--gray-light);
+    cursor: none;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* GRID */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2px;
+    padding: 0;
+  }
+  /* Empêcher la dernière card de s'étirer si elle est seule */
+  .card:last-child:nth-child(odd):not(.featured) {
+    grid-column: span 1;
+  }
+  .card {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--gray);
+    cursor: none;
+  }
+  .card.featured {
+    grid-column: span 2;
+    aspect-ratio: 21/9;
+  }
+  .card-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.5s ease;
+    filter: grayscale(30%) brightness(0.75);
+  }
+  .card:hover .card-img {
+    transform: scale(1.06);
+    filter: grayscale(0%) brightness(0.85);
+  }
+  /* Icône play pour les cards avec vidéo */
+  .play-icon {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.15);
+    border: 2px solid rgba(201,168,76,0.6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; color: var(--gold);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .card:hover .play-icon { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .card-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,10,0.9) 0%, transparent 60%);
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .card:hover .card-overlay { opacity: 1; }
+  .card-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, transparent 100%);
+    transform: translateY(20px);
+    transition: transform 0.4s ease;
+  }
+  .card:hover .card-bottom { transform: translateY(0); }
+  .card-cats {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
+  .cat-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: var(--white);
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+  }
+  .card-date {
+    font-size: 0.65rem;
+    color: var(--gray-light);
+    letter-spacing: 0.1em;
+  }
+  .card-thumb {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0f1520 0%, #1a2535 50%, #0d1018 100%);
+  }
+  .card-thumb-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  }
+
+  /* ABOUT */
+  .about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-top: 6rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .about-text {
+    padding: 5rem 3rem;
+    border-right: 1px solid rgba(255,255,255,0.05);
+  }
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .section-label::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--gold);
+    display: inline-block;
+  }
+  .about-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    line-height: 1.15;
+    margin-bottom: 2rem;
+    color: var(--white);
+  }
+  .about-heading em { font-style: italic; color: var(--gold); }
+  .about-body {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--gray-light);
+    max-width: 460px;
+  }
+  .about-stats {
+    padding: 5rem 3rem;
+    display: flex; flex-direction: column;
+    justify-content: center; gap: 2.5rem;
+  }
+  .stat {
+    display: flex; align-items: baseline; gap: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding-bottom: 2rem;
+  }
+  .stat:last-child { border-bottom: none; padding-bottom: 0; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    line-height: 1.5;
+  }
+
+  /* CONTACT */
+  .contact {
+    padding: 6rem 3rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  .contact-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 0.9;
+    color: var(--white);
+  }
+  .contact-heading span { color: var(--gold); }
+  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-group input, .form-group textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--white);
+    padding: 1rem 1.25rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.25s;
+    cursor: none;
+  }
+  .form-group input:focus, .form-group textarea:focus {
+    border-color: var(--gold);
+  }
+  .form-group textarea { height: 120px; resize: vertical; }
+  .form-group input::placeholder, .form-group textarea::placeholder {
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+  }
+  .btn-send {
+    align-self: flex-start;
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    padding: 0.9rem 2.5rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: none;
+    transition: background 0.25s, transform 0.15s;
+  }
+  .btn-send:hover { background: var(--gold-light); transform: translateX(4px); }
+
+  /* FOOTER */
+  footer {
+    padding: 2rem 3rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  footer p { font-size: 0.7rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.2); }
+  .social-links { display: flex; gap: 1.5rem; }
+  .social-links a {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .social-links a:hover { color: var(--gold); }
+
+  /* MODAL */
+  .modal {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.92);
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .modal.open { display: flex; }
+  .modal-inner {
+    max-width: 900px;
+    width: 100%;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: -2.5rem; right: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray-light);
+    cursor: none;
+    background: none;
+    border: none;
+    color: var(--gray-light);
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--gold); }
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--white);
+  }
+  .modal-desc {
+    font-size: 0.9rem;
+    color: var(--gray-light);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+  .modal-video {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-light);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+  }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    overflow: hidden;
+    padding: 1.5rem 0;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    margin: 4rem 0;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    white-space: nowrap;
+    animation: marquee 18s linear infinite;
+  }
+  .marquee-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  .marquee-item.accent { color: rgba(201,168,76,0.2); }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1.25rem 1.5rem; }
+    .hero { padding: 0 1.5rem 3rem; }
+    .filter-bar { padding: 2rem 1.5rem 1.5rem; }
+    .grid { grid-template-columns: 1fr; }
+    .card.featured { grid-column: span 1; aspect-ratio: 16/9; }
+    .about { grid-template-columns: 1fr; }
+    .about-text { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 3rem 1.5rem; }
+    .about-stats { padding: 3rem 1.5rem; }
+    .contact { grid-template-columns: 1fr; padding: 4rem 1.5rem; }
+    footer { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+<canvas id="comet-canvas"></canvas>
+<div class="cursor" id="cursor"></div>
+
+<nav>
+  <a href="#" class="nav-logo">Simon Larré</a>
+  <ul class="nav-links">
+    <li><a href="#works">Portfolio</a></li>
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-noise"></div>
+  <div class="hero-line"></div>
+  <h1 class="hero-title">Simon<br><em>Larré</em></h1>
+  <div class="hero-sub">
+    <span class="hero-role">Réalisateur</span>
+    <span class="hero-sep"></span>
+    <span class="hero-role">Motion Designer</span>
+    <span class="hero-sep"></span>
+    <span class="hero-scroll">Poitiers, France</span>
+  </div>
+</section>
+
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee">
+    <span class="marquee-item">Réalisation</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Motion Design</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">IA Générative</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Clip</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Événementiel</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Culture</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Réalisation</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Motion Design</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">IA Générative</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Clip</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Événementiel</span>
+    <span class="marquee-item accent">✦</span>
+    <span class="marquee-item">Culture</span>
+    <span class="marquee-item accent">✦</span>
+  </div>
+</div>
+
+<section id="works">
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">Tout</button>
+    <button class="filter-btn" data-filter="ia">IA</button>
+    <button class="filter-btn" data-filter="clip">Clip</button>
+    <button class="filter-btn" data-filter="événementiel">Événementiel</button>
+    <button class="filter-btn" data-filter="culture">Culture</button>
+    <button class="filter-btn" data-filter="musique">Musique</button>
+    <button class="filter-btn" data-filter="pédagogie">Pédagogie</button>
+  </div>
+
+  <div class="grid" id="grid">
+
+    <div class="card featured" data-cats="ia clip culture musique motion"
+         data-title="Vidéos IA" data-url="https://simonlarre.fr/archives/667"
+         data-desc="Extraits de projets de vidéos génératives réalisés avec des outils d'IA (Midjourney, Kling AI, Adobe Firefly) et montés sur Adobe Premiere Pro."
+         data-date="Mars 2026"
+         data-video="">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2026/03/antidatae_artistic_undrwater_photo_-ar_11_-motion_low_-raw_70159d87-b78f-4ca3-b6cf-7901f69bfd23_3.webp" alt="Vidéos IA" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">IA</span><span class="cat-tag">· Clip</span><span class="cat-tag">· Motion</span></div>
+        <div class="card-title">Vidéos IA</div>
+        <div class="card-date">Mars 2026</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="événementiel"
+         data-title="Mariage, mariage…"
+         data-desc="Captation vidéo pour le mariage d'Aurélien et Anne-Sophie. Montage réalisé en collaboration avec aur_crea."
+         data-date="Décembre 2025"
+         data-video="https://www.instagram.com/p/DPHR-I-CSrn/?hl=fr">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/12/Capture-decran-2025-12-09-120838-1-768x400.webp" alt="Mariage" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span></div>
+        <div class="card-title">Mariage, mariage…</div>
+        <div class="card-date">Décembre 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture ia"
+         data-title="Voyage dans le temps" data-url="https://simonlarre.fr/archives/635"
+         data-desc="Morphing du chasseur-cueilleur au voyageur temporel, réalisé à partir d'une photo et de prompts sur Nanobanana, Midjourney et Kling AI. Bande son Tame Impala."
+         data-date="Novembre 2025"
+         data-video="https://simonlarre.fr/wp-content/uploads/2025/11/VIDEO-2025-10-31-19-55-02.mp4">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/11/5d7ee173aaafe1a15e0157e5f2fcbc3abcd5fdb040ee46e3182634257cb03a19-768x439.webp" alt="Voyage dans le temps" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· IA</span></div>
+        <div class="card-title">Voyage dans le temps</div>
+        <div class="card-date">Novembre 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture événementiel pédagogie"
+         data-title="Jeunes à Poitiers, Jeunes Engagés"
+         data-desc="Accompagnement à la réalisation d'une courte dystopie autour de l'Union Européenne, destinée aux secteurs Jeunes, lycées et Résidences Habitat Jeunes."
+         data-date="Mars 2025"
+         data-video="https://www.youtube.com/watch?v=F4z_VjunSHs">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/03/Capture-decran-2026-03-26-161211-768x431.png" onerror="this.src='https://img.youtube.com/vi/F4z_VjunSHs/hqdefault.jpg'" alt="Jeunes à Poitiers" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· Pédagogie</span></div>
+        <div class="card-title">Jeunes à Poitiers</div>
+        <div class="card-date">Mars 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture"
+         data-title="Info Jeunes Nouvelle-Aquitaine" data-url="https://simonlarre.fr/archives/626"
+         data-desc="Vidéo de présentation de La Boussole des Jeunes — 80 secondes de témoignages sur ce service gratuit et anonyme dédié aux jeunes. Réalisé avec IKKI VIDÉO."
+         data-date="Février 2025"
+         data-video="https://www.youtube.com/watch?v=ac33WrYohfQ">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/02/Capture-decran-2026-03-26-161211-1-768x431.png" onerror="this.src='https://img.youtube.com/vi/ac33WrYohfQ/hqdefault.jpg';this.onerror=null" alt="Info Jeunes" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span></div>
+        <div class="card-title">Info Jeunes Nouvelle-Aquitaine</div>
+        <div class="card-date">Février 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture ia"
+         data-title="ai.viator" data-url="https://simonlarre.fr/archives/615"
+         data-desc="Voyage dans le temps à travers de vieilles cartes postales de Poitiers, Corte, La Rochelle, Naples — recolorisées et réanimées par intelligence artificielle."
+         data-date="Janvier 2025"
+         data-video="https://www.instagram.com/ai.viator">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2025/01/Capture-decran-2025-02-07-165011.webp" alt="ai.viator" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· IA</span></div>
+        <div class="card-title">ai.viator</div>
+        <div class="card-date">Janvier 2025</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture"
+         data-title="Plage 76 — heure d'hiver"
+         data-desc="Film pour Plage 76, espace regroupant boutique et galerie : arts visuels, artisanat d'art, mode, design & décoration, porté par Consortium Coopérative à Poitiers."
+         data-date="Janvier 2023"
+         data-video="https://www.youtube.com/watch?v=I-w6ksnlb28">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2023/02/Capture-decran-2023-02-22-a-17.22.47-768x708.webp" onerror="this.src='https://img.youtube.com/vi/I-w6ksnlb28/hqdefault.jpg';this.onerror=null" alt="Plage 76" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Culture</span><span class="cat-tag">· Tiers-lieu</span></div>
+        <div class="card-title">Plage 76 — heure d'hiver</div>
+        <div class="card-date">Janvier 2023</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="culture santé"
+         data-title="Présentation du CRESAM"
+         data-desc="Film de présentation du Centre National de Ressources Handicaps Rares – Surdicécité. Sous-titres disponibles. Voix off et missions de l'équipe."
+         data-date="Décembre 2022"
+         data-video="https://www.youtube.com/watch?v=uxd9MvBdU3U">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2023/02/Capture-decran_20230206_161012-e1675696328716-768x767.png" onerror="this.src='https://img.youtube.com/vi/uxd9MvBdU3U/hqdefault.jpg';this.onerror=null" alt="CRESAM" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Santé</span></div>
+        <div class="card-title">Présentation du CRESAM</div>
+        <div class="card-date">Décembre 2022</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="événementiel musique"
+         data-title="Gospel'ère à Notre Dame la Grande"
+         data-desc="Captation de la chorale Gospel'ère lors d'un concert à Notre Dame la Grande. Chorale gospel associative ouverte à tous, créée en 2004 à Poitiers."
+         data-date="Octobre 2022"
+         data-video="https://www.youtube.com/watch?v=A42xStw0l_g">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2023/02/Capture-decran_20230206_155754-768x677.png" onerror="this.src='https://img.youtube.com/vi/A42xStw0l_g/hqdefault.jpg';this.onerror=null" alt="Gospel'ère" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Événementiel</span><span class="cat-tag">· Musique</span></div>
+        <div class="card-title">Gospel'ère à Notre Dame</div>
+        <div class="card-date">Octobre 2022</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="ia musique"
+         data-title="The Third Machine — Pool of Tears"
+         data-desc="Collaboration entre son et intelligence artificielle : The Third Machine (groupe de musique) et Simon Larré (prompt artist). Pool of Tears Remastered."
+         data-date="Août 2022"
+         data-video="https://www.youtube.com/watch?v=FzhR9_gnC1s">
+      <div class="card-thumb">
+        <img class="card-img" src="https://simonlarre.fr/wp-content/uploads/2022/08/Capture-decran-2025-02-07-165309-768x624.webp" onerror="this.src='https://img.youtube.com/vi/FzhR9_gnC1s/hqdefault.jpg';this.onerror=null" alt="The Third Machine" loading="lazy">
+      </div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">IA</span><span class="cat-tag">· Musique</span></div>
+        <div class="card-title">The Third Machine — Pool of Tears</div>
+        <div class="card-date">Août 2022</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="about-text">
+    <p class="section-label">À propos</p>
+    <h2 class="about-heading">Raconter des histoires<br>avec <em>image & son</em></h2>
+    <p class="about-body">
+      Simon Larré est réalisateur et motion designer basé à Poitiers. Il travaille entre la captation événementielle, le clip musical, la vidéo institutionnelle et l'exploration des outils d'intelligence artificielle générative.
+      <br><br>
+      Sous le pseudonyme <strong>Antidatae</strong>, il expérimente l'animation d'images fixes par IA — cartes postales d'époque, morphings temporels, créations sonores — et collabore avec artistes, associations et institutions culturelles.
+      <br><br>
+      Chaque projet est une rencontre entre technique et sens, entre outil et intention.
+    </p>
+  </div>
+  <div class="about-stats">
+    <div class="stat">
+      <span class="stat-num">10+</span>
+      <span class="stat-label">Années<br>d'expérience</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">50+</span>
+      <span class="stat-label">Projets<br>réalisés</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">IA</span>
+      <span class="stat-label">Exploration<br>générative</span>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div>
+    <p class="section-label">Contact</p>
+    <h2 class="contact-heading">Un projet<br>en <span>tête ?</span></h2>
+  </div>
+  <div class="contact-form">
+    <div class="form-group">
+      <input type="text" placeholder="Votre nom" />
+    </div>
+    <div class="form-group">
+      <input type="email" placeholder="Email" />
+    </div>
+    <div class="form-group">
+      <textarea placeholder="Décrivez votre projet…"></textarea>
+    </div>
+    <button class="btn-send">Envoyer →</button>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Simon Larré — Réalisateur · Motion Designer · Poitiers</p>
+  <div class="social-links">
+    <a href="https://www.instagram.com/antidatae/" target="_blank">Instagram</a>
+    <a href="#" target="_blank">Vimeo</a>
+    <a href="#" target="_blank">YouTube</a>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-inner">
+    <button class="modal-close" id="modal-close">← Fermer</button>
+    <h3 class="modal-title" id="modal-title"></h3>
+    <p class="modal-desc" id="modal-desc"></p>
+    <div class="modal-video" id="modal-video"></div>
+    <p style="margin-top:0.75rem; font-size:0.65rem; letter-spacing:0.15em; color:rgba(255,255,255,0.2);" id="modal-date"></p>
+  </div>
+</div>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .card, .filter-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
+  });
+
+  // Filter
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.card');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      cards.forEach(card => {
+        const cats = card.dataset.cats || '';
+        if (filter === 'all' || cats.includes(filter)) {
+          card.style.display = '';
+          setTimeout(() => card.style.opacity = '1', 10);
+        } else {
+          card.style.opacity = '0';
+          setTimeout(() => card.style.display = 'none', 300);
+        }
+      });
+    });
+  });
+
+  // Modal
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalDesc = document.getElementById('modal-desc');
+  const modalDate = document.getElementById('modal-date');
+  const modalVideo = document.getElementById('modal-video');
+
+  function buildVideoEmbed(videoSrc) {
+    if (!videoSrc) return '<div style="padding:2rem;text-align:center;opacity:0.3;font-size:0.75rem;letter-spacing:0.15em">VIDÉO BIENTÔT DISPONIBLE</div>';
+    // YouTube
+    const yt = videoSrc.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}?autoplay=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;aspect-ratio:16/9;display:block"></iframe>`;
+    // Vimeo
+    const vm = videoSrc.match(/vimeo\.com\/(\d+)/);
+    if (vm) return `<iframe src="https://player.vimeo.com/video/${vm[1]}?autoplay=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;aspect-ratio:16/9;display:block"></iframe>`;
+    // Instagram — lien cliquable
+    if (videoSrc.match(/instagram\.com/)) return `<div style="padding:2rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1rem"><div style="opacity:0.5;font-size:0.7rem;letter-spacing:0.15em">VIDÉO DISPONIBLE SUR INSTAGRAM</div><a href="${videoSrc}" target="_blank" rel="noopener" style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.1em;color:#c9a84c;border:1px solid rgba(201,168,76,0.4);padding:0.7rem 2rem;text-decoration:none">Voir sur Instagram →</a></div>`;
+    // MP4 local ou distant
+    if (videoSrc.match(/\.mp4$/i)) return `<video src="${videoSrc}" controls autoplay style="width:100%;aspect-ratio:16/9;display:block;background:#000"></video>`;
+    return '<div style="padding:2rem;text-align:center;opacity:0.3;font-size:0.75rem;letter-spacing:0.15em">VIDÉO BIENTÔT DISPONIBLE</div>';
+  }
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      modalTitle.textContent = card.dataset.title || '';
+      modalDesc.textContent  = card.dataset.desc  || '';
+      modalDate.textContent  = card.dataset.date  || '';
+      modalVideo.innerHTML   = buildVideoEmbed(card.dataset.video || '');
+      // Lien vers l'article WordPress
+      const articleUrl = card.dataset.url || '';
+      let linkEl = document.getElementById('modal-article-link');
+      if (!linkEl) {
+        linkEl = document.createElement('a');
+        linkEl.id = 'modal-article-link';
+        linkEl.target = '_blank';
+        linkEl.rel = 'noopener';
+        linkEl.style.cssText = 'display:inline-block;margin-top:1rem;font-family:"Bebas Neue",sans-serif;font-size:1rem;letter-spacing:0.12em;color:var(--gold);border:1px solid rgba(201,168,76,0.4);padding:0.5rem 1.5rem;text-decoration:none;transition:background 0.2s;';
+        linkEl.onmouseover = () => linkEl.style.background = 'rgba(201,168,76,0.1)';
+        linkEl.onmouseout  = () => linkEl.style.background = 'transparent';
+        document.querySelector('.modal-inner').appendChild(linkEl);
+      }
+      if (articleUrl) {
+        linkEl.href = articleUrl;
+        linkEl.textContent = 'Voir l\'article complet →';
+        linkEl.style.display = 'inline-block';
+      } else {
+        linkEl.style.display = 'none';
+      }
+      modal.classList.add('open');
+    });
+  });
+  function closeModal() {
+    modal.classList.remove('open');
+    modalVideo.innerHTML = '';
+  }
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // ─── STARFIELD ───
+  (function() {
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let W, H, stars = [];
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    function initStars(n) {
+      stars = [];
+      for (let i = 0; i < n; i++) {
+        const x = Math.random() * W, y = Math.random() * H;
+        stars.push({ x, y, baseX: x, baseY: y,
+          r: Math.random() < 0.15 ? 2 : 1,
+          brightness: 0.3 + Math.random() * 0.7,
+          twinkle: Math.random() * Math.PI * 2,
+          twinkleSpeed: 0.01 + Math.random() * 0.03,
+          hue: Math.random() < 0.3 ? 210 : 0,
+          sat: Math.random() < 0.3 ? 60 : 0,
+          vx: 0, vy: 0 });
+      }
+    }
+    let mouseX = -9999, mouseY = -9999;
+    const REPEL_R = 90, REPEL_F = 3.5, RETURN = 0.06;
+    window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      for (const s of stars) {
+        const dx = s.x - mouseX, dy = s.y - mouseY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < REPEL_R && dist > 0) { const f = (REPEL_R - dist) / REPEL_R * REPEL_F; s.vx += dx/dist*f; s.vy += dy/dist*f; }
+        s.vx += (s.baseX - s.x) * RETURN; s.vy += (s.baseY - s.y) * RETURN;
+        s.vx *= 0.78; s.vy *= 0.78; s.x += s.vx; s.y += s.vy;
+        s.twinkle += s.twinkleSpeed;
+        const alpha = s.brightness * (0.6 + 0.4 * Math.sin(s.twinkle));
+        ctx.beginPath(); ctx.arc(Math.round(s.x), Math.round(s.y), s.r, 0, Math.PI*2);
+        ctx.fillStyle = s.hue ? `hsla(${s.hue},${s.sat}%,90%,${alpha})` : `rgba(255,255,255,${alpha})`;
+        ctx.fill();
+        if (s.r === 2) {
+          const g = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,5);
+          g.addColorStop(0, `rgba(180,210,255,${alpha*0.4})`); g.addColorStop(1,'rgba(0,0,0,0)');
+          ctx.beginPath(); ctx.arc(s.x,s.y,5,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+    resize(); initStars(320); draw();
+    window.addEventListener('resize', () => { resize(); initStars(320); });
+  })();
+
+  // ─── COMÈTE PIXEL + EXPLOSION ───
+  (function() {
+    const canvas = document.getElementById('comet-canvas');
+    const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+    let mx = window.innerWidth/2, my = window.innerHeight/2;
+    const trail = [], particles = [];
+    window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    window.addEventListener('click', e => {
+      const colors = ['#ff6010','#ff3000','#ffaa30','#ffe060','#a0c8ff','#ffffff'];
+      for (let i = 0; i < 28; i++) {
+        const angle = (i/28)*Math.PI*2 + Math.random()*0.3, speed = 2 + Math.random()*5;
+        particles.push({ x:e.clientX, y:e.clientY, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed,
+          size: 2+Math.floor(Math.random()*4)*2, color:colors[Math.floor(Math.random()*colors.length)],
+          life:1, decay:0.03+Math.random()*0.04 });
+      }
+      particles.push({ x:e.clientX, y:e.clientY, vx:0, vy:0, size:18, color:'#ffffff', life:1, decay:0.12 });
+    });
+    function px(x,y,size,color,alpha) { ctx.fillStyle=color; ctx.globalAlpha=alpha; ctx.fillRect(Math.round(x-size/2),Math.round(y-size/2),size,size); }
+    function loop() {
+      ctx.clearRect(0,0,canvas.width,canvas.height); ctx.globalAlpha=1;
+      trail.push({x:mx,y:my,life:1}); if(trail.length>18) trail.shift();
+      trail.forEach((p,i) => {
+        p.life -= 0.04; if(p.life<=0) return;
+        const t = i/trail.length, size = Math.max(2,Math.round(t*8));
+        px(p.x,p.y,size,`rgb(255,${Math.round(200*t+50*(1-t))},${Math.round(80*t)})`,p.life*t*0.85);
+      });
+      const gH = ctx.createRadialGradient(mx,my,0,mx,my,10);
+      gH.addColorStop(0,'rgba(255,220,150,0.9)'); gH.addColorStop(0.4,'rgba(255,100,20,0.4)'); gH.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.globalAlpha=1; ctx.fillStyle=gH; ctx.beginPath(); ctx.arc(mx,my,10,0,Math.PI*2); ctx.fill();
+      px(mx,my,4,'#ffffff',1);
+      for (let i=particles.length-1;i>=0;i--) {
+        const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.12; p.vx*=0.95; p.vy*=0.95; p.life-=p.decay;
+        if(p.life<=0){particles.splice(i,1);continue;} px(p.x,p.y,p.size,p.color,p.life);
+      }
+      ctx.globalAlpha=1; requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+  cards.forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(24px)';
+    card.style.transition = `opacity 0.6s ${i * 0.05}s ease, transform 0.6s ${i * 0.05}s ease`;
+    observer.observe(card);
+  });
+</script>
+</body>
+</html>
