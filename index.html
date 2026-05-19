@@ -20,7 +20,7 @@
     --red: #c0392b;
   }
 
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; background: #07090f; }
 
   body {
     background: var(--black);
@@ -48,23 +48,6 @@
     z-index: 9998;
     opacity: 0.4;
     mix-blend-mode: screen;
-  }
-
-  /* ─── PERFORATIONS LATÉRALES ─── */
-  .side-perfs {
-    position: fixed; top: 0;
-    width: 32px; height: 100%;
-    background: repeating-linear-gradient(to bottom, #2a1005 0px, #1a0a02 8px, #0f0602 8px, #1a0a02 16px);
-    display: flex; flex-direction: column;
-    gap: 10px; padding: 10px 5px;
-    z-index: 80; pointer-events: none;
-  }
-  .side-perfs.left  { left: 0;  box-shadow: inset -2px 0 10px rgba(180,60,10,0.35); }
-  .side-perfs.right { right: 0; box-shadow: inset  2px 0 10px rgba(180,60,10,0.35); }
-  .side-perf {
-    width: 20px; height: 24px; border-radius: 4px;
-    flex-shrink: 0; background: #000;
-    box-shadow: 0 0 6px 3px rgba(210,80,10,0.75), 0 0 14px 5px rgba(180,40,5,0.45), 0 0 2px 1px rgba(255,150,50,0.6);
   }
 
   /* Tout contenu au-dessus des canvas */
@@ -529,8 +512,6 @@
 
 <canvas id="starfield"></canvas>
 <canvas id="comet-canvas"></canvas>
-<div class="side-perfs left"  id="perfs-left"></div>
-<div class="side-perfs right" id="perfs-right"></div>
 <div class="cursor" id="cursor"></div>
 
 <nav>
@@ -1115,6 +1096,18 @@
   </div>
 </section>
 
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-inner">
+    <button class="modal-close" id="modal-close">← Fermer</button>
+    <h3 class="modal-title" id="modal-title"></h3>
+    <p class="modal-desc" id="modal-desc"></p>
+    <div class="modal-video" id="modal-video"></div>
+    <p style="margin-top:0.75rem; font-size:0.65rem; letter-spacing:0.15em; color:rgba(255,255,255,0.2);" id="modal-date"></p>
+  </div>
+</div>
+
 <script>
   // Cursor
   const cursor = document.getElementById('cursor');
@@ -1181,66 +1174,61 @@
   modal.addEventListener('click', e => { if (e.target === modal) { modal.classList.remove('open'); modalVideo.innerHTML = ''; }});
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { modal.classList.remove('open'); modalVideo.innerHTML = ''; }});
 
-  // ─── PERFORATIONS LATÉRALES ───
-  function buildPerfs(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const count = Math.ceil(window.innerHeight / 34) + 2;
-    el.innerHTML = Array(count).fill('<div class="side-perf"></div>').join('');
-  }
-  buildPerfs('perfs-left');
-  buildPerfs('perfs-right');
-  window.addEventListener('resize', () => { buildPerfs('perfs-left'); buildPerfs('perfs-right'); });
+  
 
   // ─── STARFIELD ───
-  (function() {
+(function initStarfield() {
     const canvas = document.getElementById('starfield');
+    if (!canvas) { setTimeout(initStarfield, 50); return; }
     const ctx = canvas.getContext('2d');
     let W, H, stars = [];
-    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+    }
     function initStars(n) {
-      stars = [];
-      for (let i = 0; i < n; i++) {
-        const x = Math.random() * W, y = Math.random() * H;
-        stars.push({ x, y, baseX: x, baseY: y,
-          r: Math.random() < 0.15 ? 2 : 1,
-          brightness: 0.3 + Math.random() * 0.7,
-          twinkle: Math.random() * Math.PI * 2,
-          twinkleSpeed: 0.01 + Math.random() * 0.03,
-          hue: Math.random() < 0.3 ? 210 : 0,
-          sat: Math.random() < 0.3 ? 60 : 0,
-          vx: 0, vy: 0 });
-      }
+        stars = [];
+        for (let i = 0; i < n; i++) {
+            const x = Math.random() * W, y = Math.random() * H;
+            stars.push({ x, y, baseX: x, baseY: y,
+                r: Math.random() < 0.15 ? 2 : 1,
+                brightness: 0.3 + Math.random() * 0.7,
+                twinkle: Math.random() * Math.PI * 2,
+                twinkleSpeed: 0.01 + Math.random() * 0.03,
+                hue: Math.random() < 0.3 ? 210 : 0,
+                sat: Math.random() < 0.3 ? 60 : 0,
+                vx: 0, vy: 0 });
+        }
     }
     let mouseX = -9999, mouseY = -9999;
     const REPEL_R = 90, REPEL_F = 3.5, RETURN = 0.06;
     window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
     function draw() {
-      ctx.clearRect(0, 0, W, H);
-      for (const s of stars) {
-        const dx = s.x - mouseX, dy = s.y - mouseY;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < REPEL_R && dist > 0) { const f = (REPEL_R - dist) / REPEL_R * REPEL_F; s.vx += dx/dist*f; s.vy += dy/dist*f; }
-        s.vx += (s.baseX - s.x) * RETURN; s.vy += (s.baseY - s.y) * RETURN;
-        s.vx *= 0.78; s.vy *= 0.78; s.x += s.vx; s.y += s.vy;
-        s.twinkle += s.twinkleSpeed;
-        const alpha = s.brightness * (0.6 + 0.4 * Math.sin(s.twinkle));
-        ctx.beginPath(); ctx.arc(Math.round(s.x), Math.round(s.y), s.r, 0, Math.PI*2);
-        ctx.fillStyle = s.hue ? `hsla(${s.hue},${s.sat}%,90%,${alpha})` : `rgba(255,255,255,${alpha})`;
-        ctx.fill();
-        if (s.r === 2) {
-          const g = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,5);
-          g.addColorStop(0, `rgba(180,210,255,${alpha*0.4})`); g.addColorStop(1,'rgba(0,0,0,0)');
-          ctx.beginPath(); ctx.arc(s.x,s.y,5,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+        ctx.clearRect(0, 0, W, H);
+        for (const s of stars) {
+            const dx = s.x - mouseX, dy = s.y - mouseY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < REPEL_R && dist > 0) { const f = (REPEL_R - dist) / REPEL_R * REPEL_F; s.vx += dx/dist*f; s.vy += dy/dist*f; }
+            s.vx += (s.baseX - s.x) * RETURN; s.vy += (s.baseY - s.y) * RETURN;
+            s.vx *= 0.78; s.vy *= 0.78; s.x += s.vx; s.y += s.vy;
+            s.twinkle += s.twinkleSpeed;
+            const alpha = s.brightness * (0.6 + 0.4 * Math.sin(s.twinkle));
+            ctx.beginPath(); ctx.arc(Math.round(s.x), Math.round(s.y), s.r, 0, Math.PI*2);
+            ctx.fillStyle = s.hue ? `hsla(${s.hue},${s.sat}%,90%,${alpha})` : `rgba(255,255,255,${alpha})`;
+            ctx.fill();
+            if (s.r === 2) {
+                const g = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,5);
+                g.addColorStop(0, `rgba(180,210,255,${alpha*0.4})`); g.addColorStop(1,'rgba(0,0,0,0)');
+                ctx.beginPath(); ctx.arc(s.x,s.y,5,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+            }
         }
-      }
-      requestAnimationFrame(draw);
+        requestAnimationFrame(draw);
     }
     resize(); initStars(320); draw();
     window.addEventListener('resize', () => { resize(); initStars(320); });
-  })();
+})();
 
-  // ─── COMÈTE PIXEL + EXPLOSION ───
+// ─── COMÈTE PIXEL + EXPLOSION ───
   (function() {
     const canvas = document.getElementById('comet-canvas');
     const ctx = canvas.getContext('2d');
@@ -1280,20 +1268,21 @@
     }
     loop();
   })();
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.style.opacity = '1';
-        e.target.style.transform = 'translateY(0)';
-      }
-    });
-  }, { threshold: 0.1 });
+  // Cards visibles par défaut - animation CSS simple
   cards.forEach((card, i) => {
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(24px)';
-    card.style.transition = `opacity 0.6s ${i * 0.05}s ease, transform 0.6s ${i * 0.05}s ease`;
-    observer.observe(card);
+    card.style.opacity = '1';
+    card.style.transform = 'translateY(0)';
   });
+
+// Fallback: forcer l'affichage des cards si l'observer ne se déclenche pas
+setTimeout(() => {
+  document.querySelectorAll('.card').forEach(card => {
+    if (card.style.opacity === '0' || card.style.opacity === '') {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }
+  });
+}, 1500);
 
 // ─── TRACKING CLICS + FEATURED DYNAMIQUE ───
 (function() {
