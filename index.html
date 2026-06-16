@@ -22,12 +22,17 @@
 
   html { scroll-behavior: smooth; background: #07090f; }
 
+  html {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
   body {
     background: var(--black);
     color: var(--white);
     font-family: 'DM Sans', sans-serif;
     font-weight: 300;
     overflow-x: hidden;
+    max-width: 100%;
     cursor: none;
   }
 
@@ -37,7 +42,7 @@
     pointer-events: none;
   }
   #starfield  { z-index: 1; }
-  #comet-canvas { z-index: 2; }
+  #comet-canvas { z-index: 99999; }
 
   /* Grain overlay argentique */
   body::after {
@@ -51,9 +56,16 @@
   }
 
   /* Tout contenu au-dessus des canvas */
-  body > *:not(#starfield):not(#comet-canvas):not(.side-perfs):not(.cursor) {
+  body > *:not(#starfield):not(#comet-canvas):not(.side-perfs):not(.cursor):not(.video-expand):not(.video-expand-backdrop):not(.video-expand-close) {
     position: relative; z-index: 10;
     margin-left: 32px; margin-right: 32px;
+    width: calc(100% - 64px);
+    box-sizing: border-box;
+  }
+  /* nav et modal restent pleine largeur (position fixed) */
+  body > nav, body > .modal {
+    margin-left: 0; margin-right: 0;
+    width: 100%;
   }
 
   /* CURSOR — masqué, remplacé par comète */
@@ -423,6 +435,71 @@
     padding: 2rem;
   }
   .modal.open { display: flex; }
+
+  /* ─── EXPAND FLIP (carte vidéo qui s'agrandit depuis sa position) ─── */
+  .video-expand-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(8,8,8,0);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: background 0.45s ease, opacity 0.45s ease;
+    backdrop-filter: blur(0px);
+  }
+  .video-expand-backdrop.active {
+    background: rgba(8,8,8,0.94);
+    backdrop-filter: blur(6px);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .video-expand {
+    position: fixed;
+    z-index: 160;
+    background: #000;
+    overflow: hidden;
+    box-shadow: 0 30px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(201,168,76,0.15);
+    transition: top 0.5s cubic-bezier(0.16,1,0.3,1),
+                left 0.5s cubic-bezier(0.16,1,0.3,1),
+                width 0.5s cubic-bezier(0.16,1,0.3,1),
+                height 0.5s cubic-bezier(0.16,1,0.3,1),
+                border-radius 0.5s ease;
+    display: flex; flex-direction: column;
+  }
+  .video-expand iframe, .video-expand video {
+    width: 100%; height: 100%; border: 0; display: block; background: #000;
+    flex: 1;
+  }
+  .video-expand .ve-meta {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 1.5rem 1.75rem 1.25rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.92), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease 0.3s;
+    pointer-events: none;
+  }
+  .video-expand.full .ve-meta { opacity: 1; }
+  .ve-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem; color: #fff; margin-bottom: 0.35rem;
+  }
+  .ve-date { font-size: 0.65rem; letter-spacing: 0.15em; color: var(--gold); text-transform: uppercase; }
+  .video-expand-close {
+    position: fixed;
+    z-index: 170;
+    top: 1.5rem; right: 1.75rem;
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #fff; background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 0.5rem 1rem;
+    cursor: none;
+    font-family: 'DM Sans', sans-serif;
+    opacity: 0;
+    transition: opacity 0.4s ease 0.3s, border-color 0.2s, background 0.2s;
+    pointer-events: none;
+  }
+  .video-expand-close.show { opacity: 1; pointer-events: auto; }
+  .video-expand-close:hover { border-color: var(--gold); color: var(--gold); background: rgba(0,0,0,0.8); }
+
   .modal-inner {
     max-width: 900px;
     width: 100%;
@@ -465,6 +542,62 @@
     color: var(--gray-light);
     font-size: 0.8rem;
     letter-spacing: 0.15em;
+  }
+
+  /* ─── CV VIDÉO (surplombe, en haut) ─── */
+  .cv-video {
+    padding: 4rem 3rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+  }
+  .cv-video .section-label { justify-content: center; }
+  .cv-video-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+  .cv-video-heading em { font-style: italic; color: var(--gold); }
+  .cv-video-sub {
+    font-size: 0.8rem; letter-spacing: 0.1em; color: var(--gray-light);
+    margin-bottom: 2.5rem;
+  }
+  .cv-video-frame {
+    position: relative;
+    max-width: 1000px;
+    margin: 0 auto;
+    aspect-ratio: 16/9;
+    border: 1px solid rgba(201,168,76,0.2);
+    box-shadow: 0 20px 80px rgba(0,0,0,0.6), 0 0 60px rgba(201,168,76,0.05);
+    overflow: hidden;
+    background: #000;
+    cursor: none;
+  }
+  .cv-video-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .cv-video-poster {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.4s ease;
+  }
+  .cv-video-poster::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,10,10,0.7), rgba(10,10,10,0.2));
+  }
+  .cv-play {
+    position: relative; z-index: 2;
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(201,168,76,0.2);
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; color: var(--gold);
+    transition: transform 0.3s, background 0.3s;
+  }
+  .cv-video-frame:hover .cv-play { transform: scale(1.1); background: rgba(201,168,76,0.35); }
+
+  @media (max-width: 768px) {
+    .cv-video { padding: 3rem 1.5rem 1.5rem; }
   }
 
   /* MARQUEE */
@@ -537,6 +670,17 @@
   </div>
 </section>
 
+<section class="cv-video">
+  <div class="section-label">Présentation</div>
+  <h2 class="cv-video-heading">Mon <em>CV vidéo</em></h2>
+  <p class="cv-video-sub">90 secondes pour faire connaissance</p>
+  <div class="cv-video-frame" id="cv-video-frame" data-yt="s3tqPkDL3_w">
+    <div class="cv-video-poster" id="cv-video-poster" style="background-image:url('MINIATURE/cv-video-poster.webp')">
+      <div class="cv-play">▶</div>
+    </div>
+  </div>
+</section>
+
 <div class="marquee-wrap">
   <div class="marquee-track" id="marquee">
     <span class="marquee-item">Réalisation</span>
@@ -589,7 +733,7 @@
       </div>
     </div>
     <div class="card" data-cats="culture économie santé" data-title="Info Jeunes Nouvelle-Aquitaine" data-url="https://simonlarre.fr/archives/626" data-desc="🤩 🎥 La Boussole des Jeunes a une nouvelle vidéo de présentation, 100% locale, made in Poitiers ! ⏱80 secondes de témoignages sur le service rendu aux " data-date="Février 2025" data-video="https://www.youtube.com/watch?v=ac33WrYohfQ">
-      <div class="card-thumb"><img class="card-img" src="MINIATURE/info-jeunes-na.webp"MINIATURE/info-jeunes-na.webp" alt="Info Jeunes Nouvelle-Aquitaine" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/boussole-des-jeunes.png" alt="Info Jeunes Nouvelle-Aquitaine" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
         <div class="card-cats"><span class="cat-tag">Culture</span> <span class="cat-tag">Économie</span></div>
@@ -597,7 +741,7 @@
         <div class="card-date">Février 2025</div>
       </div>
     </div>
-    <div class="card" data-cats="culture ia" data-title="Voyage dans le temps" data-url="https://simonlarre.fr/archives/635" data-desc="Morphing du chasseur-cueilleur au voyageur temporel, réalisé à partir d’une photo et de quelques prompts sur #nanobanana en modèle dans #adobe #firefl" data-date="Novembre 2025" data-video="https://simonlarre.fr/wp-content/uploads/2025/11/VIDEO-2025-10-31-19-55-02.mp4">
+    <div class="card" data-cats="culture ia" data-title="Voyage dans le temps" data-url="https://simonlarre.fr/archives/635" data-desc="Morphing du chasseur-cueilleur au voyageur temporel, réalisé à partir d’une photo et de quelques prompts sur #nanobanana en modèle dans #adobe #firefl" data-date="Novembre 2025" data-video="https://www.instagram.com/p/DQgynKDDNB7/">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/voyage-dans-le-temps.webp" alt="Voyage dans le temps" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -1097,16 +1241,6 @@
 </section>
 
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-inner">
-    <button class="modal-close" id="modal-close">← Fermer</button>
-    <h3 class="modal-title" id="modal-title"></h3>
-    <p class="modal-desc" id="modal-desc"></p>
-    <div class="modal-video" id="modal-video"></div>
-    <p style="margin-top:0.75rem; font-size:0.65rem; letter-spacing:0.15em; color:rgba(255,255,255,0.2);" id="modal-date"></p>
-  </div>
-</div>
 
 <script>
   // Cursor
@@ -1141,38 +1275,119 @@
     });
   });
 
-  // Modal
-  const modal = document.getElementById('modal');
-  const modalTitle = document.getElementById('modal-title');
-  const modalDesc = document.getElementById('modal-desc');
-  const modalDate = document.getElementById('modal-date');
-  const modalVideo = document.getElementById('modal-video');
-
+  // ─── LECTEUR VIDÉO : EXPAND FLIP ───
   function buildVideoEmbed(videoSrc) {
-    if (!videoSrc) return '<div style="padding:2rem;text-align:center;opacity:0.3;font-size:0.75rem;letter-spacing:0.15em">VIDÉO BIENTÔT DISPONIBLE</div>';
+    if (!videoSrc) return null;
     // YouTube
     const yt = videoSrc.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}?autoplay=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;aspect-ratio:16/9;display:block"></iframe>`;
+    if (yt) return `<iframe src="https://www.youtube.com/embed/${yt[1]}?autoplay=1&rel=0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
     // Vimeo
     const vm = videoSrc.match(/vimeo\.com\/(\d+)/);
-    if (vm) return `<iframe src="https://player.vimeo.com/video/${vm[1]}?autoplay=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="width:100%;aspect-ratio:16/9;display:block"></iframe>`;
+    if (vm) return `<iframe src="https://player.vimeo.com/video/${vm[1]}?autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+    // Instagram (reel ou post)
+    const ig = videoSrc.match(/instagram\.com\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/);
+    if (ig) return `<iframe src="https://www.instagram.com/p/${ig[1]}/embed/" allow="autoplay; encrypted-media" allowfullscreen scrolling="no"></iframe>`;
     // MP4 local
-    if (videoSrc.match(/\.mp4$/i)) return `<video src="${videoSrc}" controls autoplay style="width:100%;aspect-ratio:16/9;display:block;background:#000"></video>`;
-    return '<div style="padding:2rem;text-align:center;opacity:0.3;font-size:0.75rem;letter-spacing:0.15em">VIDÉO BIENTÔT DISPONIBLE</div>';
+    if (videoSrc.match(/\.mp4$/i)) return `<video src="${videoSrc}" controls autoplay></video>`;
+    return null;
+  }
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'video-expand-backdrop';
+  document.body.appendChild(backdrop);
+
+  let currentExpand = null;
+
+  function closeExpand() {
+    if (!currentExpand) return;
+    const { box, card, closeBtn, rect } = currentExpand;
+    closeBtn.classList.remove('show');
+    box.classList.remove('full');
+    backdrop.classList.remove('active');
+    // animation retour vers la position d'origine de la carte
+    const r = card.getBoundingClientRect();
+    box.style.top = r.top + 'px';
+    box.style.left = r.left + 'px';
+    box.style.width = r.width + 'px';
+    box.style.height = r.height + 'px';
+    box.style.borderRadius = '0px';
+    setTimeout(() => {
+      box.remove();
+      closeBtn.remove();
+      card.style.visibility = '';
+    }, 520);
+    currentExpand = null;
+    document.body.style.overflow = '';
+  }
+
+  function openExpand(card) {
+    if (currentExpand) return;
+    const embed = buildVideoEmbed(card.dataset.video || '');
+    if (!embed) return; // pas de vidéo -> on ne fait rien (carte sans lecteur)
+
+    const rect = card.getBoundingClientRect();
+
+    // Boîte qui démarre exactement sur la carte
+    const box = document.createElement('div');
+    box.className = 'video-expand';
+    box.style.top = rect.top + 'px';
+    box.style.left = rect.left + 'px';
+    box.style.width = rect.width + 'px';
+    box.style.height = rect.height + 'px';
+    box.style.borderRadius = '0px';
+
+    const isInsta = /instagram\.com/.test(card.dataset.video || '');
+    box.innerHTML = embed +
+      `<div class="ve-meta"><div class="ve-title">${(card.dataset.title||'').replace(/&#39;/g,"'")}</div><div class="ve-date">${card.dataset.date||''}</div></div>`;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'video-expand-close';
+    closeBtn.textContent = '✕ Fermer';
+
+    document.body.appendChild(box);
+    document.body.appendChild(closeBtn);
+    card.style.visibility = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    backdrop.classList.add('active');
+
+    // Cible finale : grand format centré, qui respecte l'écran
+    requestAnimationFrame(() => {
+      const vw = window.innerWidth, vh = window.innerHeight;
+      // Instagram = format vertical, le reste 16:9
+      const ratio = isInsta ? 9/16 : 16/9;
+      let w = Math.min(vw * 0.9, isInsta ? 460 : 1100);
+      let h = w / ratio;
+      if (h > vh * 0.88) { h = vh * 0.88; w = h * ratio; }
+      box.style.top = ((vh - h)/2) + 'px';
+      box.style.left = ((vw - w)/2) + 'px';
+      box.style.width = w + 'px';
+      box.style.height = h + 'px';
+      box.style.borderRadius = '4px';
+      box.classList.add('full');
+      closeBtn.classList.add('show');
+    });
+
+    currentExpand = { box, card, closeBtn, rect };
+
+    backdrop.onclick = closeExpand;
+    closeBtn.onclick = closeExpand;
   }
 
   cards.forEach(card => {
-    card.addEventListener('click', () => {
-      modalTitle.textContent = card.dataset.title || '';
-      modalDesc.textContent  = card.dataset.desc  || '';
-      modalDate.textContent  = card.dataset.date  || '';
-      modalVideo.innerHTML   = buildVideoEmbed(card.dataset.video || '');
-      modal.classList.add('open');
-    });
+    card.addEventListener('click', () => openExpand(card));
   });
-  document.getElementById('modal-close').addEventListener('click', () => { modal.classList.remove('open'); modalVideo.innerHTML = ''; });
-  modal.addEventListener('click', e => { if (e.target === modal) { modal.classList.remove('open'); modalVideo.innerHTML = ''; }});
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { modal.classList.remove('open'); modalVideo.innerHTML = ''; }});
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeExpand(); });
+  window.addEventListener('resize', () => { if (currentExpand) closeExpand(); });
+
+  // ─── CV VIDÉO (clic sur le poster -> charge l'iframe YouTube) ───
+  const cvFrame = document.getElementById('cv-video-frame');
+  if (cvFrame) {
+    cvFrame.addEventListener('click', () => {
+      const id = cvFrame.dataset.yt;
+      cvFrame.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+    });
+  }
 
   
 
