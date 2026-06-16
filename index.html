@@ -469,6 +469,20 @@
     width: 100%; height: 100%; border: 0; display: block; background: #000;
     flex: 1;
   }
+  /* Galerie IA : colonne verticale scrollable de vidéos en boucle */
+  .video-expand.is-gallery { background: #0c0c0c; }
+  .ia-gallery {
+    width: 100%; height: 100%;
+    overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; gap: 2px;
+    scrollbar-width: thin; scrollbar-color: var(--gold) #1a1a1a;
+  }
+  .ia-gallery::-webkit-scrollbar { width: 8px; }
+  .ia-gallery::-webkit-scrollbar-track { background: #1a1a1a; }
+  .ia-gallery::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.5); border-radius: 4px; }
+  .ia-gallery video {
+    width: 100%; height: auto; flex: none; display: block; background: #000;
+  }
   .video-expand .ve-meta {
     position: absolute; left: 0; right: 0; bottom: 0;
     padding: 1.5rem 1.75rem 1.25rem;
@@ -722,6 +736,26 @@
   </div>
 
   <div class="grid" id="grid">
+
+    <div class="card" data-cats="ia" data-type="snack" data-title="Mamagrane — jeu d'anagrammes" data-url="https://snack.expo.dev/@similarr/mamagrane" data-desc="Jeu d'anagrammes mobile que j'ai développé (React Native / Expo), esthétique collage Basquiat / dada. Jouable directement ici." data-date="Mai 2026" data-snack="https://snack.expo.dev/embedded/@similarr/mamagrane?platform=web&preview=true&theme=dark">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/mamagrane.webp" alt="Mamagrane" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Jeu</span> <span class="cat-tag">App</span></div>
+        <div class="card-title">Mamagrane — jeu d'anagrammes</div>
+        <div class="card-date">Mai 2026</div>
+      </div>
+    </div>
+
+    <div class="card" data-cats="ia" data-type="gallery" data-title="IA générative — sélection 2026" data-url="" data-desc="Une sélection de mes explorations vidéo en IA générative (Midjourney, Kling, Firefly). Antidatae." data-date="Février 2026" data-video="">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/ia-generative.webp" alt="IA générative — sélection 2026" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">IA</span> <span class="cat-tag">Antidatae</span></div>
+        <div class="card-title">IA générative — sélection 2026</div>
+        <div class="card-date">Février 2026</div>
+      </div>
+    </div>
 
     <div class="card" data-cats="culture ia" data-title="ai.viator" data-url="https://simonlarre.fr/archives/615" data-desc="https://www.instagram.com/ai.viator?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0MzIxNw== Voyagez dans le temps à travers de vieilles cartes " data-date="Janvier 2025" data-video="https://www.instagram.com/p/DC9hQHny28x/">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/ai-viator.webp" alt="ai.viator" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
@@ -1242,6 +1276,7 @@
 
 
 
+<script src="IA/media.js"></script>
 <script>
   // Cursor
   const cursor = document.getElementById('cursor');
@@ -1320,24 +1355,54 @@
     document.body.style.overflow = '';
   }
 
+  // Liste des médias de la carte "IA générative" (fichiers dans le dossier IA/).
+  // Régénère cette liste avec la commande fournie, ou ajoute/retire des entrées à la main.
+  const IA_MEDIA = window.IA_MEDIA || [];
+
   function openExpand(card) {
     if (currentExpand) return;
-    const embed = buildVideoEmbed(card.dataset.video || '');
-    if (!embed) return; // pas de vidéo -> on ne fait rien (carte sans lecteur)
+    const type = card.dataset.type || 'video';
+
+    let inner = '', isInsta = false, ratio = 16/9, maxW = 1100;
+
+    if (type === 'gallery') {
+      // Colonne verticale de vidéos en boucle
+      const items = IA_MEDIA.length ? IA_MEDIA : [];
+      if (!items.length) {
+        inner = `<div style="padding:3rem;text-align:center;color:#888;font-family:'DM Sans',sans-serif;font-size:0.85rem;letter-spacing:0.1em">Aucun média pour l'instant.<br>Ajoute tes fichiers dans le dossier <b>IA/</b>.</div>`;
+      } else {
+        inner = `<div class="ia-gallery">` + items.map(src =>
+          `<video src="${src}" autoplay muted loop playsinline preload="metadata"></video>`
+        ).join('') + `</div>`;
+      }
+      ratio = 9/16;          // colonne verticale
+      maxW = 480;
+    } else if (type === 'snack') {
+      const snackUrl = card.dataset.snack || '';
+      inner = `<iframe src="${snackUrl}" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:0"></iframe>`;
+      ratio = 16/10;
+      maxW = 1100;
+    } else {
+      const embed = buildVideoEmbed(card.dataset.video || '');
+      if (!embed) return; // pas de vidéo -> rien
+      inner = embed;
+      isInsta = /instagram\.com/.test(card.dataset.video || '');
+      ratio = isInsta ? 9/16 : 16/9;
+      maxW = isInsta ? 460 : 1100;
+    }
 
     const rect = card.getBoundingClientRect();
 
     // Boîte qui démarre exactement sur la carte
     const box = document.createElement('div');
-    box.className = 'video-expand';
+    box.className = 'video-expand' + (type === 'gallery' ? ' is-gallery' : '');
     box.style.top = rect.top + 'px';
     box.style.left = rect.left + 'px';
     box.style.width = rect.width + 'px';
     box.style.height = rect.height + 'px';
     box.style.borderRadius = '0px';
 
-    const isInsta = /instagram\.com/.test(card.dataset.video || '');
-    box.innerHTML = embed +
+    box.innerHTML = inner +
       `<div class="ve-meta"><div class="ve-title">${(card.dataset.title||'').replace(/&#39;/g,"'")}</div><div class="ve-date">${card.dataset.date||''}</div></div>`;
 
     const closeBtn = document.createElement('button');
@@ -1373,11 +1438,9 @@
     // Cible finale : grand format centré, qui respecte l'écran
     requestAnimationFrame(() => {
       const vw = window.innerWidth, vh = window.innerHeight;
-      // Instagram = format vertical, le reste 16:9
-      const ratio = isInsta ? 9/16 : 16/9;
-      let w = Math.min(vw * 0.9, isInsta ? 460 : 1100);
+      let w = Math.min(vw * 0.9, maxW);
       let h = w / ratio;
-      if (h > vh * 0.88) { h = vh * 0.88; w = h * ratio; }
+      if (h > vh * 0.9) { h = vh * 0.9; w = h * ratio; }
       box.style.top = ((vh - h)/2) + 'px';
       box.style.left = ((vw - w)/2) + 'px';
       box.style.width = w + 'px';
