@@ -471,6 +471,17 @@
   }
   /* Galerie IA : colonne verticale scrollable de vidéos en boucle */
   .video-expand.is-gallery { background: #0c0c0c; }
+  /* Snack : on cache l'éditeur de code, on ne montre que le preview (jeu) */
+  .snack-wrap { width: 100%; height: 100%; overflow: hidden; position: relative; background:#1a1a1a; }
+  .video-expand .snack-wrap iframe.snack-frame {
+    position: absolute; top: 0;
+    height: 100%; border: 0;
+    /* iframe large, décalée à gauche : seul le preview (à droite) reste visible.
+       Ajuste --snack-w (largeur) et --snack-x (décalage) si le cadrage est imparfait. */
+    width: var(--snack-w, 280%);
+    left: var(--snack-x, -180%);
+    flex: none;
+  }
   .ia-gallery {
     width: 100%; height: 100%;
     overflow-y: auto; overflow-x: hidden;
@@ -1379,9 +1390,12 @@
       maxW = 480;
     } else if (type === 'snack') {
       const snackUrl = card.dataset.snack || '';
-      inner = `<iframe src="${snackUrl}" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:100%;border:0"></iframe>`;
-      ratio = 16/10;
-      maxW = 1100;
+      // Expo Snack affiche toujours code+preview. On masque l'éditeur en décalant
+      // l'iframe : elle est large (250%), poussée vers la gauche pour ne laisser
+      // visible que le panneau preview (le jeu), à droite.
+      inner = `<div class="snack-wrap"><iframe src="${snackUrl}" allow="autoplay; fullscreen" allowfullscreen class="snack-frame"></iframe></div>`;
+      ratio = 10/16;   // portrait : on ne garde que la colonne preview
+      maxW = 460;
     } else {
       const embed = buildVideoEmbed(card.dataset.video || '');
       if (!embed) return; // pas de vidéo -> rien
