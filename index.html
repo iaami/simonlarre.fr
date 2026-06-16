@@ -208,8 +208,8 @@
     cursor: none;
   }
   .card.featured {
-    grid-column: span 2;
-    aspect-ratio: 21/9;
+    grid-column: span 1;
+    aspect-ratio: 16/9;
   }
   .card-img {
     width: 100%; height: 100%;
@@ -723,7 +723,7 @@
 
   <div class="grid" id="grid">
 
-    <div class="card featured" data-cats="culture ia" data-title="ai.viator" data-url="https://simonlarre.fr/archives/615" data-desc="https://www.instagram.com/ai.viator?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0MzIxNw== Voyagez dans le temps à travers de vieilles cartes " data-date="Janvier 2025" data-video="">
+    <div class="card" data-cats="culture ia" data-title="ai.viator" data-url="https://simonlarre.fr/archives/615" data-desc="https://www.instagram.com/ai.viator?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0MzIxNw== Voyagez dans le temps à travers de vieilles cartes " data-date="Janvier 2025" data-video="https://www.instagram.com/p/DC9hQHny28x/">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/ai-viator.webp" alt="ai.viator" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -732,7 +732,7 @@
         <div class="card-date">Janvier 2025</div>
       </div>
     </div>
-    <div class="card" data-cats="culture économie santé" data-title="Info Jeunes Nouvelle-Aquitaine" data-url="https://simonlarre.fr/archives/626" data-desc="🤩 🎥 La Boussole des Jeunes a une nouvelle vidéo de présentation, 100% locale, made in Poitiers ! ⏱80 secondes de témoignages sur le service rendu aux " data-date="Février 2025" data-video="https://www.youtube.com/watch?v=ac33WrYohfQ">
+    <div class="card" data-cats="culture économie santé" data-title="Info Jeunes Nouvelle-Aquitaine" data-url="https://simonlarre.fr/archives/626" data-desc="🤩 🎥 La Boussole des Jeunes a une nouvelle vidéo de présentation, 100% locale, made in Poitiers ! ⏱80 secondes de témoignages sur le service rendu aux " data-date="Février 2025" data-video="https://www.instagram.com/p/DGGda1AtK-R/">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/boussole-des-jeunes.png" alt="Info Jeunes Nouvelle-Aquitaine" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -750,7 +750,7 @@
         <div class="card-date">Novembre 2025</div>
       </div>
     </div>
-    <div class="card" data-cats="événementiel" data-title="Mariage, mariage..." data-url="https://simonlarre.fr/archives/650" data-desc="Captation pour Aurélien et Anne-Sophie, montage aur_crea ! https://www.instagram.com/aur_crea?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0Mz" data-date="Décembre 2025" data-video="">
+    <div class="card" data-cats="événementiel" data-title="Mariage, mariage..." data-url="https://simonlarre.fr/archives/650" data-desc="Captation pour Aurélien et Anne-Sophie, montage aur_crea ! https://www.instagram.com/aur_crea?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0Mz" data-date="Décembre 2025" data-video="https://www.instagram.com/reel/DPHR-I-CSrn/">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/mariage-mariage-2025.webp" alt="Mariage, mariage..." loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -1286,7 +1286,7 @@
     if (vm) return `<iframe src="https://player.vimeo.com/video/${vm[1]}?autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
     // Instagram (reel ou post)
     const ig = videoSrc.match(/instagram\.com\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/);
-    if (ig) return `<iframe src="https://www.instagram.com/p/${ig[1]}/embed/" allow="autoplay; encrypted-media" allowfullscreen scrolling="no"></iframe>`;
+    if (ig) return `<iframe class="ig-frame" src="https://www.instagram.com/p/${ig[1]}/embed/captioned/" allow="autoplay; encrypted-media; clipboard-write; picture-in-picture" allowfullscreen scrolling="no" data-igurl="https://www.instagram.com/p/${ig[1]}/"></iframe>`;
     // MP4 local
     if (videoSrc.match(/\.mp4$/i)) return `<video src="${videoSrc}" controls autoplay></video>`;
     return null;
@@ -1348,6 +1348,25 @@
     document.body.appendChild(closeBtn);
     card.style.visibility = 'hidden';
     document.body.style.overflow = 'hidden';
+
+    // Fallback Instagram : si l'embed reste vide, proposer un lien direct
+    if (isInsta) {
+      const ifr = box.querySelector('iframe.ig-frame');
+      let loaded = false;
+      if (ifr) {
+        ifr.addEventListener('load', () => { loaded = true; });
+        setTimeout(() => {
+          if (!loaded) {
+            const u = ifr.getAttribute('data-igurl');
+            box.insertAdjacentHTML('beforeend',
+              `<a href="${u}" target="_blank" rel="noopener" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;background:#1a1a1a;color:#fff;text-decoration:none;font-family:'DM Sans',sans-serif">
+                 <span style="font-size:2.5rem">◎</span>
+                 <span style="letter-spacing:0.15em;font-size:0.85rem">VOIR SUR INSTAGRAM →</span>
+               </a>`);
+          }
+        }, 2500);
+      }
+    }
 
     backdrop.classList.add('active');
 
@@ -1521,11 +1540,7 @@ setTimeout(() => {
       .map(c => ({ el: c, title: c.dataset.title || '', clicks: clicks[c.dataset.title] || 0 }))
       .sort((a, b) => b.clicks - a.clicks);
     allCards.forEach(c => { if (!c.classList.contains('featured')) return; });
-    if (sorted[0] && sorted[0].clicks > 0) {
-      allCards.forEach(c => c.classList.remove('featured'));
-      sorted[0].el.classList.add('featured');
-      if (sorted[1] && sorted[1].clicks > 0) sorted[1].el.classList.add('featured');
-    }
+    // Agrandissement dynamique desactive (clics toujours comptes via GoatCounter)
   }
   document.querySelectorAll('.card').forEach(card => {
     card.addEventListener('click', function() {
