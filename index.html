@@ -278,6 +278,13 @@
     color: var(--gray-light);
     letter-spacing: 0.1em;
   }
+  .card-tagline {
+    font-size: 0.78rem;
+    font-style: italic;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+    line-height: 1.3;
+  }
   .card-thumb-placeholder {
     width: 100%; height: 100%;
     display: flex; align-items: center; justify-content: center;
@@ -737,12 +744,13 @@
 
   <div class="grid" id="grid">
 
-    <div class="card" data-cats="ia" data-type="webapp" data-title="Mamagrane — jeu d'anagrammes" data-url="https://snack.expo.dev/@similarr/mamagrane" data-desc="Jeu d'anagrammes mobile que j'ai développé (React Native / Expo), esthétique collage Basquiat / dada. Jouable directement ici." data-date="Mai 2026" data-app="mamagrane/">
-      <div class="card-thumb"><img class="card-img" src="MINIATURE/mamagrane.webp" alt="Mamagrane" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+    <div class="card" data-cats="ia" data-type="webapp" data-title="MamaGranne — jeu d'anagrammes" data-url="https://snack.expo.dev/@similarr/mamagrane" data-desc="J'adore les anagrammes : j'en ai fait une App ! Essayez !" data-date="Mai 2026" data-app="mamagrane/">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/mamagrane.webp" alt="MamaGranne" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
         <div class="card-cats"><span class="cat-tag">Jeu</span> <span class="cat-tag">App</span></div>
-        <div class="card-title">Mamagrane — jeu d'anagrammes</div>
+        <div class="card-title">MamaGranne — jeu d'anagrammes</div>
+        <div class="card-tagline">J'adore les anagrammes : j'en ai fait une App ! Essayez !</div>
         <div class="card-date">Mai 2026</div>
       </div>
     </div>
@@ -1404,8 +1412,9 @@
     box.style.height = rect.height + 'px';
     box.style.borderRadius = '0px';
 
-    box.innerHTML = inner +
+    const meta = (type === 'webapp') ? '' :
       `<div class="ve-meta"><div class="ve-title">${(card.dataset.title||'').replace(/&#39;/g,"'")}</div><div class="ve-date">${card.dataset.date||''}</div></div>`;
+    box.innerHTML = inner + meta;
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'video-expand-close';
@@ -1438,7 +1447,7 @@
     backdrop.classList.add('active');
 
     // Cible finale : grand format centré, qui respecte l'écran
-    requestAnimationFrame(() => {
+    function fit() {
       const vw = window.innerWidth, vh = window.innerHeight;
       let w = Math.min(vw * 0.9, maxW);
       let h = w / ratio;
@@ -1447,12 +1456,15 @@
       box.style.left = ((vw - w)/2) + 'px';
       box.style.width = w + 'px';
       box.style.height = h + 'px';
+    }
+    requestAnimationFrame(() => {
+      fit();
       box.style.borderRadius = '4px';
       box.classList.add('full');
       closeBtn.classList.add('show');
     });
 
-    currentExpand = { box, card, closeBtn, rect };
+    currentExpand = { box, card, closeBtn, rect, fit };
 
     backdrop.onclick = closeExpand;
     closeBtn.onclick = closeExpand;
@@ -1462,7 +1474,9 @@
     card.addEventListener('click', () => openExpand(card));
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeExpand(); });
-  window.addEventListener('resize', () => { if (currentExpand) closeExpand(); });
+  // Rotation d'écran / redimensionnement : on réajuste la taille, on ne ferme plus
+  // (avant, une rotation de téléphone en plein visionnage fermait la vidéo par erreur).
+  window.addEventListener('resize', () => { if (currentExpand) currentExpand.fit(); });
 
   // ─── CV VIDÉO (clic sur le poster -> charge l'iframe YouTube) ───
   const cvFrame = document.getElementById('cv-video-frame');
