@@ -1390,8 +1390,8 @@
       // directement dans le repo. Aucun code visible : juste l'appli qui tourne.
       const appUrl = card.dataset.app || '';
       inner = `<iframe src="${appUrl}" allow="autoplay" style="background:#fff"></iframe>`;
-      ratio = 10/16;   // format portrait, type appli mobile
-      maxW = 460;
+      ratio = 9/19.5;   // vrai format smartphone (type iPhone), assez long pour que
+      maxW = 460;       // tout le contenu de l'app respire sans jamais se chevaucher
     } else {
       const embed = buildVideoEmbed(card.dataset.video || '');
       if (!embed) return; // pas de vidéo -> rien
