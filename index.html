@@ -499,6 +499,20 @@
     pointer-events: none;
   }
   .video-expand.full .ve-meta { opacity: 1; }
+  .ve-dots {
+    position: absolute; top: 16px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 8px;
+    z-index: 5; opacity: 0; transition: opacity 0.4s ease 0.3s;
+  }
+  .video-expand.full .ve-dots { opacity: 1; }
+  .ve-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: rgba(255,255,255,0.35); cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.3);
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .ve-dot:hover { transform: scale(1.2); }
+  .ve-dot.active { background: var(--gold); }
   .ve-title {
     font-family: 'DM Serif Display', serif;
     font-size: 1.4rem; color: #fff; margin-bottom: 0.35rem;
@@ -882,7 +896,7 @@
         <div class="card-date">Novembre 2021</div>
       </div>
     </div>
-    <div class="card" data-cats="culture événementiel théâtre" data-title="Compagnie Arlette Moreau" data-url="https://simonlarre.fr/archives/563" data-desc="https://youtu.be/B2eZyRJAxcM Chante la vie chante ! Compagnie Arlette Moreau https://youtu.be/5zGFR0bvOEc Enfilez votre casque de protection, allongez" data-date="Mai 2021" data-video="https://www.youtube.com/watch?v=B2eZyRJAxcM">
+    <div class="card" data-cats="culture événementiel théâtre" data-title="Compagnie Arlette Moreau" data-url="https://simonlarre.fr/archives/563" data-desc="https://youtu.be/B2eZyRJAxcM Chante la vie chante ! Compagnie Arlette Moreau https://youtu.be/5zGFR0bvOEc Enfilez votre casque de protection, allongez" data-date="Mai 2021" data-video="https://www.youtube.com/watch?v=B2eZyRJAxcM" data-videos="https://youtu.be/B2eZyRJAxcM|https://youtu.be/5zGFR0bvOEc">
       <div class="card-thumb"><img class="card-img" src="https://img.youtube.com/vi/B2eZyRJAxcM/maxresdefault.jpg" alt="Compagnie Arlette Moreau" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -909,7 +923,7 @@
         <div class="card-date">Novembre 2020</div>
       </div>
     </div>
-    <div class="card" data-cats="événementiel musique" data-title="Colours in the street, Mada & Mathilde & David Henry, Sylvain DIEMS en live au Futuroscope" data-url="https://simonlarre.fr/archives/255" data-desc="https://youtu.be/Y9HnFUixfnk https://youtu.be/j8WNVfqc1f0 https://youtu.be/HuCp6kRSNOc" data-date="Novembre 2020" data-video="https://www.youtube.com/watch?v=Y9HnFUixfnk">
+    <div class="card" data-cats="événementiel musique" data-title="Colours in the street, Mada & Mathilde & David Henry, Sylvain DIEMS en live au Futuroscope" data-url="https://simonlarre.fr/archives/255" data-desc="https://youtu.be/Y9HnFUixfnk https://youtu.be/j8WNVfqc1f0 https://youtu.be/HuCp6kRSNOc" data-date="Novembre 2020" data-video="https://www.youtube.com/watch?v=Y9HnFUixfnk" data-videos="https://youtu.be/Y9HnFUixfnk|https://youtu.be/j8WNVfqc1f0|https://youtu.be/HuCp6kRSNOc">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/futuroscope-colours-street.png" alt="Colours in the street, Mada & Mathilde & David Henry, Sylvain DIEMS en live au Futuroscope" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -1197,7 +1211,7 @@
         <div class="card-date">Avril 2016</div>
       </div>
     </div>
-    <div class="card" data-cats="non classé" data-title="PTK Beatbox" data-url="https://simonlarre.fr/archives/493" data-desc="https://www.youtube.com/watch?v=xxUy_SY7q24 https://www.youtube.com/watch?v=traSs5MGMI8 https://www.youtube.com/watch?v=OCk0z3Rgs5w https://www.youtub" data-date="Novembre 2016" data-video="https://www.youtube.com/watch?v=xxUy_SY7q24">
+    <div class="card" data-cats="non classé" data-title="PTK Beatbox" data-url="https://simonlarre.fr/archives/493" data-desc="https://www.youtube.com/watch?v=xxUy_SY7q24 https://www.youtube.com/watch?v=traSs5MGMI8 https://www.youtube.com/watch?v=OCk0z3Rgs5w https://www.youtub" data-date="Novembre 2016" data-video="https://www.youtube.com/watch?v=xxUy_SY7q24" data-videos="https://www.youtube.com/watch?v=xxUy_SY7q24|https://www.youtube.com/watch?v=traSs5MGMI8|https://www.youtube.com/watch?v=OCk0z3Rgs5w">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/ptk-beatbox.webp" alt="PTK Beatbox" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -1215,7 +1229,7 @@
         <div class="card-date">Avril 2016</div>
       </div>
     </div>
-    <div class="card" data-cats="non classé" data-title="CLIP Technogramma" data-url="https://simonlarre.fr/archives/489" data-desc="https://vimeo.com/110716510?embedded=true&amp;source=vimeo_logo&amp;owner=27240577 https://youtu.be/aNFFX128lKo" data-date="Avril 2015" data-video="https://www.youtube.com/watch?v=aNFFX128lKo">
+    <div class="card" data-cats="non classé" data-title="CLIP Technogramma" data-url="https://simonlarre.fr/archives/489" data-desc="https://vimeo.com/110716510?embedded=true&amp;source=vimeo_logo&amp;owner=27240577 https://youtu.be/aNFFX128lKo" data-date="Avril 2015" data-video="https://www.youtube.com/watch?v=aNFFX128lKo" data-videos="https://youtu.be/aNFFX128lKo|https://vimeo.com/110716510">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/clip-technogramma.png" alt="CLIP Technogramma" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -1233,7 +1247,7 @@
         <div class="card-date">Octobre 2014</div>
       </div>
     </div>
-    <div class="card" data-cats="clip musique" data-title="CLIP des Master de l&#39;Univers - Mc Monchien" data-url="https://simonlarre.fr/archives/478" data-desc="https://youtu.be/WWlH91l2xXI Le clip https://youtu.be/vGGhemrlblQ Le teaser" data-date="Mai 2014" data-video="https://www.youtube.com/watch?v=WWlH91l2xXI">
+    <div class="card" data-cats="clip musique" data-title="CLIP des Master de l&#39;Univers - Mc Monchien" data-url="https://simonlarre.fr/archives/478" data-desc="https://youtu.be/WWlH91l2xXI Le clip https://youtu.be/vGGhemrlblQ Le teaser" data-date="Mai 2014" data-video="https://www.youtube.com/watch?v=WWlH91l2xXI" data-videos="https://youtu.be/WWlH91l2xXI|https://youtu.be/vGGhemrlblQ">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/clip-mc-monchien.webp" alt="CLIP des Master de l&#39;Univers - Mc Monchien" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -1393,10 +1407,11 @@
       ratio = 9/19.5;   // vrai format smartphone (type iPhone), assez long pour que
       maxW = 460;       // tout le contenu de l'app respire sans jamais se chevaucher
     } else {
-      const embed = buildVideoEmbed(card.dataset.video || '');
+      const videoList = (card.dataset.videos || card.dataset.video || '').split('|').filter(Boolean);
+      const embed = buildVideoEmbed(videoList[0] || '');
       if (!embed) return; // pas de vidéo -> rien
       inner = embed;
-      isInsta = /instagram\.com/.test(card.dataset.video || '');
+      isInsta = /instagram\.com/.test(videoList[0] || '');
       ratio = isInsta ? 9/16 : 16/9;
       maxW = isInsta ? 460 : 1100;
     }
@@ -1414,7 +1429,32 @@
 
     const meta = (type === 'webapp') ? '' :
       `<div class="ve-meta"><div class="ve-title">${(card.dataset.title||'').replace(/&#39;/g,"'")}</div><div class="ve-date">${card.dataset.date||''}</div></div>`;
-    box.innerHTML = inner + meta;
+
+    const videoList = (type === 'video' || type === undefined || (type !== 'gallery' && type !== 'webapp'))
+      ? (card.dataset.videos || '').split('|').filter(Boolean) : [];
+    const dotsHTML = videoList.length > 1
+      ? `<div class="ve-dots">${videoList.map((_,i) => `<span class="ve-dot${i===0?' active':''}" data-i="${i}"></span>`).join('')}</div>`
+      : '';
+
+    box.innerHTML = inner + meta + dotsHTML;
+
+    if (videoList.length > 1) {
+      box.querySelectorAll('.ve-dot').forEach(dot => {
+        dot.onclick = (e) => {
+          e.stopPropagation();
+          const i = parseInt(dot.dataset.i, 10);
+          const isI = /instagram\.com/.test(videoList[i]);
+          const newEmbed = buildVideoEmbed(videoList[i]);
+          const old = box.querySelector('iframe, video, .ig-frame, a');
+          const wrap = box.querySelector('.ve-meta') || box.lastElementChild;
+          box.querySelectorAll('iframe, video').forEach(el => el.remove());
+          box.insertAdjacentHTML('afterbegin', newEmbed);
+          box.querySelectorAll('.ve-dot').forEach(d => d.classList.remove('active'));
+          dot.classList.add('active');
+        };
+      });
+    }
+
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'video-expand-close';
