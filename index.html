@@ -221,6 +221,35 @@
     transform: scale(1.06);
     filter: grayscale(0%) brightness(0.85);
   }
+  .card-preview-video {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 2;
+    pointer-events: none;
+  }
+  /* tuiles-lettres animees pour MamaGranne (pas de video, juste les lettres) */
+  .letters-preview {
+    position: absolute; inset: 0;
+    z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    gap: 4px;
+    pointer-events: none;
+    background: rgba(20,16,12,0.55);
+  }
+  .letters-preview .lt {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 38px;
+    background: #f0e6cf;
+    border: 1px solid rgba(0,0,0,0.25);
+    border-radius: 3px;
+    font-family: 'DM Serif Display', serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: #1a1a1a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.35);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  }
   /* Icône play pour les cards avec vidéo */
   .play-icon {
     position: absolute;
@@ -758,7 +787,7 @@
 
   <div class="grid" id="grid">
 
-    <div class="card" data-cats="ia" data-type="webapp" data-title="MamaGranne — jeu d'anagrammes" data-url="https://snack.expo.dev/@similarr/mamagrane" data-desc="J'adore les anagrammes : j'en ai fait une App ! Essayez !" data-date="Mai 2026" data-app="mamagrane/">
+    <div class="card" data-cats="ia" data-type="webapp" data-title="MamaGranne — jeu d'anagrammes" data-url="https://snack.expo.dev/@similarr/mamagrane" data-desc="J'adore les anagrammes : j'en ai fait une App ! Essayez !" data-date="Mai 2026" data-app="mamagrane/" data-preview-type="letters">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/mamagrane.webp" alt="MamaGranne" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -769,7 +798,7 @@
       </div>
     </div>
 
-    <div class="card" data-cats="ia" data-type="gallery" data-title="IA générative — sélection 2026" data-url="" data-desc="Une sélection de mes explorations vidéo en IA générative (Midjourney, Kling, Firefly). Antidatae." data-date="Février 2026" data-video="">
+    <div class="card" data-cats="ia" data-type="gallery" data-title="IA générative — sélection 2026" data-url="" data-desc="Une sélection de mes explorations vidéo en IA générative (Midjourney, Kling, Firefly). Antidatae." data-date="Février 2026" data-video="" data-preview="PREVIEWS/ia-generative.mp4">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/ia-generative.webp" alt="IA générative — sélection 2026" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -779,7 +808,7 @@
       </div>
     </div>
 
-    <div class="card" data-cats="culture ia" data-title="ai.viator" data-url="https://simonlarre.fr/archives/615" data-desc="https://www.instagram.com/ai.viator?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0MzIxNw== Voyagez dans le temps à travers de vieilles cartes " data-date="Janvier 2025" data-video="https://www.instagram.com/p/DC9hQHny28x/">
+    <div class="card" data-cats="culture ia" data-title="ai.viator" data-url="https://simonlarre.fr/archives/615" data-desc="https://www.instagram.com/ai.viator?utm_source=ig_web_button_share_sheet&amp;igsh=ZDNlZDc0MzIxNw== Voyagez dans le temps à travers de vieilles cartes " data-date="Janvier 2025" data-video="https://www.instagram.com/p/DC9hQHny28x/" data-preview="PREVIEWS/ai-viator.mp4">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/ai-viator.webp" alt="ai.viator" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -788,7 +817,7 @@
         <div class="card-date">Janvier 2025</div>
       </div>
     </div>
-    <div class="card" data-cats="culture économie santé" data-title="Info Jeunes Nouvelle-Aquitaine" data-url="https://simonlarre.fr/archives/626" data-desc="🤩 🎥 La Boussole des Jeunes a une nouvelle vidéo de présentation, 100% locale, made in Poitiers ! ⏱80 secondes de témoignages sur le service rendu aux " data-date="Février 2025" data-video="https://www.instagram.com/p/DGGda1AtK-R/">
+    <div class="card" data-cats="culture économie santé" data-title="Info Jeunes Nouvelle-Aquitaine" data-url="https://simonlarre.fr/archives/626" data-desc="🤩 🎥 La Boussole des Jeunes a une nouvelle vidéo de présentation, 100% locale, made in Poitiers ! ⏱80 secondes de témoignages sur le service rendu aux " data-date="Février 2025" data-video="https://www.instagram.com/p/DGGda1AtK-R/" data-preview="PREVIEWS/info-jeunes.mp4">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/boussole-des-jeunes.png" alt="Info Jeunes Nouvelle-Aquitaine" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -797,7 +826,7 @@
         <div class="card-date">Février 2025</div>
       </div>
     </div>
-    <div class="card" data-cats="culture ia" data-title="Voyage dans le temps" data-url="https://simonlarre.fr/archives/635" data-desc="Morphing du chasseur-cueilleur au voyageur temporel, réalisé à partir d’une photo et de quelques prompts sur #nanobanana en modèle dans #adobe #firefl" data-date="Novembre 2025" data-video="https://www.instagram.com/p/DQgynKDDNB7/">
+    <div class="card" data-cats="culture ia" data-title="Voyage dans le temps" data-url="https://simonlarre.fr/archives/635" data-desc="Morphing du chasseur-cueilleur au voyageur temporel, réalisé à partir d’une photo et de quelques prompts sur #nanobanana en modèle dans #adobe #firefl" data-date="Novembre 2025" data-video="https://www.instagram.com/p/DQgynKDDNB7/" data-preview="PREVIEWS/voyage-dans-le-temps.mp4">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/voyage-dans-le-temps.webp" alt="Voyage dans le temps" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -1517,6 +1546,104 @@
   // Rotation d'écran / redimensionnement : on réajuste la taille, on ne ferme plus
   // (avant, une rotation de téléphone en plein visionnage fermait la vidéo par erreur).
   window.addEventListener('resize', () => { if (currentExpand) currentExpand.fit(); });
+
+  // ─── PREVIEW AU SURVOL (vidéo accélérée muette, ou animation lettres pour MamaGranne) ───
+  // Reste toujours sous le curseur comète (z-index 99999) : ces éléments vivent dans
+  // .card-thumb, jamais ajoutés au <body>, donc aucun risque de chevauchement.
+  const ANAGRAM_WORDS = ['MAMAGRANNE', 'MAGMA', 'GRAMMA', 'MANGER', 'GAMMA', 'ARME', 'GENRE'];
+
+  function startLettersPreview(thumb) {
+    if (thumb.querySelector('.letters-preview')) return;
+    const box = document.createElement('div');
+    box.className = 'letters-preview';
+    thumb.appendChild(box);
+    let i = 0;
+    function renderWord(word) {
+      const letters = word.split('');
+      box.innerHTML = letters.map(ch => `<span class="lt">${ch}</span>`).join('');
+      // petite anim d'entree decalee lettre par lettre
+      box.querySelectorAll('.lt').forEach((el, idx) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(14px) rotate(' + (Math.random()*16-8) + 'deg)';
+        setTimeout(() => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0) rotate(' + (Math.random()*8-4) + 'deg)';
+        }, idx * 60);
+      });
+    }
+    renderWord(ANAGRAM_WORDS[0]);
+    const timer = setInterval(() => {
+      i = (i + 1) % ANAGRAM_WORDS.length;
+      renderWord(ANAGRAM_WORDS[i]);
+    }, 1400);
+    box._timer = timer;
+  }
+  function stopLettersPreview(thumb) {
+    const box = thumb.querySelector('.letters-preview');
+    if (box) { clearInterval(box._timer); box.remove(); }
+  }
+
+  function startVideoPreview(thumb, src) {
+    if (thumb.querySelector('.card-preview-video')) return;
+    const vid = document.createElement('video');
+    vid.className = 'card-preview-video';
+    vid.src = src;
+    vid.muted = true;
+    vid.loop = true;
+    vid.playsInline = true;
+    vid.autoplay = true;
+    vid.setAttribute('aria-hidden', 'true');
+    vid.onerror = () => vid.remove(); // pas encore genere -> on garde juste l'image fixe
+    thumb.appendChild(vid);
+    vid.play().catch(() => {}); // ignore si l'autoplay est bloque
+  }
+  function stopVideoPreview(thumb) {
+    const vid = thumb.querySelector('.card-preview-video');
+    if (vid) { vid.pause(); vid.remove(); }
+  }
+
+  function activatePreview(card) {
+    const thumb = card.querySelector('.card-thumb');
+    if (!thumb) return;
+    if (card.dataset.previewType === 'letters') startLettersPreview(thumb);
+    else if (card.dataset.preview) startVideoPreview(thumb, card.dataset.preview);
+  }
+  function deactivatePreview(card) {
+    const thumb = card.querySelector('.card-thumb');
+    if (!thumb) return;
+    stopLettersPreview(thumb);
+    stopVideoPreview(thumb);
+  }
+
+  const previewCards = Array.from(cards).filter(c => c.dataset.preview || c.dataset.previewType);
+
+  // Desktop : survol souris classique
+  previewCards.forEach(card => {
+    card.addEventListener('mouseenter', () => activatePreview(card));
+    card.addEventListener('mouseleave', () => deactivatePreview(card));
+  });
+
+  // Mobile : la carte sous le doigt pendant le scroll/touch s'anime
+  let touchActiveCard = null;
+  function handleTouchPoint(x, y) {
+    const el = document.elementFromPoint(x, y);
+    const card = el ? el.closest('.card') : null;
+    if (card === touchActiveCard) return;
+    if (touchActiveCard) deactivatePreview(touchActiveCard);
+    touchActiveCard = (card && previewCards.includes(card)) ? card : null;
+    if (touchActiveCard) activatePreview(touchActiveCard);
+  }
+  document.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    if (t) handleTouchPoint(t.clientX, t.clientY);
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    if (t) handleTouchPoint(t.clientX, t.clientY);
+  }, { passive: true });
+  document.addEventListener('touchend', () => {
+    if (touchActiveCard) { deactivatePreview(touchActiveCard); touchActiveCard = null; }
+  }, { passive: true });
 
   // ─── CV VIDÉO (clic sur le poster -> charge l'iframe YouTube) ───
   const cvFrame = document.getElementById('cv-video-frame');
