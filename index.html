@@ -441,6 +441,41 @@
   }
   .btn-send:hover { background: var(--gold-light); transform: translateX(4px); }
 
+  /* MODALE CONTACT */
+  .cmodal {
+    display: none; position: fixed; inset: 0; z-index: 10000;
+    background: rgba(7,9,15,0.85); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .cmodal.open { display: flex; }
+  .cmodal-box {
+    background: #0f1320; border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 4px; padding: 2.5rem; max-width: 460px; width: 100%;
+    position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .cmodal-close {
+    position: absolute; top: 1rem; right: 1rem; background: none; border: none;
+    color: var(--gray-light); font-size: 1.1rem; cursor: none; transition: color 0.2s;
+  }
+  .cmodal-close:hover { color: var(--gold); }
+  .cmodal-title { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--white); margin-bottom: 1.5rem; }
+  .cmodal-form { display: flex; flex-direction: column; gap: 0.85rem; }
+  .cmodal-form input, .cmodal-form textarea {
+    width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--white); padding: 0.85rem 1rem; font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 300; outline: none; transition: border-color 0.2s; cursor: none;
+  }
+  .cmodal-form input:focus, .cmodal-form textarea:focus { border-color: var(--gold); }
+  .cmodal-form input::placeholder, .cmodal-form textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .cmodal-form textarea { resize: vertical; }
+  .cmodal-submit {
+    background: var(--gold); color: var(--black); border: none; padding: 0.9rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.75rem; letter-spacing: 0.2em;
+    text-transform: uppercase; font-weight: 500; cursor: none; transition: background 0.2s; margin-top: 0.25rem;
+  }
+  .cmodal-submit:hover { background: var(--gold-light); }
+  .cmodal-status { font-size: 0.8rem; text-align: center; min-height: 1.2rem; margin: 0; }
+
   /* FOOTER */
   footer {
     padding: 2rem 3rem;
@@ -1347,7 +1382,7 @@
       <span class="stat-label">Ans en coopérative<br>(associé depuis 2016)</span>
     </div>
     <div class="stat">
-      <span class="stat-num">20+</span>
+      <span class="stat-num">60+</span>
       <span class="stat-label">Structures & clients<br>accompagnés</span>
     </div>
   </div>
@@ -1356,7 +1391,7 @@
 <div style="padding: 0 3rem 4rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 3rem;">
   <div class="section-label">Ils m'ont fait confiance</div>
   <div style="display:flex; flex-wrap:wrap; gap:0.6rem 1rem; max-width:900px;">
-    <span style="font-size:0.78rem; color:var(--gray-light); letter-spacing:0.03em;">Fr3 NoA · Le Futuroscope · Grand Poitiers · Le Crédit Agricole · Radio Pulsar · L'ARS Nouvelle-Aquitaine · L'Agence Culturelle Nouvelle-Aquitaine · Le CRESAM · PGA Motors · Les Usines · Victoire 2 · Le SPN · Cobalt · Agence Zébrelle · Résidence Habitat Jeunes Kennedy · Communauté de Communes du Haut-Poitou · Compagnie Arlette Moreau · Le Tisonnier / La Guinguette Pictave · Mairie de Sèvres-Anxaumont · Fédération des Orthophonistes de France · Beaux-Arts Poitiers</span>
+    <span style="font-size:0.78rem; color:var(--gray-light); letter-spacing:0.03em;">France 3 Nouvelle-Aquitaine · Le Futuroscope · Grand Poitiers · Région Nouvelle-Aquitaine · Communauté de Communes du Haut-Poitou · Communauté de Communes du Pays de Mortagne · Mairie de Sèvres-Anxaumont · Le Crédit Agricole · La Caisse d'Épargne · CCI Nouvelle-Aquitaine · PGA Motors · L'ARS Nouvelle-Aquitaine · Le CRESAM · Université de Poitiers · Université de Tours · Faculté de Médecine et Pharmacie · ABS Lab · HSEN · Dispositifs MAIA · Fédération des Orthophonistes de France · L'Agence Culturelle Nouvelle-Aquitaine · Le Confort Moderne · Cobalt · Les Usines · Plage 76 · Rurart · Le Lieu Multiple / EMF · Beaux-Arts Poitiers · Le Dietrich · Radio Pulsar · Studio db · Agence Zébrelle · Victoire 2 · Le SPN · Résidence Habitat Jeunes Kennedy · Le Tisonnier / La Guinguette Pictave · Zoye · Plexus Records · Compagnie Arlette Moreau · Compagnie Phorm · Homardpayette · Marine Antony · Festival Jokeboxon · Festival Yzeures N'Rock · Festival Pilinator · The Third Machine · Lemon Furia · Calliphonists · Motion Wave · Colours in the Street · Régina Démina · Info Jeunes Nouvelle-Aquitaine · Arkanson · Stentor &amp; THK · PTK Beatbox · Technogramma…</span>
   </div>
 </div>
 
@@ -1364,13 +1399,29 @@
   <h2 class="contact-heading">Travaillons<br><span>ensemble</span></h2>
   <div class="contact-form">
     <p style="font-size:0.85rem; color:var(--gray-light); line-height:1.7; margin-bottom:0.5rem;">
-      Pas de formulaire ici — j'y réponds plus vite par mail, WhatsApp ou SMS.
+      Un message, un devis, une collab ? Écrivez-moi directement ici, ou par WhatsApp / SMS.
     </p>
-    <a href="#" id="contact-email-btn" class="btn-send" style="text-decoration:none; display:inline-block; text-align:center;" data-user="slarre" data-domain="yahoo.com">✉ Écrire un email</a>
+    <a href="#" id="contact-email-btn" class="btn-send" style="text-decoration:none; display:inline-block; text-align:center;">✉ Écrire un email</a>
     <a href="#" id="contact-wa-btn" class="btn-send" style="text-decoration:none; display:inline-block; text-align:center; background:transparent; border:1px solid var(--gold); color:var(--gold);" data-wa-a="3368" data-wa-b="2775058">💬 WhatsApp</a>
     <a href="#" id="contact-sms-btn" class="btn-send" style="text-decoration:none; display:inline-block; text-align:center; background:transparent; border:1px solid rgba(255,255,255,0.15); color:var(--gray-light);" data-sms-a="3368" data-sms-b="2775058">💌 SMS</a>
   </div>
 </section>
+
+<div id="contact-modal" class="cmodal">
+  <div class="cmodal-box">
+    <button class="cmodal-close" id="cmodal-close" aria-label="Fermer">✕</button>
+    <h3 class="cmodal-title">M'écrire un message</h3>
+    <form id="cmodal-form" class="cmodal-form">
+      <input type="text" name="name" placeholder="Votre nom" required>
+      <input type="email" name="email" placeholder="Votre email" required>
+      <input type="text" name="_subject" placeholder="Objet (ex: projet vidéo, devis…)">
+      <textarea name="message" placeholder="Votre message" rows="5" required></textarea>
+      <input type="text" name="_gotcha" style="display:none">
+      <button type="submit" class="cmodal-submit">Envoyer</button>
+      <p class="cmodal-status" id="cmodal-status"></p>
+    </form>
+  </div>
+</div>
 
 <footer>
   <p>© Simon Larré — Antidatae</p>
@@ -1384,10 +1435,44 @@
   // Obfuscation anti-bot : email et numero construits au clic, jamais en clair dans le HTML
   (function() {
     const emailBtn = document.getElementById('contact-email-btn');
-    if (emailBtn) {
+    const modal = document.getElementById('contact-modal');
+    if (emailBtn && modal) {
+      const modalClose = document.getElementById('cmodal-close');
+      const form = document.getElementById('cmodal-form');
+      const status = document.getElementById('cmodal-status');
+      // ⚠️ Remplacer FORMSPREE_ID par l'identifiant Formspree (formspree.io/f/XXXXXXXX).
+      // Les messages arrivent sur slarre@yahoo.com (mail du compte Formspree).
+      const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mdarwdnv';
+
       emailBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        window.location.href = 'mailto:' + emailBtn.dataset.user + '@' + emailBtn.dataset.domain;
+        modal.classList.add('open');
+      });
+      modalClose.addEventListener('click', () => modal.classList.remove('open'));
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.classList.remove('open'); });
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (form._gotcha && form._gotcha.value) return; // bot detecte
+        status.textContent = 'Envoi en cours…';
+        status.style.color = 'var(--gray-light)';
+        try {
+          const res = await fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+          });
+          if (res.ok) {
+            status.textContent = '✓ Message envoyé, merci ! Je reviens vers vous vite.';
+            status.style.color = 'var(--gold)';
+            form.reset();
+            setTimeout(() => { modal.classList.remove('open'); status.textContent = ''; }, 2500);
+          } else { throw new Error('échec'); }
+        } catch (err) {
+          status.textContent = "Erreur d'envoi. Réessayez ou écrivez-moi sur WhatsApp.";
+          status.style.color = 'var(--red)';
+        }
       });
     }
     const waBtn = document.getElementById('contact-wa-btn');
