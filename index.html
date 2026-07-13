@@ -822,7 +822,7 @@
 
   <div class="grid" id="grid">
 
-    <div class="card" data-cats="ia" data-type="webapp" data-title="MamaGranne — jeu d'anagrammes" data-url="https://snack.expo.dev/@similarr/mamagrane" data-desc="J'adore les anagrammes : j'en ai fait une App ! Essayez !" data-date="Mai 2026" data-app="mamagrane/" data-preview-type="letters">
+    <div class="card" data-cats="ia" data-type="webapp" data-title="MamaGranne — jeu d'anagrammes" data-url="https://snack.expo.dev/@similarr/mamagrane" data-desc="J'adore les anagrammes : j'en ai fait une App ! Essayez !" data-date="Mai 2026" data-app="mamagrane/?v=3" data-preview-type="letters">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/mamagrane.webp" alt="MamaGranne" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
       <div class="card-bottom">
@@ -1683,6 +1683,13 @@
     // Cible finale : grand format centré, qui respecte l'écran
     function fit() {
       const vw = window.innerWidth, vh = window.innerHeight;
+      // Webapp sur mobile : plein ecran bord a bord (fini les bandes noires)
+      if (type === 'webapp' && vw <= 700) {
+        box.style.top = '0px'; box.style.left = '0px';
+        box.style.width = vw + 'px'; box.style.height = vh + 'px';
+        box.style.borderRadius = '0px';
+        return;
+      }
       let w = Math.min(vw * 0.9, maxW);
       let h = w / ratio;
       if (h > vh * 0.9) { h = vh * 0.9; w = h * ratio; }
