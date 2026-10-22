@@ -822,6 +822,17 @@
 
   <div class="grid" id="grid">
 
+    <div class="card" data-cats="ia culture" data-type="link" data-title="Galexico — dictionnaire galactique des synonymes" data-url="" data-desc="Un dictionnaire de synonymes en constellations : chaque mot est une étoile, ses synonymes l'entourent. Français, langues cousines, ancien français." data-date="Octobre 2026" data-app="https://simonlarre.fr/galexico/">
+      <div class="card-thumb"><img class="card-img" src="MINIATURE/galexico.webp" alt="Galexico" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
+      <div class="play-icon">▶</div>
+      <div class="card-bottom">
+        <div class="card-cats"><span class="cat-tag">Langues</span> <span class="cat-tag">Web</span></div>
+        <div class="card-title">Galexico — dictionnaire galactique</div>
+        <div class="card-tagline">Les synonymes en constellations : 120 000 mots, 16 galaxies de langues.</div>
+        <div class="card-date">Octobre 2026</div>
+      </div>
+    </div>
+
     <div class="card" data-cats="ia" data-type="webapp" data-title="MamaGranne — jeu d'anagrammes" data-url="https://snack.expo.dev/@similarr/mamagrane" data-desc="J'adore les anagrammes : j'en ai fait une App ! Essayez !" data-date="Mai 2026" data-app="mamagrane/?v=10" data-preview-type="letters">
       <div class="card-thumb"><img class="card-img" src="MINIATURE/mamagrane.webp" alt="MamaGranne" loading="lazy" onerror="this.onerror=null;this.style.opacity=0"></div>
       <div class="play-icon">▶</div>
@@ -1578,6 +1589,7 @@
   function openExpand(card) {
     if (currentExpand) return;
     const type = card.dataset.type || 'video';
+    if (type === 'link') { window.open(card.dataset.app, '_blank', 'noopener'); return; }
 
     let inner = '', isInsta = false, ratio = 16/9, maxW = 1100;
 
