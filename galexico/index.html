@@ -1060,21 +1060,21 @@ addEventListener('resize', resize); resize();
 const GALAXIES = [
   { id: 'fr', name: 'Le Français', pos: [0, 0, 0], radius: 44, n: SMALL ? 36000 : 78000, tint: [1, .76, .48], cold: [.6, .75, .98], arms: 3, twist: 3.1, rings: 24, spin: .2, label: 'Le Français', lh: 30, ready: true, count: '119 884 mots' },
   { id: 'oc', name: 'Occitan', pos: [-48, 6, 33], radius: 10, n: 9100, tint: [1, .8, .35], cold: [.9, .82, .6], arms: 2, twist: 2.6, rings: 6, spin: .4, label: 'Occitan', lh: 6.8, ready: true, count: '34 459 mots' },
-  { id: 'ca', name: 'Catalan', pos: [-66, -9, 50], radius: 11, n: 9750, tint: [1, .62, .3], cold: [1, .8, .55], arms: 2, twist: 3, rings: 6, spin: .38, label: 'Catalan', lh: 6.8, ready: true, count: '22 125 mots' },
-  { id: 'it', name: 'Italien', pos: [72, 14, 27], radius: 19, n: 16900, tint: [1, .58, .5], cold: [.98, .72, .8], arms: 3, twist: 3.4, rings: 9, spin: .3, label: 'Italien', lh: 8.4, ready: true, count: '64 585 mots' },
+  { id: 'ca', name: 'Catalan', pos: [-66, -9, 50], radius: 11, n: 9750, tint: [1, .62, .3], cold: [1, .8, .55], arms: 2, twist: 3, rings: 6, spin: .38, label: 'Catalan', lh: 6.8, ready: true, count: '38 314 mots' },
+  { id: 'it', name: 'Italien', pos: [72, 14, 27], radius: 19, n: 16900, tint: [1, .58, .5], cold: [.98, .72, .8], arms: 3, twist: 3.4, rings: 9, spin: .3, label: 'Italien', lh: 8.4, ready: true, count: '75 420 mots' },
   { id: 'co', name: 'Corse', pos: [95, -12, 69], radius: 7, n: 5200, tint: [.5, .95, .85], cold: [.6, .9, 1], arms: 0, twist: 0, rings: 4, spin: .5, label: 'Corse', lh: 5.7, ready: true, count: '3 643 mots' },
-  { id: 'es', name: 'Espagnol', pos: [-114, -4, 10], radius: 22, n: 18200, tint: [1, .45, .25], cold: [1, .72, .5], arms: 3, twist: 3.2, rings: 10, spin: .28, label: 'Espagnol', lh: 8.7, ready: true, count: '40 601 mots' },
-  { id: 'pt', name: 'Portugais', pos: [-156, 16, -24], radius: 13, n: 11050, tint: [.95, .78, .3], cold: [.7, .85, .6], arms: 2, twist: 2.8, rings: 7, spin: .34, label: 'Portugais', lh: 7.2, ready: true, count: '28 650 mots' },
+  { id: 'es', name: 'Espagnol', pos: [-114, -4, 10], radius: 22, n: 18200, tint: [1, .45, .25], cold: [1, .72, .5], arms: 3, twist: 3.2, rings: 10, spin: .28, label: 'Espagnol', lh: 8.7, ready: true, count: '46 981 mots' },
+  { id: 'pt', name: 'Portugais', pos: [-156, 16, -24], radius: 13, n: 11050, tint: [.95, .78, .3], cold: [.7, .85, .6], arms: 2, twist: 2.8, rings: 7, spin: .34, label: 'Portugais', lh: 7.2, ready: true, count: '35 791 mots' },
   { id: 'la', name: 'Latin', pos: [24, 48, -108], radius: 30, n: 20800, tint: [.95, .9, .74], cold: [.8, .82, .88], arms: 0, twist: 0, rings: 16, spin: .1, gain: .7, label: 'Latin', lh: 9.9, bulge: .12, flat: .5, ready: true, count: '29 556 mots' },
-  { id: 'ro', name: 'Roumain', pos: [154, 6, -55], radius: 13, n: 10400, tint: [.85, .55, .95], cold: [.7, .7, 1], arms: 2, twist: 3.2, rings: 7, spin: .3, label: 'Roumain', lh: 7.2, ready: true, count: '10 038 mots' },
+  { id: 'ro', name: 'Roumain', pos: [154, 6, -55], radius: 13, n: 10400, tint: [.85, .55, .95], cold: [.7, .7, 1], arms: 2, twist: 3.2, rings: 7, spin: .3, label: 'Roumain', lh: 7.2, ready: true, count: '29 932 mots' },
   { id: 'br', name: 'Breton', pos: [-52, -26, -112], radius: 8, n: 6500, tint: [.55, .72, .95], cold: [.7, .8, .9], arms: 0, twist: 0, rings: 5, spin: .45, label: 'Breton', lh: 6.1, ready: true, count: '13 373 mots' },
-  { id: 'eu', name: 'Basque', pos: [40, 30, 134], radius: 9, n: 7150, tint: [.78, .55, 1], cold: [.9, .72, 1], arms: 0, twist: 0, rings: 4, spin: .45, label: 'Basque · isolat', lh: 6.1, ready: true, count: '8 234 mots' },
-  { id: 'en', name: 'Anglais', pos: [187, -22, 86], radius: 30, n: 19500, tint: [.62, .78, 1], cold: [.82, .9, 1], arms: 4, twist: 3, rings: 12, spin: .26, label: 'Anglais', lh: 9.5, ready: true, count: '80 414 mots' },
+  { id: 'eu', name: 'Basque', pos: [40, 30, 134], radius: 9, n: 7150, tint: [.78, .55, 1], cold: [.9, .72, 1], arms: 0, twist: 0, rings: 4, spin: .45, label: 'Basque · isolat', lh: 6.1, ready: true, count: '20 920 mots' },
+  { id: 'en', name: 'Anglais', pos: [187, -22, 86], radius: 30, n: 19500, tint: [.62, .78, 1], cold: [.82, .9, 1], arms: 4, twist: 3, rings: 12, spin: .26, label: 'Anglais', lh: 9.5, ready: true, count: '121 349 mots' },
   /* trois petits dictionnaires faits maison : le français d'avant, la langue d'avant lui, et celle des cours de lycée */
   { id: 'fro', name: 'Ancien français', pos: [-64, 30, -70], radius: 17, n: 15500, tint: [.96, .8, .5], cold: [.78, .82, .95], arms: 2, twist: 2.4, rings: 10, spin: .14, label: 'Ancien français · dates', lh: 8.2, ready: true, count: '10 929 mots' },
   { id: 'gaul', name: 'Gaulois', pos: [-98, -34, -148], radius: 10, n: 8200, tint: [.5, .92, .66], cold: [.7, .92, .85], arms: 0, twist: 0, rings: 5, spin: .42, label: 'Gaulois', lh: 6.4, ready: true, count: '364 mots' },
   { id: 'arg', name: "Argot 90's", pos: [46, -50, 54], radius: 13, n: 10800, tint: [1, .42, .74], cold: [.5, .88, 1], arms: 2, twist: 3.6, rings: 7, spin: .55, label: "Argot 90's", lh: 7.2, ready: true, count: '512 mots' },
-  { id: 'de', name: 'Allemand', pos: [131, 42, -108], radius: 21, n: 15600, tint: [.8, .88, 1], cold: [.65, .75, .95], arms: 3, twist: 3.6, rings: 9, spin: .28, label: 'Allemand', lh: 8.4, ready: true, count: '66 191 mots' }
+  { id: 'de', name: 'Allemand', pos: [131, 42, -108], radius: 21, n: 15600, tint: [.8, .88, 1], cold: [.65, .75, .95], arms: 3, twist: 3.6, rings: 9, spin: .28, label: 'Allemand', lh: 8.4, ready: true, count: '125 685 mots' }
 ];
 const HOME = { entered: 'fr', built: false, items: [], hov: -1, fade: 1, fadeT: 1, keep: 0, keepT: 0, ph: 1.04, camR: SMALL ? 300 : 215 };
 
