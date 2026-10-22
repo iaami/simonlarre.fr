@@ -422,7 +422,7 @@ body.playing .tr *,body.playing .dock *{pointer-events:none!important}
 <div class="help" id="help" hidden>
   <div role="dialog" aria-labelledby="hTitle">
     <h3 id="hTitle">Galexico</h3>
-    <p>La carte céleste de la langue française, avec trois petits dictionnaires voisins : l’ancien français, le gaulois et l’argot des années 90. Chaque mot est une étoile, ses synonymes tournent autour de lui. Glisse pour tourner autour du système, molette ou pincement pour zoomer. Survole une étoile : la mise au point glisse vers elle, sa définition apparaît et ses propres synonymes, jusque-là flous, s’éveillent. Clique : elle devient le nouveau soleil. Sur écran tactile, un premier toucher vise, le second bascule. <kbd>/</kbd> pour écrire, <kbd>Échap</kbd> pour fermer.</p>
+    <p>La carte céleste de la langue française, avec ses langues cousines (italien, espagnol, portugais, catalan, occitan, roumain, corse, latin, breton, basque, anglais, allemand) et trois petits dictionnaires : l’ancien français, le gaulois et l’argot des années 90. Dans une langue cousine, les voisins d’un mot sont ceux qui partagent son sens, souvent à travers leurs équivalents français : un rapprochement par le sens, pas une généalogie. Chaque mot est une étoile, ses synonymes tournent autour de lui. Glisse pour tourner autour du système, molette ou pincement pour zoomer. Survole une étoile : la mise au point glisse vers elle, sa définition apparaît et ses propres synonymes, jusque-là flous, s’éveillent. Clique : elle devient le nouveau soleil. Sur écran tactile, un premier toucher vise, le second bascule. <kbd>/</kbd> pour écrire, <kbd>Échap</kbd> pour fermer.</p>
     <h4>Taille et couleur des étoiles</h4>
     <p>La taille, de 1 à 10, suit le nombre de synonymes du mot. La couleur suit sa rareté, comme dans le ciel : les étoiles rouges sont les plus communes, les bleues les plus rares. Les mots très rares et peu fournis deviennent des naines blanches ou des pulsars, les mots communs et riches des géantes rouges. Un mot qui a des contraires est une étoile double.</p>
     <h4>Orbites et coordonnées</h4>
@@ -524,13 +524,13 @@ function loadLexicon(onProgress) {
 }
 
 /* ── petits dictionnaires : ancien français, gaulois, argot des années 90 (un fichier JSON compressé chacun) ── */
-const MINIS = {}, MINI_FILES = { fro: 'x_fro.json.gz', gaul: 'x_gaul.json.gz', arg: 'x_arg.json.gz' };
+const MINIS = {}, MINI_FILE = id => 'x_' + id + '.json.gz'; /* x_fro, x_gaul, x_arg et les langues cousines : x_it, x_es… */
 async function loadMini(id) {
   if (MINIS[id]) return MINIS[id];
-  const j = JSON.parse(new TextDecoder().decode(await fetchBytes(DATA_URL + MINI_FILES[id])));
+  const j = JSON.parse(new TextDecoder().decode(await fetchBytes(DATA_URL + MINI_FILE(id))));
   const n = j.w.length, o = { id, mini: true, ready: true, n, words: j.w, keys: j.w.map(norm), map: new Map(), man: null, defs: j.d.map(x => x ? { s: x, l: x } : null), tags: j.t, seeds: j.seeds, era: j.era };
-  o.keys.forEach((k, i) => { if (!o.map.has(k)) o.map.set(k, i); });
   o.zipf = Uint8Array.from(j.z); o.flags = Uint8Array.from(j.f); o.deg = new Uint8Array(n);
+  o.keys.forEach((k, i) => { const p = o.map.get(k); if (p === undefined || (!(o.flags[p] & 128) && (o.flags[i] & 128))) o.map.set(k, i); });
   let E = 0; j.nb.forEach(r => E += r.length / 2);
   o.eo = new Uint32Array(n + 1); o.ea = new Uint32Array(E); let c = 0;
   j.nb.forEach((r, i) => { o.eo[i] = c; for (let k = 0; k < r.length; k += 2) o.ea[c++] = (r[k] << 8) | r[k + 1]; o.deg[i] = Math.min(255, r.length / 2); });
@@ -1059,22 +1059,22 @@ addEventListener('resize', resize); resize();
    Le Français au centre, ses langues cousines au loin (floues, courte focale). Positions : proximité grossière, pas une mesure. */
 const GALAXIES = [
   { id: 'fr', name: 'Le Français', pos: [0, 0, 0], radius: 44, n: SMALL ? 36000 : 78000, tint: [1, .76, .48], cold: [.6, .75, .98], arms: 3, twist: 3.1, rings: 24, spin: .2, label: 'Le Français', lh: 30, ready: true, count: '119 884 mots' },
-  { id: 'oc', name: 'Occitan', pos: [-48, 6, 33], radius: 10, n: 9100, tint: [1, .8, .35], cold: [.9, .82, .6], arms: 2, twist: 2.6, rings: 6, spin: .4, label: 'Occitan', lh: 6.8 },
-  { id: 'ca', name: 'Catalan', pos: [-66, -9, 50], radius: 11, n: 9750, tint: [1, .62, .3], cold: [1, .8, .55], arms: 2, twist: 3, rings: 6, spin: .38, label: 'Catalan', lh: 6.8 },
-  { id: 'it', name: 'Italien', pos: [72, 14, 27], radius: 19, n: 16900, tint: [1, .58, .5], cold: [.98, .72, .8], arms: 3, twist: 3.4, rings: 9, spin: .3, label: 'Italien', lh: 8.4 },
-  { id: 'co', name: 'Corse', pos: [95, -12, 69], radius: 7, n: 5200, tint: [.5, .95, .85], cold: [.6, .9, 1], arms: 0, twist: 0, rings: 4, spin: .5, label: 'Corse', lh: 5.7 },
-  { id: 'es', name: 'Espagnol', pos: [-114, -4, 10], radius: 22, n: 18200, tint: [1, .45, .25], cold: [1, .72, .5], arms: 3, twist: 3.2, rings: 10, spin: .28, label: 'Espagnol', lh: 8.7 },
-  { id: 'pt', name: 'Portugais', pos: [-156, 16, -24], radius: 13, n: 11050, tint: [.95, .78, .3], cold: [.7, .85, .6], arms: 2, twist: 2.8, rings: 7, spin: .34, label: 'Portugais', lh: 7.2 },
-  { id: 'la', name: 'Latin', pos: [24, 48, -108], radius: 30, n: 20800, tint: [.95, .9, .74], cold: [.8, .82, .88], arms: 0, twist: 0, rings: 16, spin: .1, gain: .7, label: 'Latin', lh: 9.9, bulge: .12, flat: .5 },
-  { id: 'ro', name: 'Roumain', pos: [154, 6, -55], radius: 13, n: 10400, tint: [.85, .55, .95], cold: [.7, .7, 1], arms: 2, twist: 3.2, rings: 7, spin: .3, label: 'Roumain', lh: 7.2 },
-  { id: 'br', name: 'Breton', pos: [-52, -26, -112], radius: 8, n: 6500, tint: [.55, .72, .95], cold: [.7, .8, .9], arms: 0, twist: 0, rings: 5, spin: .45, label: 'Breton', lh: 6.1 },
-  { id: 'eu', name: 'Basque', pos: [40, 30, 134], radius: 9, n: 7150, tint: [.78, .55, 1], cold: [.9, .72, 1], arms: 0, twist: 0, rings: 4, spin: .45, label: 'Basque · isolat', lh: 6.1 },
-  { id: 'en', name: 'Anglais', pos: [187, -22, 86], radius: 30, n: 19500, tint: [.62, .78, 1], cold: [.82, .9, 1], arms: 4, twist: 3, rings: 12, spin: .26, label: 'Anglais', lh: 9.5 },
+  { id: 'oc', name: 'Occitan', pos: [-48, 6, 33], radius: 10, n: 9100, tint: [1, .8, .35], cold: [.9, .82, .6], arms: 2, twist: 2.6, rings: 6, spin: .4, label: 'Occitan', lh: 6.8, ready: true, count: '34 459 mots' },
+  { id: 'ca', name: 'Catalan', pos: [-66, -9, 50], radius: 11, n: 9750, tint: [1, .62, .3], cold: [1, .8, .55], arms: 2, twist: 3, rings: 6, spin: .38, label: 'Catalan', lh: 6.8, ready: true, count: '22 125 mots' },
+  { id: 'it', name: 'Italien', pos: [72, 14, 27], radius: 19, n: 16900, tint: [1, .58, .5], cold: [.98, .72, .8], arms: 3, twist: 3.4, rings: 9, spin: .3, label: 'Italien', lh: 8.4, ready: true, count: '64 585 mots' },
+  { id: 'co', name: 'Corse', pos: [95, -12, 69], radius: 7, n: 5200, tint: [.5, .95, .85], cold: [.6, .9, 1], arms: 0, twist: 0, rings: 4, spin: .5, label: 'Corse', lh: 5.7, ready: true, count: '3 643 mots' },
+  { id: 'es', name: 'Espagnol', pos: [-114, -4, 10], radius: 22, n: 18200, tint: [1, .45, .25], cold: [1, .72, .5], arms: 3, twist: 3.2, rings: 10, spin: .28, label: 'Espagnol', lh: 8.7, ready: true, count: '40 601 mots' },
+  { id: 'pt', name: 'Portugais', pos: [-156, 16, -24], radius: 13, n: 11050, tint: [.95, .78, .3], cold: [.7, .85, .6], arms: 2, twist: 2.8, rings: 7, spin: .34, label: 'Portugais', lh: 7.2, ready: true, count: '28 650 mots' },
+  { id: 'la', name: 'Latin', pos: [24, 48, -108], radius: 30, n: 20800, tint: [.95, .9, .74], cold: [.8, .82, .88], arms: 0, twist: 0, rings: 16, spin: .1, gain: .7, label: 'Latin', lh: 9.9, bulge: .12, flat: .5, ready: true, count: '29 556 mots' },
+  { id: 'ro', name: 'Roumain', pos: [154, 6, -55], radius: 13, n: 10400, tint: [.85, .55, .95], cold: [.7, .7, 1], arms: 2, twist: 3.2, rings: 7, spin: .3, label: 'Roumain', lh: 7.2, ready: true, count: '10 038 mots' },
+  { id: 'br', name: 'Breton', pos: [-52, -26, -112], radius: 8, n: 6500, tint: [.55, .72, .95], cold: [.7, .8, .9], arms: 0, twist: 0, rings: 5, spin: .45, label: 'Breton', lh: 6.1, ready: true, count: '13 373 mots' },
+  { id: 'eu', name: 'Basque', pos: [40, 30, 134], radius: 9, n: 7150, tint: [.78, .55, 1], cold: [.9, .72, 1], arms: 0, twist: 0, rings: 4, spin: .45, label: 'Basque · isolat', lh: 6.1, ready: true, count: '8 234 mots' },
+  { id: 'en', name: 'Anglais', pos: [187, -22, 86], radius: 30, n: 19500, tint: [.62, .78, 1], cold: [.82, .9, 1], arms: 4, twist: 3, rings: 12, spin: .26, label: 'Anglais', lh: 9.5, ready: true, count: '80 414 mots' },
   /* trois petits dictionnaires faits maison : le français d'avant, la langue d'avant lui, et celle des cours de lycée */
   { id: 'fro', name: 'Ancien français', pos: [-64, 30, -70], radius: 17, n: 15500, tint: [.96, .8, .5], cold: [.78, .82, .95], arms: 2, twist: 2.4, rings: 10, spin: .14, label: 'Ancien français · dates', lh: 8.2, ready: true, count: '10 929 mots' },
   { id: 'gaul', name: 'Gaulois', pos: [-98, -34, -148], radius: 10, n: 8200, tint: [.5, .92, .66], cold: [.7, .92, .85], arms: 0, twist: 0, rings: 5, spin: .42, label: 'Gaulois', lh: 6.4, ready: true, count: '364 mots' },
   { id: 'arg', name: "Argot 90's", pos: [46, -50, 54], radius: 13, n: 10800, tint: [1, .42, .74], cold: [.5, .88, 1], arms: 2, twist: 3.6, rings: 7, spin: .55, label: "Argot 90's", lh: 7.2, ready: true, count: '512 mots' },
-  { id: 'de', name: 'Allemand', pos: [131, 42, -108], radius: 21, n: 15600, tint: [.8, .88, 1], cold: [.65, .75, .95], arms: 3, twist: 3.6, rings: 9, spin: .28, label: 'Allemand', lh: 8.4 }
+  { id: 'de', name: 'Allemand', pos: [131, 42, -108], radius: 21, n: 15600, tint: [.8, .88, 1], cold: [.65, .75, .95], arms: 3, twist: 3.6, rings: 9, spin: .28, label: 'Allemand', lh: 8.4, ready: true, count: '66 191 mots' }
 ];
 const HOME = { entered: 'fr', built: false, items: [], hov: -1, fade: 1, fadeT: 1, keep: 0, keepT: 0, ph: 1.04, camR: SMALL ? 300 : 215 };
 
@@ -1894,7 +1894,7 @@ async function enterField(wordId) {
   HOME.fadeT = 0; HOME.keepT = .9; setHomeHover(-1); tip.classList.add('off');
   cam.k = 1.15; cam.kt = 1.15; cam.tR = 74; cam.tPh = 1.12; cam.tTarget.copy(FIELD_C);
   GXA.riser(3.4); setTimeout(() => { cam.k = 5; cam.kt = 2.2; }, 3600);
-  if (wordId == null) { say(LX.mini && LX.id !== 'arg' ? 'Écris un mot de ' + (LX.id === 'fro' ? 'l’ancien français' : 'gaulois') + ', ou un mot d’aujourd’hui pour voir d’où il vient.' : 'Écris un mot, ou lance le <b>Quizz</b> (le dé orange) pour jouer.', 7000); renderSugg(); if (!TOUCH) setTimeout(() => $('word').focus({ preventScroll: true }), 1800); }
+  if (wordId == null) { say(LX.mini && LX.id !== 'arg' ? (COUSIN[LX.id] ? 'Écris un mot ' + (/^[aeiouh]/i.test(COUSIN[LX.id][1]) ? 'd’' : 'de ') + COUSIN[LX.id][1] + ', ou un mot français pour voir ses cousins.' : 'Écris un mot de ' + (LX.id === 'fro' ? 'l’ancien français' : 'gaulois') + ', ou un mot d’aujourd’hui pour voir d’où il vient.') : 'Écris un mot, ou lance le <b>Quizz</b> (le dé orange) pour jouer.', 7000); renderSugg(); if (!TOUCH) setTimeout(() => $('word').focus({ preventScroll: true }), 1800); }
   else setTimeout(() => goWord(wordId), 1500);
 }
 function goHome() {
@@ -1937,7 +1937,7 @@ function onInstall(g) {
   const xyz = '<span class="xyz">x +0,00  y +0,00  z +0,00 · d 0,00 u</span>';
   if (LX.mini) $('cMeta').innerHTML = `${wordEra(g.centre)}<br><b>${g.total}</b> mot${g.total > 1 ? 's' : ''} voisin${g.total > 1 ? 's' : ''} · taille <b>${sc.s.toFixed(1).replace('.', ',')}</b>/10<br>${LEXNOTE[LX.id]}<br>${xyz}`;
   else $('cMeta').innerHTML = `<b>${g.total}</b> synonyme${g.total > 1 ? 's' : ''} · taille <b>${sc.s.toFixed(1).replace('.', ',')}</b>/10<br>rareté : <b>${sc.rare}</b> · fréquence ${sc.z.toFixed(1).replace('.', ',')}/8<br>${g.nAnt ? `<b>${g.nAnt}</b> contraire${g.nAnt > 1 ? 's' : ''} (étoile double)` : 'aucun contraire connu'}<br>${xyz}`;
-  $('cLink').href = 'https://fr.wiktionary.org/wiki/' + encodeURIComponent(g.label) + (LX.id === 'fro' ? '#fro' : LX.id === 'gaul' ? '#gaulois' : '');
+  $('cLink').href = 'https://fr.wiktionary.org/wiki/' + encodeURIComponent(g.label) + (LX.id === 'fro' ? '#fro' : LX.id === 'gaul' ? '#gaulois' : COUSIN[LX.id] && isNative(g.centre) ? '#' + COUSIN[LX.id][2] : '');
   $('trBtn').hidden = LX.mini;
   $('card').classList.remove('off'); $('card').classList.toggle('mini', SMALL);
   closeTr();
@@ -1945,12 +1945,15 @@ function onInstall(g) {
   $('stats').innerHTML = LX.mini ? `<b>${esc(LEXNAME[LX.id])}</b> · ${nf(LX.nNative)} mots<br><b>${shown}</b> voisins en orbite sur <b>${g.total}</b>` : `<b>${nf(LX.n)}</b> mots dans le dictionnaire<br><b>${shown}</b> synonymes en orbite sur <b>${g.total}</b>`;
   renderTrail();
 }
-const LEXNAME = { fro: 'Ancien français', gaul: 'Gaulois', arg: 'Argot des années 90' };
-const LEXNOTE = { fro: 'les couleurs vont du blanc (ancien) au rouge (français d’aujourd’hui)', gaul: 'langue celtique, mots reconstruits ou attestés', arg: 'sélection éditoriale : mots du parler des années 1990' };
+/* langues cousines : mots de la langue (bleu clair) reliés à leurs équivalents français (ponts) et entre eux */
+const COUSIN = { it: ['Italien', 'italien', 'it'], es: ['Espagnol', 'espagnol', 'es'], pt: ['Portugais', 'portugais', 'pt'], ca: ['Catalan', 'catalan', 'ca'], oc: ['Occitan', 'occitan', 'oc'], ro: ['Roumain', 'roumain', 'ro'], co: ['Corse', 'corse', 'co'], la: ['Latin', 'latin', 'la'], br: ['Breton', 'breton', 'br'], eu: ['Basque', 'basque', 'eu'], en: ['Anglais', 'anglais', 'en'], de: ['Allemand', 'allemand', 'de'] };
+const LEXNAME = { fro: 'Ancien français', gaul: 'Gaulois', arg: 'Argot des années 90' }, LEXNOTE = { fro: 'les couleurs vont du blanc (ancien) au rouge (français d’aujourd’hui)', gaul: 'langue celtique, mots reconstruits ou attestés', arg: 'sélection éditoriale : mots du parler des années 1990' };
+for (const k in COUSIN) { LEXNAME[k] = COUSIN[k][0]; LEXNOTE[k] = 'les voisins sont des mots de la langue ou leurs équivalents français : lien par le sens, pas par l’étymologie'; }
 function wordEra(id) {
   const nat = isNative(id), tag = LX.tags[id] || '';
   if (LX.id === 'fro') return `<b>${nat ? 'ancien français' : 'français moderne'}</b>${tag ? ' · ' + esc(tag) : nat ? ' · avant 1400, date inconnue' : ''}`;
   if (LX.id === 'gaul') return `<b>${nat ? 'gaulois' : 'français moderne'}</b>${nat ? ' · avant le Ve siècle' : ''}`;
+  if (COUSIN[LX.id]) return `<b>${nat ? COUSIN[LX.id][1] : 'français'}</b>`;
   return `<b>${nat ? 'argot · années 90' : 'français courant'}</b>`;
 }
 function renderTrail() {
