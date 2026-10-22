@@ -1,0 +1,2153 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Galexico · la carte céleste des synonymes du français</title>
+<meta name="description" content="Galexico : chaque mot du français est une étoile, ses synonymes tournent autour. Explore la constellation de plus de 100 000 mots, ou joue : trouve à voix haute les synonymes d’un mot en une minute.">
+<meta name="theme-color" content="#050608">
+<meta property="og:title" content="Galexico · la carte céleste des synonymes du français">
+<meta property="og:description" content="Un dictionnaire de synonymes en forme de galaxie, avec un jeu vocal pour apprendre le français.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23050608'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23f0a355'/%3E%3Ccircle cx='16' cy='16' r='11' fill='none' stroke='%23ece5d8' stroke-opacity='.5' transform='rotate(-24 16 16)' stroke-dasharray='40 30'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* Galexico — nuit d'encre. Carte spatiale encadrée, HUD aux quatre coins, pilule de recherche et bouton « hasard » en bas. */
+:root{
+  --void:#050608;
+  --ink:#ece5d8;
+  --dim:rgba(236,229,216,.62);
+  --faint:rgba(236,229,216,.3);
+  --hair:rgba(236,229,216,.2);
+  --amber:#f0a355;
+  --ember:#cf6a3f;
+  --glacier:#a9c6e6;
+  --good:#9fd8b0;
+  --glass:rgba(16,19,26,.5);
+  --glass-edge:rgba(200,218,244,.16);
+  --f-pen:'Homemade Apple','Segoe Script','Bradley Hand',cursive;
+  --f-sun:'Mrs Saint Delafield','Segoe Script',cursive;
+  --f-ui:'DM Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--void);color:var(--ink);overflow:hidden;overscroll-behavior:none}
+body{font-family:var(--f-ui);font-weight:300;-webkit-font-smoothing:antialiased;touch-action:none;user-select:none;-webkit-user-select:none}
+input,textarea{user-select:text;-webkit-user-select:text}
+canvas#gl{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab}
+canvas#gl.grabbing{cursor:grabbing}
+canvas#gl.pointing{cursor:pointer}
+.ocular{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 84% at 50% 48%,transparent 50%,rgba(2,3,5,.5) 84%,rgba(2,3,5,.86) 100%)}
+.grain{position:fixed;inset:-40px;pointer-events:none;opacity:.08;mix-blend-mode:screen;background-size:220px 220px}
+
+/* ───────── cadre de carte céleste ───────── */
+.frame{position:fixed;inset:10px;pointer-events:none;border:1px solid var(--hair);transition:opacity 1.4s,inset 1.2s}
+.frame::before{content:"";position:absolute;inset:6px;border:1px solid rgba(236,229,216,.09)}
+.frame i{position:absolute;pointer-events:none;font-style:normal;font-size:9px;letter-spacing:.2em;color:var(--faint);font-variant-numeric:tabular-nums}
+.frame .tk-t,.frame .tk-b{left:6px;right:6px;height:7px;background:repeating-linear-gradient(90deg,var(--hair) 0 1px,transparent 1px 22px)}
+.frame .tk-t{top:6px}.frame .tk-b{bottom:6px;transform:scaleY(-1)}
+.frame .tk-l,.frame .tk-r{top:6px;bottom:6px;width:7px;background:repeating-linear-gradient(180deg,var(--hair) 0 1px,transparent 1px 22px)}
+.frame .tk-l{left:6px}.frame .tk-r{right:6px;transform:scaleX(-1)}
+.frame .c{width:13px;height:13px;border:0}
+.frame .c::before,.frame .c::after{content:"";position:absolute;background:var(--amber);opacity:.7}
+.frame .c::before{left:6px;top:0;width:1px;height:13px}.frame .c::after{top:6px;left:0;height:1px;width:13px}
+.frame .c1{left:-7px;top:-7px}.frame .c2{right:-7px;top:-7px}.frame .c3{left:-7px;bottom:-7px}.frame .c4{right:-7px;bottom:-7px}
+.frame .ra-a{left:22%;bottom:12px}.frame .ra-b{left:50%;bottom:12px;transform:translateX(-50%)}.frame .ra-c{right:22%;bottom:12px}
+.frame .de-a{left:12px;top:30%}.frame .de-b{left:12px;top:50%}.frame .de-c{left:12px;top:70%}
+body.field .frame{inset:6px;opacity:.55}
+.title{position:fixed;left:0;right:0;top:calc(14px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;align-items:center;pointer-events:none;transition:opacity 1s,transform 1.2s}
+.title h1{margin:0;padding:0 26px 0;font-family:var(--f-sun);font-weight:400;font-size:clamp(72px,11vw,128px);line-height:1;letter-spacing:0;color:var(--ink);
+  background:radial-gradient(ellipse 60% 70% at 50% 60%,rgba(5,6,8,.92),rgba(5,6,8,.0) 78%);text-shadow:0 0 28px rgba(240,163,85,.24)}
+.title h1 span{display:inline-block;padding:.32em .22em .28em;margin:-.32em -.22em -.28em;-webkit-mask-image:linear-gradient(90deg,#000 var(--pen,0%),transparent calc(var(--pen,0%) + 7%));mask-image:linear-gradient(90deg,#000 var(--pen,0%),transparent calc(var(--pen,0%) + 7%))}
+.title p{margin:4px 0 0;font-size:10.5px;letter-spacing:.38em;text-transform:uppercase;color:var(--dim);transition:opacity 1.2s}
+body.field .title{transform:translateY(-62px) scale(.5);transform-origin:top left;left:max(14px,env(safe-area-inset-left,0px));right:auto;align-items:flex-start;opacity:.0;pointer-events:none}
+.mark{display:none;font-family:var(--f-sun);font-size:44px;line-height:1;color:var(--ink);cursor:pointer;background:none;border:0;padding:0;text-shadow:0 0 18px rgba(240,163,85,.28);pointer-events:auto}
+body.field .mark{display:inline-block}
+
+/* ───────── HUD ───────── */
+.hud{position:fixed;pointer-events:none;display:flex;gap:10px;font-size:11px;letter-spacing:.06em;color:var(--dim)}
+.hud *{pointer-events:auto}
+.tl{top:calc(20px + env(safe-area-inset-top,0px));left:max(24px,env(safe-area-inset-left,0px));flex-direction:column;gap:5px;max-width:min(470px,calc(100vw - 48px));transition:opacity .8s}
+body.home .tl{opacity:0;pointer-events:none}
+body.home .tl *{pointer-events:none}
+.stats{line-height:1.6;color:var(--dim);font-variant-numeric:tabular-nums}
+.stats b{color:var(--ink);font-weight:400}
+.trail{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;font-family:var(--f-pen);font-size:13px;line-height:2;letter-spacing:0}
+.trail button{appearance:none;background:none;border:0;padding:0;color:var(--dim);font:inherit;cursor:pointer;border-bottom:1px solid transparent}
+.trail button:hover{color:var(--ink);border-color:var(--faint)}
+.trail button[aria-current="true"]{color:var(--amber);cursor:default}
+.trail i{font-style:normal;font-family:var(--f-ui);font-size:10px;color:var(--faint)}
+.tr{top:calc(22px + env(safe-area-inset-top,0px));right:max(24px,env(safe-area-inset-right,0px));flex-wrap:wrap;justify-content:flex-end;max-width:min(760px,60vw)}
+.chip{appearance:none;border:1px solid var(--glass-edge);background:var(--glass);color:var(--dim);font:inherit;letter-spacing:.08em;text-decoration:none;
+  padding:7px 11px;border-radius:999px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:color .2s,border-color .2s,background .2s;white-space:nowrap}
+.chip:hover{color:var(--ink);border-color:rgba(240,163,85,.5)}
+.chip[aria-pressed="true"],.chip[aria-expanded="true"],.chip.on{color:var(--ink);border-color:rgba(240,163,85,.65);background:rgba(240,163,85,.12)}
+.chip:disabled{opacity:.4;cursor:default}
+.chip:focus-visible,.pill button:focus-visible,.pill input:focus-visible,.trail button:focus-visible,.dice:focus-visible,.mark:focus-visible{outline:1px solid var(--amber);outline-offset:3px}
+.bl{bottom:calc(26px + env(safe-area-inset-bottom,0px));left:max(24px,env(safe-area-inset-left,0px));flex-direction:column;gap:8px;font-variant-numeric:tabular-nums;transition:opacity .8s}
+body.home .bl{opacity:0;pointer-events:none}
+.scale{display:flex;align-items:center;gap:10px}
+.scale i{display:block;width:64px;height:5px;border:1px solid var(--dim);border-top:0;position:relative}
+.scale i::after{content:"";position:absolute;left:50%;top:0;height:3px;border-left:1px solid var(--dim)}
+.lens{display:flex;align-items:center;gap:10px}
+.lens input{width:110px;accent-color:var(--amber)}
+
+/* ───────── choix de langue (accueil) ───────── */
+.langs{position:fixed;left:0;right:0;bottom:calc(30px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none;transition:opacity .9s,transform .9s}
+.langs>*{pointer-events:auto}
+body.field .langs{opacity:0;pointer-events:none;transform:translateY(12px)}
+body.field .langs>*{pointer-events:none}
+.langs .hint{font-family:var(--f-pen);font-size:15px;color:var(--dim);letter-spacing:0;text-align:center;padding:0 16px}
+.langrow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:min(860px,calc(100vw - 32px))}
+.langrow .chip{font-family:var(--f-pen);font-size:12.5px;letter-spacing:0;padding:6px 13px 3px}
+.langrow .chip.fr{border-color:rgba(240,163,85,.6);color:var(--ink);background:rgba(240,163,85,.14)}
+.loadbar{width:min(260px,70vw);height:2px;background:rgba(236,229,216,.14);border-radius:2px;overflow:hidden;transition:opacity .6s}
+.loadbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ember),var(--amber));transition:width .25s}
+
+/* ───────── dock : recherche + hasard ───────── */
+.dock{position:fixed;left:0;right:0;bottom:calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));transition:opacity .9s,transform .9s}
+body.home .dock{opacity:0;transform:translateY(16px)}
+body.home .dock>*{pointer-events:none}
+.dock>*{pointer-events:auto}
+.dockrow{display:flex;align-items:center;gap:14px;width:min(640px,100%);justify-content:center}
+.pill{position:relative;display:flex;align-items:center;gap:6px;flex:1;max-width:460px;height:58px;padding:0 7px 0 24px;border-radius:999px;
+  background:linear-gradient(180deg,rgba(255,255,255,.085),rgba(255,255,255,.02) 46%,rgba(255,255,255,.035));border:1px solid rgba(220,232,250,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -12px 24px rgba(240,163,85,.05),0 10px 40px rgba(0,0,0,.55),0 0 0 6px rgba(200,218,244,.025);
+  backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);transition:box-shadow .4s,border-color .4s}
+.pill::before{content:"";position:absolute;left:18px;right:18px;top:3px;height:42%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0));pointer-events:none;filter:blur(1px)}
+.pill:focus-within{border-color:rgba(240,163,85,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 10px 40px rgba(0,0,0,.55),0 0 34px rgba(240,163,85,.18),0 0 0 6px rgba(240,163,85,.04)}
+.pill input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--ink);font-family:var(--f-pen);font-size:19px;letter-spacing:0;padding-top:6px}
+.pill input::placeholder{color:var(--faint)}
+.pill button{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid rgba(220,232,250,.14);display:grid;place-items:center;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.16),rgba(255,255,255,.02) 60%);color:var(--ink);transition:transform .2s}
+.pill button:hover{transform:scale(1.05)}
+.pill button.go{background:radial-gradient(circle at 35% 30%,#ffd7a6,var(--amber) 45%,#cf6a3f);color:#2a1306;border-color:rgba(255,200,140,.5)}
+.pill button.listening,.listening{background:radial-gradient(circle at 35% 30%,#ffd7a6,#cf6a3f)!important;color:#2a1306!important;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(207,106,63,.15)}}
+.pill svg,.dice svg{width:18px;height:18px}
+.dice{position:relative;flex:none;width:58px;height:58px;border-radius:50%;border:1px solid rgba(255,200,140,.5);cursor:pointer;display:grid;place-items:center;color:#2a1306;
+  background:radial-gradient(circle at 35% 28%,#ffe3bd,var(--amber) 48%,#bd5b33);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 10px 40px rgba(0,0,0,.55),0 0 28px rgba(240,163,85,.22);transition:transform .25s}
+.dice:hover{transform:scale(1.07) rotate(-8deg)}
+.dice svg{width:26px;height:26px}
+.dice small{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.sugg{display:flex;gap:6px;max-width:min(760px,100%);min-height:30px;overflow-x:auto;scrollbar-width:none;padding:2px;mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 24px),transparent)}
+.sugg::-webkit-scrollbar{display:none}
+.sugg .chip{font-family:var(--f-pen);font-size:13px;letter-spacing:0;padding:5px 13px 2px;flex:none}
+.sugg .chip small{font-family:var(--f-ui);font-size:10px;color:var(--faint);margin-left:6px}
+
+/* ───────── fiche du soleil ───────── */
+.card{position:fixed;top:calc(64px + env(safe-area-inset-top,0px));right:max(24px,env(safe-area-inset-right,0px));width:min(336px,calc(100vw - 32px));max-height:calc(100% - 230px);
+  padding:18px 18px 14px;border-radius:18px;background:rgba(11,13,18,.66);border:1px solid var(--glass-edge);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  display:flex;flex-direction:column;gap:10px;font-size:11px;letter-spacing:.04em;color:var(--dim);transition:opacity .4s,transform .4s;overflow:auto;scrollbar-width:thin}
+.card.off{opacity:0;transform:translateY(-6px);pointer-events:none}
+.card h2{margin:0;font-family:var(--f-sun);font-weight:400;font-size:56px;line-height:1.05;letter-spacing:0;color:var(--ink);text-wrap:balance;overflow-wrap:anywhere}
+.card .klass{display:flex;align-items:center;gap:9px;color:var(--ink);letter-spacing:.06em}
+.card .klass .dot{flex:none;width:12px;height:12px;border-radius:50%;box-shadow:0 0 12px currentColor}
+.card .def{font-size:12.5px;line-height:1.55;color:var(--ink);letter-spacing:.01em;font-weight:300;font-family:system-ui,-apple-system,'Segoe UI','Noto Sans',sans-serif}
+.card .def em{font-style:italic;color:var(--dim)}
+.card .meta{line-height:1.7;font-variant-numeric:tabular-nums}
+.card .meta b{color:var(--amber);font-weight:400}
+.card .xyz{color:var(--ink);letter-spacing:.06em}
+.card .row{display:flex;gap:8px;flex-wrap:wrap}
+.tr-box{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:auto;margin-right:-8px;padding-right:8px;scrollbar-width:thin}
+.tr-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tr-list li{display:grid;grid-template-columns:96px 1fr;gap:0 10px;padding:7px 0;border-top:1px solid rgba(200,218,244,.08);align-items:baseline;min-width:0}
+.tr-list .lg{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);line-height:1.35}
+.tr-list .lg small{display:block;letter-spacing:.04em;text-transform:none;font-variant-numeric:tabular-nums}
+.tr-list .tw{font-size:17px;line-height:1.3;color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI','Noto Sans',sans-serif;font-weight:400;letter-spacing:0;min-width:0;overflow-wrap:anywhere}
+.tr-list .ro{grid-column:2;font-size:11px;color:var(--dim);letter-spacing:.02em;overflow-wrap:anywhere}
+.tr-list li.wait .tw{color:var(--faint)}
+.tr-note{margin:0;font-size:10px;line-height:1.6;color:var(--faint);letter-spacing:.03em}
+.tr-note a{color:var(--amber)}
+
+.tip{position:fixed;left:0;top:0;pointer-events:none;padding:9px 12px 8px;border-radius:12px;background:rgba(11,13,18,.84);border:1px solid var(--glass-edge);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:11px;line-height:1.6;letter-spacing:.04em;color:var(--dim);font-variant-numeric:tabular-nums;max-width:290px;transition:opacity .2s;z-index:5}
+.tip.off{opacity:0}
+.tip strong{display:block;font-family:var(--f-pen);font-weight:400;font-size:16px;line-height:1.7;color:var(--ink);letter-spacing:0}
+.tip .df{display:block;margin:1px 0 4px;font-family:system-ui,-apple-system,'Segoe UI','Noto Sans',sans-serif;font-size:12px;line-height:1.45;color:var(--ink);letter-spacing:.01em;font-weight:300}
+.tip .df.wait{color:var(--faint)}
+.tip .xyz{color:var(--ink)}
+.tip em{font-style:normal;color:var(--amber)}
+
+.toast{position:fixed;left:50%;bottom:calc(168px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);z-index:6;
+  padding:10px 16px;border-radius:14px;background:rgba(11,13,18,.86);border:1px solid var(--glass-edge);color:var(--ink);font-size:12px;line-height:1.55;letter-spacing:.03em;text-align:center;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:opacity .35s}
+.toast.off{opacity:0;pointer-events:none}
+.toast a{color:var(--amber)}
+
+.help{position:fixed;inset:0;display:grid;place-items:center;background:rgba(2,3,5,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:20;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.help>div{width:min(600px,100%);max-height:84vh;overflow:auto;padding:24px;border-radius:20px;background:rgba(11,13,18,.95);border:1px solid var(--glass-edge);
+  font-size:12px;line-height:1.7;letter-spacing:.02em;color:var(--dim);display:flex;flex-direction:column;gap:12px}
+.help h3{margin:0;font-family:var(--f-sun);font-weight:400;font-size:52px;line-height:1;color:var(--ink)}
+.help h4{margin:6px 0 0;font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--amber);font-weight:400}
+.help p{margin:0;max-width:64ch}
+.help a{color:var(--amber)}
+.help kbd,.help code{font:inherit;color:var(--ink);border:1px solid var(--glass-edge);border-radius:5px;padding:0 5px}
+.help .row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ───────── jeu ───────── */
+.game{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;z-index:8;padding:calc(18px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.game>*{pointer-events:auto}
+.gm-top{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;margin-top:8px;width:min(760px,100%)}
+.gm-ask{font-family:var(--f-pen);font-size:clamp(20px,3.1vw,34px);line-height:1.5;color:var(--ink);text-shadow:0 2px 22px rgba(0,0,0,.9);letter-spacing:0;margin:0}
+.gm-ask b{font-family:var(--f-sun);font-weight:400;font-size:2.7em;line-height:.9;color:var(--amber);vertical-align:-.12em;text-shadow:0 0 30px rgba(240,163,85,.35)}
+.gm-count{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:520px}
+.gm-count i{width:12px;height:12px;border-radius:50%;border:1px solid rgba(236,229,216,.45);transition:all .5s}
+.gm-count i.on{background:radial-gradient(circle at 35% 30%,#fff3d6,var(--amber));border-color:rgba(255,220,170,.8);box-shadow:0 0 14px rgba(240,163,85,.7)}
+.gm-clock{display:flex;align-items:center;gap:14px;margin-top:2px}
+.gm-clock svg{width:46px;height:64px;overflow:visible}
+.gm-clock .sec{font-family:var(--f-ui);font-size:30px;letter-spacing:.04em;color:var(--ink);font-variant-numeric:tabular-nums;min-width:2.2ch;text-align:left}
+.gm-clock.late .sec{color:#ff9a72}
+.gm-mid{flex:1}
+.gm-bot{display:flex;flex-direction:column;align-items:center;gap:12px;width:min(720px,100%)}
+.gm-riddle{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 20px 12px;border-radius:20px;background:rgba(9,11,16,.72);border:1px solid var(--glass-edge);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);width:100%;text-align:center}
+.gm-riddle .kicker{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--amber)}
+.gm-riddle .clue{font-family:var(--f-pen);font-size:clamp(16px,2.1vw,23px);line-height:1.55;color:var(--ink);margin:0}
+.gm-riddle .sub{font-size:12px;color:var(--dim);line-height:1.5;font-family:system-ui,-apple-system,'Segoe UI','Noto Sans',sans-serif;letter-spacing:.01em}
+.gm-riddle .bar{width:100%;height:3px;background:rgba(236,229,216,.12);border-radius:3px;overflow:hidden}
+.gm-riddle .bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--ember),var(--amber));transform-origin:left}
+.gm-riddle .slots{display:flex;gap:6px;justify-content:center;font-family:var(--f-ui);font-size:19px;letter-spacing:.2em;color:var(--ink)}
+.gm-typed{display:flex;gap:8px;width:min(460px,100%)}
+.gm-typed input{flex:1;height:42px;border-radius:999px;border:1px solid var(--glass-edge);background:rgba(10,12,17,.7);color:var(--ink);font-family:var(--f-pen);font-size:16px;padding:2px 18px 0;outline:none;backdrop-filter:blur(10px)}
+.gm-typed input:focus{border-color:rgba(240,163,85,.5)}
+.gm-typed input::placeholder{color:var(--faint)}
+.gm-mic{display:flex;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.gm-mic i{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.gm-mic.on i{background:#ff6a4d;box-shadow:0 0 10px #ff6a4d;animation:pulse 1.2s infinite}
+.gm-heard{min-height:22px;font-family:var(--f-pen);font-size:15px;color:var(--dim);text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gm-found{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);font-family:var(--f-sun);font-size:clamp(70px,13vw,160px);line-height:1;color:var(--amber);text-shadow:0 0 40px rgba(240,163,85,.55);pointer-events:none;opacity:0;white-space:nowrap}
+.gm-found.pop{animation:foundpop 1.5s ease-out forwards}
+@keyframes foundpop{0%{opacity:0;transform:translate(-50%,-30%) scale(.7)}18%{opacity:1;transform:translate(-50%,-50%) scale(1)}70%{opacity:.9}100%{opacity:0;transform:translate(-50%,-72%) scale(1.04)}}
+.gm-modal{position:fixed;inset:0;display:grid;place-items:center;background:rgba(2,3,5,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:12;padding:16px}
+.gm-card{width:min(560px,100%);display:flex;flex-direction:column;align-items:center;gap:16px;padding:28px 24px;border-radius:24px;background:rgba(11,13,18,.92);border:1px solid var(--glass-edge);text-align:center;max-height:92vh;overflow:auto}
+.gm-card h3{margin:0;font-family:var(--f-sun);font-weight:400;font-size:clamp(54px,9vw,84px);line-height:.95;color:var(--ink)}
+.gm-card p{margin:0;font-size:12.5px;line-height:1.65;color:var(--dim);max-width:46ch;font-family:system-ui,-apple-system,'Segoe UI','Noto Sans',sans-serif;letter-spacing:.01em}
+.gm-card .lvls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.lvl{appearance:none;width:64px;height:64px;border-radius:50%;border:1px solid var(--glass-edge);background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.12),rgba(255,255,255,.02) 62%);color:var(--ink);font-family:var(--f-sun);font-size:38px;line-height:1;cursor:pointer;padding-top:6px;transition:transform .2s,border-color .2s,box-shadow .2s}
+.lvl:hover{transform:scale(1.07);border-color:rgba(240,163,85,.6)}
+.lvl.sel{border-color:rgba(255,200,140,.8);box-shadow:0 0 22px rgba(240,163,85,.4);background:radial-gradient(circle at 35% 30%,rgba(255,215,166,.3),rgba(240,163,85,.08) 62%)}
+.gm-card .lvlname{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--amber);min-height:1.4em}
+.gm-card .bigbtn{appearance:none;border:1px solid rgba(255,200,140,.5);cursor:pointer;color:#2a1306;font-family:var(--f-pen);font-size:19px;padding:12px 34px 8px;border-radius:999px;background:radial-gradient(circle at 35% 30%,#ffe3bd,var(--amber) 55%,#cf6a3f);box-shadow:0 0 30px rgba(240,163,85,.25)}
+.gm-card .bigbtn:hover{transform:scale(1.03)}
+.gm-card .words{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.gm-card .words span{font-family:var(--f-pen);font-size:14px;padding:4px 12px 1px;border-radius:999px;border:1px solid var(--glass-edge);color:var(--dim)}
+.gm-card .words span.ok{color:var(--ink);border-color:rgba(240,163,85,.6);background:rgba(240,163,85,.12)}
+.gm-card .words span.rid{color:var(--ink);border-color:rgba(159,216,176,.55);background:rgba(159,216,176,.1)}
+.gm-card .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+@media (max-width:700px){
+  .tr{max-width:calc(100vw - 32px);top:calc(54px + env(safe-area-inset-top,0px));right:16px;gap:6px}
+  .tr .chip{font-size:10px;padding:5px 9px}
+  .tl{left:20px;top:calc(14px + env(safe-area-inset-top,0px))}
+  .tl .stats{display:none}
+  .bl{display:none}
+  .card{top:auto;bottom:calc(150px + env(safe-area-inset-bottom,0px));max-height:44%;padding:14px;right:16px}
+  .card h2{font-size:38px;cursor:pointer}
+  .card.mini .tr-box,.card.mini .meta,.card.mini .def{display:none}
+  .card.mini{gap:6px}
+  .dockrow{gap:10px}
+  .pill{height:52px}
+  .dice{width:52px;height:52px}
+  .title h1{font-size:clamp(66px,19vw,96px)}
+  .frame .ra-a,.frame .ra-c,.frame .de-a,.frame .de-c{display:none}
+  .gm-ask{font-size:19px}
+  .gm-clock svg{width:36px;height:50px}
+}
+@media (prefers-reduced-motion:reduce){.pill button.listening,.listening,.gm-mic.on i{animation:none}}
+
+/* ───────── états globaux ───────── */
+body.playing .dock,body.playing .tr,body.playing .tl,body.playing .card,body.playing .bl,body.playing .tip{opacity:0!important;pointer-events:none!important}
+body.playing .tr *,body.playing .dock *{pointer-events:none!important}
+.langrow .chip.soon{opacity:.62}
+.hint.pulse{animation:hintp 2.4s ease-in-out infinite}
+@keyframes hintp{50%{opacity:.45}}
+.optic{font-size:10px;letter-spacing:.14em;color:var(--faint)}
+@media (prefers-reduced-motion:reduce){.hint.pulse{animation:none}}
+.gm-mid{pointer-events:none!important}
+.gm-top{pointer-events:none!important}
+.gm-top>*{pointer-events:auto}
+.gm-top>.gm-ask{pointer-events:none}
+.pill{min-width:0}.pill input{width:0}
+@media (max-width:700px){
+  body.home .tr{opacity:0;pointer-events:none}
+  body.home .tr *{pointer-events:none}
+  .card.mini .row{display:none}
+  .gm-riddle{padding:10px 14px}
+  .gm-count{max-width:300px}
+}
+
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="Carte céleste des synonymes du français, en 3D"></canvas>
+<div class="ocular"></div>
+<div class="grain" id="grain"></div>
+
+<div class="frame" id="frame" aria-hidden="true">
+  <i class="tk-t"></i><i class="tk-b"></i><i class="tk-l"></i><i class="tk-r"></i>
+  <i class="c c1"></i><i class="c c2"></i><i class="c c3"></i><i class="c c4"></i>
+  <i class="ra-a">α 04h</i><i class="ra-b">α 12h</i><i class="ra-c">α 20h</i>
+  <i class="de-a">δ +45°</i><i class="de-b">δ 0°</i><i class="de-c">δ −45°</i>
+</div>
+<header class="title" id="title"><h1><span id="penTitle">Galexico</span></h1><p id="sub">dictionnaire galactique des synonymes</p></header>
+
+<header class="hud tl" id="hudTL">
+  <button class="mark" id="home" aria-label="Retour à la carte des langues" title="Retour à la carte des langues">Galexico</button>
+  <div class="stats" id="stats"></div>
+  <nav class="trail" id="trail" aria-label="Parcours"></nav>
+</header>
+
+<nav class="hud tr" aria-label="Réglages">
+  <button class="chip" id="bXYZ" aria-pressed="true" title="Coordonnées X Y Z et distance au soleil">coordonnées</button>
+  <button class="chip" id="bAnt" aria-pressed="false" title="Antonymes : l’antimatière du mot">antimatière</button>
+  <button class="chip" id="bRot" aria-pressed="true" title="Rotation lente quand tu ne touches à rien">dérive</button>
+  <button class="chip" id="bSnd" aria-pressed="true" title="Son">son ♪</button>
+  <button class="chip" id="bHelp" aria-label="Aide, sources et licences">?</button>
+</nav>
+
+<div class="hud bl">
+  <div class="lens"><label for="aperture">ouverture</label><input type="range" id="aperture" min="0" max="100" value="62"><span id="fnum">f/2</span></div>
+  <div class="scale"><i></i><span id="scaleTxt">5 u</span></div>
+  <div id="optic"></div>
+</div>
+
+<aside class="card off" id="card" aria-live="polite">
+  <h2 id="cWord">—</h2>
+  <div class="klass" id="cKlass"></div>
+  <div class="def" id="cDef"></div>
+  <div class="meta" id="cMeta"></div>
+  <div class="row">
+    <button class="chip" id="trBtn" aria-expanded="false" aria-controls="trBox">traductions · 20 langues ▾</button>
+    <a class="chip" id="cLink" href="https://fr.wiktionary.org/" target="_blank" rel="noopener">Wiktionnaire ↗</a>
+  </div>
+  <div class="tr-box" id="trBox" hidden>
+    <ol class="tr-list" id="trList"></ol>
+    <p class="tr-note" id="trNote"></p>
+  </div>
+</aside>
+
+<div class="tip off" id="tip" role="status"></div>
+<div class="toast off" id="toast" role="status"></div>
+
+<div class="langs" id="langs">
+  <div class="loadbar" id="loadbar"><i id="loadfill"></i></div>
+  <div class="hint" id="hint">Clique sur « Le Français » pour y entrer.</div>
+  <div class="langrow" id="langrow"></div>
+</div>
+
+<div class="dock" id="dock">
+  <div class="dockrow">
+    <form class="pill" id="form" autocomplete="off">
+      <label for="word" hidden>Mot</label>
+      <input id="word" name="word" placeholder="écris ou dicte un mot" spellcheck="false" enterkeyhint="go" autocapitalize="off">
+      <button type="button" id="mic" aria-label="Dicter un mot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
+      </button>
+      <button type="submit" class="go" aria-label="Charger la constellation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+    <button class="dice" id="dice" aria-label="Jeu : un mot au hasard, trouve ses synonymes en une minute">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor"/></svg>
+      <small>hasard</small>
+    </button>
+  </div>
+  <div class="sugg" id="sugg" aria-label="Suggestions"></div>
+</div>
+
+<section class="game" id="game" hidden>
+  <div class="gm-top">
+    <p class="gm-ask" id="gmAsk"></p>
+    <div class="gm-count" id="gmCount"></div>
+    <div class="gm-clock" id="gmClock">
+      <svg viewBox="0 0 46 64" aria-hidden="true">
+        <defs><clipPath id="hgTop"><path d="M6 6h34c0 14-10 20-14 26 4 6 14 12 14 26H6c0-14 10-20 14-26C16 26 6 20 6 6z"/></clipPath></defs>
+        <g clip-path="url(#hgTop)">
+          <rect id="sandTop" x="0" y="6" width="46" height="26" fill="#f0a355" opacity=".92"/>
+          <rect id="sandBot" x="0" y="58" width="46" height="0" fill="#f0a355" opacity=".92"/>
+          <rect id="sandFall" x="22.4" y="31" width="1.2" height="26" fill="#ffd7a6" opacity=".9"/>
+        </g>
+        <path d="M6 6h34c0 14-10 20-14 26 4 6 14 12 14 26H6c0-14 10-20 14-26C16 26 6 20 6 6z" fill="none" stroke="rgba(236,229,216,.7)" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M3 5h40M3 59h40" stroke="rgba(236,229,216,.85)" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="sec" id="gmSec">60</span>
+    </div>
+    <div class="gm-riddle" id="gmRiddle" hidden>
+      <div class="kicker" id="gmKicker">devinette</div>
+      <p class="clue" id="gmClue"></p>
+      <div class="slots" id="gmSlots"></div>
+      <div class="sub" id="gmSub"></div>
+      <div class="bar"><i id="gmBar"></i></div>
+      <button class="chip" id="gmSkip">passer</button>
+    </div>
+  </div>
+  <div class="gm-mid"></div>
+  <div class="gm-bot">
+    <div class="gm-heard" id="gmHeard"></div>
+    <div class="gm-mic" id="gmMic"><i></i><span id="gmMicTxt">micro</span></div>
+    <form class="gm-typed" id="gmForm" autocomplete="off">
+      <input id="gmInput" placeholder="ou tape un synonyme ici" spellcheck="false" enterkeyhint="send" autocapitalize="off">
+      <button class="chip" type="submit">valider</button>
+    </form>
+    <button class="chip" id="gmQuit">quitter le jeu</button>
+  </div>
+</section>
+<div class="gm-found" id="gmFound"></div>
+<div class="gm-modal" id="gmModal" hidden></div>
+
+<div class="help" id="help" hidden>
+  <div role="dialog" aria-labelledby="hTitle">
+    <h3 id="hTitle">Galexico</h3>
+    <p>La carte céleste de la langue française. Chaque mot est une étoile, ses synonymes tournent autour de lui. Glisse pour tourner autour du système, molette ou pincement pour zoomer. Survole une étoile : la mise au point glisse vers elle, sa définition apparaît et ses propres synonymes, jusque-là flous, s’éveillent. Clique : elle devient le nouveau soleil. Sur écran tactile, un premier toucher vise, le second bascule. <kbd>/</kbd> pour écrire, <kbd>Échap</kbd> pour fermer.</p>
+    <h4>Taille et couleur des étoiles</h4>
+    <p>La taille, de 1 à 10, suit le nombre de synonymes du mot. La couleur suit sa rareté, comme dans le ciel : les étoiles rouges sont les plus communes, les bleues les plus rares. Les mots très rares et peu fournis deviennent des naines blanches ou des pulsars, les mots communs et riches des géantes rouges. Un mot qui a des contraires est une étoile double.</p>
+    <h4>Orbites et coordonnées</h4>
+    <p>Les 16 synonymes les plus proches sont rangés sur quatre couches <code>n=1</code> à <code>n=4</code>, par paquets de quatre, chacun sur son orbite. Leur distance au soleil suit la force du lien dans JeuxDeMots :</p>
+    <p><code>d = 6 u × (force du plus proche ÷ force du mot)<sup>0,6</sup></code></p>
+    <p>X, Y et Z donnent la position dans le repère du soleil. Seule la distance <code>d</code> a un sens linguistique ; l’orientation des orbites est tirée du mot lui-même.</p>
+    <h4>Jeu</h4>
+    <p>Le bouton « hasard » tire un mot et un objectif : 2, 4, 6, 8, 16 ou 32 synonymes à citer à voix haute en une minute. Le chrono part dès que la consigne apparaît. Chaque mot juste allume son étoile. Les mots manquants deviennent des devinettes de vingt secondes. La dictée vocale demande l’accès au micro et marche dans Chrome, Edge et Safari ; sans micro, tape les réponses.</p>
+    <h4>Données et licences</h4>
+    <p id="hData"></p>
+    <div class="row"><button class="chip" id="bClose">fermer</button></div>
+  </div>
+</div>
+
+<noscript><p style="position:fixed;inset:0;display:grid;place-items:center;color:#ece5d8;font:16px system-ui;text-align:center;padding:24px">Galexico a besoin de JavaScript et de WebGL pour dessiner la carte céleste.</p></noscript>
+<script src="vendor/three.min.js"></script>
+<script>
+/* ═════════════ Galexico · 0. Outils ═════════════ */
+'use strict';
+const $ = id => document.getElementById(id);
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const norm = s => String(s).trim().toLowerCase().replace(/[’‘`´]/g, "'").normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/\s+/g, ' ');
+const fmt = (v, dg = 2) => (v < 0 ? '−' : '+') + Math.abs(v).toFixed(dg).replace('.', ',');
+const fmtD = (v, dg = 2) => v.toFixed(dg).replace('.', ',');
+const nf = n => Number(n).toLocaleString('fr-FR');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SMALL = Math.min(innerWidth, innerHeight) < 700;
+const TOUCH = matchMedia('(pointer: coarse)').matches;
+function rng(seedStr) {
+  let h = 1779033703 ^ seedStr.length;
+  for (let i = 0; i < seedStr.length; i++) { h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; }
+  return () => { h = Math.imul(h ^ h >>> 16, 2246822507); h = Math.imul(h ^ h >>> 13, 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+}
+function gauss(R) { let u = 0, v = 0; while (!u) u = R(); while (!v) v = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+function lsGet(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (_) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) { } }
+const toast = $('toast'); let toastTimer = 0;
+function say(html, ms = 5200) { toast.innerHTML = html; toast.classList.remove('off'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.add('off'), ms); }
+const STATE = { mode: 'home', lang: 'fr', xyz: true, ant: false, rot: !REDUCED, game: null };
+
+/* ═════════════ Galexico · 1. Dictionnaire (fichiers compacts dans ./data/) ═════════════
+   Synonymes : JeuxDeMots (CC0). Définitions, traductions : Wiktionnaire (CC BY-SA 3.0). Fréquences : wordfreq.
+   Format : words.txt.gz (un mot par ligne, rangés du plus courant au plus rare), meta.bin.gz (3 octets par mot : zipf×30, drapeaux, degré),
+   edges.bin.gz / ants.bin.gz (CSR : n, E, offsets, arêtes empaquetées id<<8 | force logarithmique), def_NNN / tr_NNN (tranches de 3000 mots). */
+const DATA_URL = new URL('./data/', document.baseURI).href;
+const LX = { ready: false, n: 0, words: [], keys: [], zipf: null, flags: null, deg: null, eo: null, ea: null, ao: null, aa: null, map: new Map(), man: null, loading: null };
+const SHARD = 3000;
+const decQ = q => 12 * (Math.exp(q / 42) - 1);
+
+const DATA_B64 = false; /* aperçu en artefact : les .gz y sont servis en base64 dans des .txt */
+async function fetchBytes(url, onBytes) {
+  if (DATA_B64 && url.endsWith('.gz')) url += '.b64.txt';
+  const r = await fetch(url, { cache: 'force-cache' });
+  if (!r.ok) throw new Error(url + ' : ' + r.status);
+  let buf;
+  if (r.body && onBytes) {
+    const rd = r.body.getReader(), parts = []; let got = 0;
+    for (;;) { const { done, value } = await rd.read(); if (done) break; parts.push(value); got += value.length; onBytes(value.length); }
+    buf = new Uint8Array(got); let o = 0; parts.forEach(p => { buf.set(p, o); o += p.length; });
+  } else buf = new Uint8Array(await r.arrayBuffer());
+  if (DATA_B64 && url.endsWith('.b64.txt')) { const t = atob(new TextDecoder().decode(buf).trim()); buf = Uint8Array.from(t, c => c.charCodeAt(0)); }
+  if (buf[0] === 0x1f && buf[1] === 0x8b) {
+    const ds = new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip')));
+    return new Uint8Array(await ds.arrayBuffer());
+  }
+  return buf;
+}
+const u32 = (u8, off, len) => new Uint32Array(u8.buffer.slice(u8.byteOffset + off, u8.byteOffset + off + len * 4));
+function parseCSR(u8) {
+  const n = u32(u8, 0, 2); const N = n[0], E = n[1];
+  return { eo: u32(u8, 8, N + 1), ea: u32(u8, 8 + 4 * (N + 1), E) };
+}
+function loadLexicon(onProgress) {
+  if (LX.loading) return LX.loading;
+  LX.loading = (async () => {
+    const files = ['manifest.json', 'words.txt.gz', 'meta.bin.gz', 'edges.bin.gz', 'ants.bin.gz'];
+    const approx = [1e3, 6.1e5, 1.3e5, 2.72e6, 2.8e5]; const total = approx.reduce((a, b) => a + b, 0); let got = 0;
+    const tick = n => { got += n; onProgress && onProgress(Math.min(.98, got / total)); };
+    const [man, wb, mb, eb, ab] = await Promise.all(files.map(f => fetchBytes(DATA_URL + f, tick)));
+    LX.man = JSON.parse(new TextDecoder().decode(man));
+    LX.words = new TextDecoder().decode(wb).split('\n'); LX.n = LX.words.length;
+    LX.keys = new Array(LX.n);
+    for (let i = 0; i < LX.n; i++) { const k = norm(LX.words[i]); LX.keys[i] = k; if (!LX.map.has(k)) LX.map.set(k, i); }
+    LX.zipf = new Uint8Array(LX.n); LX.flags = new Uint8Array(LX.n); LX.deg = new Uint8Array(LX.n);
+    for (let i = 0; i < LX.n; i++) { LX.zipf[i] = mb[i * 3]; LX.flags[i] = mb[i * 3 + 1]; LX.deg[i] = mb[i * 3 + 2]; }
+    const e = parseCSR(eb), a = parseCSR(ab);
+    LX.eo = e.eo; LX.ea = e.ea; LX.ao = a.eo; LX.aa = a.ea;
+    LX.ready = true; onProgress && onProgress(1);
+    return LX;
+  })();
+  return LX.loading;
+}
+
+/* ── accès ── */
+function nbrs(id) { const o = []; for (let k = LX.eo[id]; k < LX.eo[id + 1]; k++) { const v = LX.ea[k]; o.push({ id: v >>> 8, u: decQ(v & 255) }); } return o; }
+function antsOf(id) { const o = []; for (let k = LX.ao[id]; k < LX.ao[id + 1]; k++) { const v = LX.aa[k]; o.push({ id: v >>> 8, u: decQ(v & 255) }); } return o; }
+const zipfOf = id => LX.zipf[id] / 30;
+const isLow = id => !!(LX.flags[id] & 8);
+const POSN = ['', 'nom', 'adj.', 'verbe', 'adv.', 'locution', 'interj.', 'pronom'];
+const posOf = id => POSN[LX.flags[id] & 7] || '';
+
+const SHCACHE = new Map(), DEFMEM = new Map(), TRMEM = new Map();
+function shard(kind, s) {
+  const k = kind + s;
+  if (!SHCACHE.has(k)) SHCACHE.set(k, fetchBytes(`${DATA_URL}${kind}_${String(s).padStart(3, '0')}.txt.gz`).then(b => new TextDecoder().decode(b).split('\n')).catch(() => null));
+  return SHCACHE.get(k);
+}
+async function defOf(id) {
+  if (DEFMEM.has(id)) return DEFMEM.get(id);
+  const L = await shard('def', id / SHARD | 0); let r = null;
+  if (L) { const line = L[id % SHARD] || ''; if (line) { const [s, l] = line.split('\t'); r = { s, l: l || s }; } }
+  DEFMEM.set(id, r); return r;
+}
+const defSync = id => { if (DEFMEM.has(id)) return DEFMEM.get(id); defOf(id); return undefined; };
+async function trOf(id) {
+  if (TRMEM.has(id)) return TRMEM.get(id);
+  const L = await shard('tr', id / SHARD | 0); let r = null;
+  if (L) { const line = L[id % SHARD]; if (line) { try { r = JSON.parse(line); } catch (_) { } } }
+  TRMEM.set(id, r); return r;
+}
+
+/* ── recherche ── */
+const ART = /^(?:le |la |les |l'|un |une |des |du |de la |de l'|d'|au |aux )/;
+function find(raw) {
+  let k = norm(raw); if (!k) return -1;
+  const tryK = s => LX.map.has(s) ? LX.map.get(s) : -1;
+  let id = tryK(k); if (id >= 0) return id;
+  const k2 = k.replace(ART, ''); if (k2 !== k) { id = tryK(k2); if (id >= 0) return id; }
+  for (const suf of ['s', 'x', 'es', 'e', 'ee', 'ees', 'aux']) if (k2.endsWith(suf)) {
+    id = tryK(k2.slice(0, -suf.length)); if (id >= 0) return id;
+    if (suf === 'aux') { id = tryK(k2.slice(0, -3) + 'al'); if (id >= 0) return id; }
+  }
+  if (k2.endsWith('ait') || k2.endsWith('ent') || k2.endsWith('ons')) { id = tryK(k2.slice(0, -3) + 'er'); if (id >= 0) return id; }
+  if (k2.endsWith('e') || k2.endsWith('es')) { id = tryK(k2.replace(/es?$/, '') + 'er'); if (id >= 0) return id; }
+  return -1;
+}
+function suggest(q, n = 10) {
+  const nq = norm(q); if (!nq) return [];
+  const out = [], seen = new Set();
+  for (let i = 0; i < LX.n && out.length < n; i++) if (LX.keys[i].startsWith(nq)) { out.push(i); seen.add(i); }
+  if (out.length < n && nq.length >= 3) for (let i = 0; i < LX.n && out.length < n; i++) if (!seen.has(i) && LX.keys[i].includes(nq)) { out.push(i); seen.add(i); }
+  return out;
+}
+function randomId(opt = {}) {
+  const { minDeg = 3, maxId = 40000, minId = 0, noLow = true, needDef = true } = opt;
+  for (let t = 0; t < 4000; t++) {
+    const id = minId + Math.floor(Math.pow(Math.random(), 1.6) * Math.min(maxId, LX.n - 1 - minId));
+    const f = LX.flags[id];
+    if (LX.deg[id] < minDeg) continue;
+    if (noLow && (f & 8)) continue;
+    if (needDef && !(f & 32)) continue;
+    if (f & 64) continue;
+    if ((f & 7) === 0 || (f & 7) === 7) continue;
+    return id;
+  }
+  return Math.floor(Math.random() * 3000);
+}
+
+/* ── classe stellaire : taille ← nombre de synonymes (1-10) ; couleur ← rareté (rouge : courant, bleu : rare) ── */
+const rarityOf = id => clamp((6.2 - zipfOf(id)) / 4.2, 0, 1);
+const sizeOf = id => clamp(1 + 9 * Math.log(Math.max(1, LX.deg[id])) / Math.log(150), 1, 10);
+const tempOf = r => 2800 + 26000 * Math.pow(r, 2.2);
+function tempRGB(T) { /* approximation du corps noir (Tanner Helland), valeurs 0-1 */
+  const t = T / 100; let r, g, b;
+  r = t <= 66 ? 255 : 329.698727446 * Math.pow(t - 60, -0.1332047592);
+  g = t <= 66 ? 99.4708025861 * Math.log(t) - 161.1195681661 : 288.1221695283 * Math.pow(t - 60, -0.0755148492);
+  b = t >= 66 ? 255 : t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307;
+  return [clamp(r, 0, 255) / 255, clamp(g, 0, 255) / 255, clamp(b, 0, 255) / 255];
+}
+function starClass(id) {
+  const r = rarityOf(id), s = sizeOf(id), nA = antsOf(id).length, z = zipfOf(id);
+  const o = { id, r, s, T: tempOf(r), nA, z, bin: nA >= 2, giant: 1, spikes: .35, beam: 0, shell: 0, puls: 0, spots: 0, gran: 1, scale: 4.2, name: '', short: '' };
+  if (r > .9 && s <= 3.2) { o.kind = 'pulsar'; o.name = 'pulsar'; o.T = 24000; o.giant = .55; o.beam = 1; o.spikes = .6; o.gran = .1; o.puls = .4; }
+  else if (r > .72 && s <= 2.6) { o.kind = 'naine blanche'; o.name = 'naine blanche'; o.T = 17000 + r * 6000; o.giant = .6; o.spikes = 1; o.gran = .2; }
+  else if (r > .8 && s >= 4.2) { o.kind = 'wolf-rayet'; o.name = 'étoile de Wolf-Rayet'; o.T = 30000; o.giant = 1.05; o.shell = 1; o.spikes = .5; o.gran = .5; }
+  else if (r > .55 && s >= 7) { o.kind = 'supergéante bleue'; o.name = 'supergéante bleue'; o.giant = 1.7; o.spikes = .9; o.gran = .6; o.scale = 3; }
+  else if (r < .36 && s >= 7) { o.kind = 'géante rouge'; o.name = 'géante rouge'; o.T = 3300 + r * 2600; o.giant = 1.9; o.gran = 1.4; o.scale = 2.1; o.spots = .6; o.spikes = .15; }
+  else if (r > .45 && s >= 4.4 && s < 7) { o.kind = 'variable'; o.name = 'étoile variable'; o.puls = 1; o.spikes = .55; }
+  else {
+    o.kind = 'séquence'; o.spots = r < .5 ? .6 : 0;
+    o.name = r < .14 ? 'naine rouge' : r < .26 ? 'naine orange' : r < .44 ? 'naine jaune' : r < .6 ? 'étoile blanche' : r < .78 ? 'étoile blanc-bleu' : 'étoile bleue';
+  }
+  if (o.bin) o.name += ' · double';
+  o.col = tempRGB(o.T);
+  o.hot = o.col.map(c => Math.min(1, c * .86 + .12));
+  o.comp = tempRGB(clamp(o.T < 6000 ? 17000 : 3600, 2800, 30000));
+  const sp = o.T < 3900 ? 'M' : o.T < 5300 ? 'K' : o.T < 6000 ? 'G' : o.T < 7500 ? 'F' : o.T < 11000 ? 'A' : o.T < 20000 ? 'B' : 'O';
+  o.sp = sp;
+  o.rare = r < .14 ? 'très courant' : r < .3 ? 'courant' : r < .5 ? 'assez courant' : r < .7 ? 'peu courant' : r < .88 ? 'rare' : 'très rare';
+  return o;
+}
+
+/* ═════════════ Galexico · 2. Moteur de rendu (Three.js) : profondeur de champ, plume, soleils, galaxies ═════════════ */
+const canvas = $('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+renderer.setClearColor(0x050608, 1);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const scene = new THREE.Scene();
+const FOV = 38;
+const camera = new THREE.PerspectiveCamera(FOV, 1, .1, 3000);
+const V3 = THREE.Vector3;
+const TANH = Math.tan(THREE.MathUtils.degToRad(FOV) / 2);
+
+const U = { uTime: { value: 0 }, uFocus: { value: 120 }, uAp: { value: .06 }, uPix: { value: 1000 }, uProj: { value: 1000 }, uRes: { value: new THREE.Vector2(1, 1) },
+  uAnt: { value: 0 }, uXYZ: { value: 1 }, uCenter: { value: new V3() }, uDust: { value: 1 } };
+
+const GLSL_NOISE = `
+float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+float vnoise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+  return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x), mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x), f.y); }
+float fbm(vec2 p){ float a=.5, s=0.; for(int i=0;i<5;i++){ s+=a*vnoise(p); p=p*2.03+vec2(17.1,3.7); a*=.5; } return s; }`;
+const GLSL_HEAD = `
+uniform float uTime,uFocus,uAp,uPix,uProj,uAnt;
+uniform vec2 uRes;
+float coc(float depth){ return uAp*abs(depth-uFocus)/max(depth,.1)*uPix; }
+float ease(float x){ x=clamp(x,0.,1.); return 1.-pow(1.-x,3.); }
+vec3 rotQ(vec3 v, vec4 q){ return v + 2.*cross(q.xyz, cross(q.xyz, v) + q.w*v); }`;
+
+/* ── poussière ambiante : champ replié autour de la cible caméra ── */
+(function makeDust() {
+  const N = SMALL ? 7000 : 16000, HALF = 95;
+  const pos = new Float32Array(N * 3), size = new Float32Array(N), seed = new Float32Array(N);
+  const R = rng('poussière');
+  for (let i = 0; i < N; i++) {
+    pos[i * 3] = (R() * 2 - 1) * HALF; pos[i * 3 + 1] = (R() * 2 - 1) * HALF * .8; pos[i * 3 + 2] = (R() * 2 - 1) * HALF;
+    size[i] = R() < .022 ? .09 + R() * .12 : .012 + Math.pow(R(), 3) * .05; seed[i] = R();
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+  g.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
+  const m = new THREE.ShaderMaterial({ uniforms: U, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
+    vertexShader: GLSL_HEAD + `
+    uniform vec3 uCenter; uniform float uDust;
+    attribute float aSize, aSeed; varying float vA, vB, vWarm;
+    void main(){
+      vec3 box = vec3(${HALF * 2}., ${HALF * 1.6}., ${HALF * 2}.);
+      vec3 p = uCenter + mod(position - uCenter + box*.5, box) - box*.5;
+      p += vec3(sin(uTime*.05+aSeed*6.28), cos(uTime*.04+aSeed*12.), sin(uTime*.03+aSeed*3.))*.7;
+      vec4 mv = modelViewMatrix*vec4(p,1.); float depth = -mv.z;
+      float sz = aSize*2.*uProj/max(depth,.5); float k = coc(depth);
+      float tot = clamp(sz + k*.9, 1.2, 140.);
+      gl_PointSize = tot;
+      vB = clamp(k/tot,0.,1.);
+      float tw = .55+.45*sin(uTime*(.8+aSeed*3.)+aSeed*40.);
+      tw = mix(tw, 1., .4) + pow(max(0., sin(uTime*.7+aSeed*91.)), 40.)*1.5;
+      vA = clamp(sz*sz/(tot*tot)+.012, 0., 1.)*tw*smoothstep(2.,10.,depth)*uDust;
+      vWarm = smoothstep(.975,1.,aSeed);
+      gl_Position = projectionMatrix*mv;
+    }`,
+    fragmentShader: `
+    varying float vA, vB, vWarm;
+    void main(){
+      vec2 uv = gl_PointCoord*2.-1.; float d = length(uv); if(d>1.) discard;
+      float core = exp(-d*d*5.);
+      float disc = smoothstep(1.,.82,d); float rim = smoothstep(.5,.96,d)*disc;
+      float a = mix(core, disc*.55+rim*.5, vB)*vA;
+      vec3 col = mix(vec3(.82,.88,1.), vec3(1.,.8,.58), vWarm);
+      gl_FragColor = vec4(col*a, a);
+    }` });
+  const dust = new THREE.Points(g, m); dust.frustumCulled = false; scene.add(dust);
+})();
+
+/* ── galaxies : spirales de points, rotation différentielle, orbites poussiéreuses en stries ── */
+const galVS = GLSL_HEAD + `
+uniform float uFade, uSpin, uGain;
+attribute vec3 aCol; attribute float aSize, aSeed;
+varying vec3 vCol; varying float vA, vB;
+void main(){
+  float r = length(position.xz);
+  float a = atan(position.z, position.x) + uTime*uSpin/(r*.06+1.);
+  vec3 p = vec3(r*cos(a), position.y, r*sin(a));
+  vec4 mv = modelViewMatrix*vec4(p,1.); float depth = -mv.z;
+  float sz = aSize*uProj/max(depth,.5);
+  float k = coc(depth);
+  float tot = clamp(sz + k*.8, 1.3, 90.);
+  gl_PointSize = tot; vB = clamp(k/tot,0.,1.);
+  float tw = .7+.3*sin(uTime*(.6+aSeed*2.5)+aSeed*50.);
+  vA = clamp(sz*sz/(tot*tot)+.02, 0., 1.)*tw*uFade*uGain;
+  vCol = aCol;
+  gl_Position = projectionMatrix*mv;
+}`;
+const galFS = `
+varying vec3 vCol; varying float vA, vB;
+void main(){
+  vec2 uv = gl_PointCoord*2.-1.; float d = length(uv); if(d>1.) discard;
+  float core = exp(-d*d*6.);
+  float disc = smoothstep(1.,.8,d);
+  float a = mix(core, disc*.5, vB)*vA;
+  gl_FragColor = vec4(vCol*a, a);
+}`;
+function makeGalaxy(o) {
+  const R = rng(o.seed), n = o.n, rad = o.radius;
+  const pos = [], col = [], size = [], seed = [];
+  const tint = o.tint, cold = o.cold || [.66, .78, .96], arms = o.arms ?? 3;
+  const SK = o.sizeK ?? 2.6;
+  const push = (x, y, z, c, s) => { pos.push(x, y, z); col.push(c[0], c[1], c[2]); size.push(s * SK); seed.push(R()); };
+  const mix3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  const nb = Math.floor(n * (o.bulge ?? .28)), nd = Math.floor(n * (o.disk ?? .5)), nr = n - nb - nd;
+  for (let i = 0; i < nb; i++) { /* noyau */
+    const r = Math.abs(gauss(R)) * rad * .17, th = R() * 6.2832, ph = Math.acos(R() * 2 - 1);
+    const t = clamp(r / (rad * .3), 0, 1);
+    push(r * Math.sin(ph) * Math.cos(th), r * Math.cos(ph) * .55 * (o.flat ?? 1), r * Math.sin(ph) * Math.sin(th), mix3([1, .93, .78], tint, t), .05 + R() * .16 * (1 - t * .6));
+  }
+  for (let i = 0; i < nd; i++) { /* bras */
+    const r = rad * Math.pow(R(), .62), k = arms ? Math.floor(R() * arms) : 0;
+    const th = arms ? k * 6.2832 / arms + (o.twist ?? 3.4) * Math.log(1 + r / (rad * .14)) + gauss(R) * (.13 + .22 * (r / rad)) : R() * 6.2832;
+    const sc = arms ? 1 : 1 + (R() - .5) * .7;
+    const y = gauss(R) * rad * .032 * (1 - r / rad * .55) * (o.flat ?? 1) * (arms ? 1 : 4);
+    const c = mix3(tint, cold, clamp(r / rad * .95 + gauss(R) * .15, 0, 1));
+    const big = R() < .02;
+    push(Math.cos(th) * r * sc, y, Math.sin(th) * r / sc, big ? [1, .94, .84] : c, big ? .22 + R() * .3 : .035 + R() * .1);
+  }
+  const rings = o.rings ?? 18;
+  for (let e = 0; e < rings; e++) { /* orbites poussiéreuses : ellipses d'étoiles minuscules */
+    const a = rad * (.18 + R() * .92), b = a * (.5 + R() * .45), ph = R() * 6.2832, incl = (R() - .5) * .22, cnt = Math.floor(nr / rings);
+    const warm = R() < .45, c0 = warm ? [1, .78, .52] : [.78, .86, 1];
+    for (let i = 0; i < cnt; i++) {
+      const t = R() * 6.2832, j = gauss(R) * rad * .006;
+      const x = (a + j) * Math.cos(t), z = (b + j) * Math.sin(t);
+      const X = x * Math.cos(ph) - z * Math.sin(ph), Z = x * Math.sin(ph) + z * Math.cos(ph);
+      push(X, Math.sin(t + ph) * rad * incl * .25 + gauss(R) * rad * .004, Z, c0, .02 + R() * .05);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos), 3));
+  g.setAttribute('aCol', new THREE.BufferAttribute(new Float32Array(col), 3));
+  g.setAttribute('aSize', new THREE.BufferAttribute(new Float32Array(size), 1));
+  g.setAttribute('aSeed', new THREE.BufferAttribute(new Float32Array(seed), 1));
+  const Ug = Object.assign({}, U, { uFade: { value: 1 }, uSpin: { value: o.spin ?? .25 }, uGain: { value: o.gain ?? 1 } });
+  const m = new THREE.ShaderMaterial({ uniforms: Ug, vertexShader: galVS, fragmentShader: galFS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending });
+  const pts = new THREE.Points(g, m); pts.frustumCulled = false; pts.userData.U = Ug;
+  if (o.tilt) { pts.rotation.set(o.tilt[0], o.tilt[1], o.tilt[2]); }
+  return pts;
+}
+
+/* ── étoiles du graphe ── */
+const nodeVS = GLSL_HEAD + `
+uniform float uRev, uFade, uHov;
+attribute vec3 aColor; attribute float aSize, aDelay, aSeed, aAwake, aLevel, aIdx, aLit;
+varying vec3 vCol; varying float vA, vB, vSpk;
+void main(){
+  float e = ease((uRev-aDelay)/.35);
+  vec3 p = position*e;
+  vec4 mv = modelViewMatrix*vec4(p,1.); float depth = -mv.z;
+  float hi = abs(aIdx-uHov)<.5 ? 1. : 0.;
+  float sz = min(aSize*uProj/max(depth,.5), 46.)*e*(1.+hi*.35+aLit*.5);
+  float k = coc(depth) + (1.-aAwake)*9.*(uPix/1400.);
+  float tot = clamp(sz + k, 1.5, 150.);
+  gl_PointSize = tot;
+  vB = clamp(k/tot, 0., 1.);
+  vA = e*uFade*(.28+.72*aAwake)*(mix(1., sz*sz/(tot*tot), .7)+.07);
+  vA *= .84+.16*sin(uTime*2.1+aSeed*60.);
+  if(aLevel>2.5) vA *= uAnt;
+  vA *= 1. + aLit*1.4;
+  vA *= step(.5, aLevel);
+  vCol = aColor*(1.+hi*.5); vSpk = (aLevel<1.5 ? 1. : .35)*(1.-vB)*(1.+aLit);
+  gl_Position = projectionMatrix*mv;
+}`;
+const nodeFS = GLSL_NOISE + `
+varying vec3 vCol; varying float vA, vB, vSpk;
+void main(){
+  vec2 uv = gl_PointCoord*2.-1.; float d = length(uv); if(d>1.) discard;
+  float core = exp(-d*d*46.);
+  float halo = exp(-d*d*6.)*.34;
+  float spikes = (exp(-abs(uv.y)*60.)*exp(-abs(uv.x)*3.2) + exp(-abs(uv.x)*60.)*exp(-abs(uv.y)*3.2))*.35*vSpk;
+  float star = core*1.5 + halo + spikes;
+  float disc = smoothstep(1.,.86,d); float rim = smoothstep(.55,.97,d)*disc;
+  float bok = disc*.45 + rim*.42 + (vnoise(uv*6.)-.5)*.1*disc;
+  float a = mix(star, bok*.55, vB)*vA;
+  vec3 col = mix(vCol, vec3(1.,.97,.92), core*.6*(1.-vB));
+  gl_FragColor = vec4(col*a, a);
+}`;
+
+/* ── poussière en orbite : bandes de grains qui tournent autour du soleil ── */
+const odVS = GLSL_HEAD + `
+uniform float uRev, uFade;
+attribute float aR, aTh, aOm, aY, aSz, aSeed, aDel; attribute vec4 aQ;
+varying float vA, vB, vW;
+void main(){
+  float e = ease((uRev-aDel)/.35);
+  float th = aTh + aOm*uTime;
+  vec3 p = rotQ(vec3(cos(th)*aR, aY, sin(th)*aR), aQ)*e;
+  vec4 mv = modelViewMatrix*vec4(p,1.); float depth = -mv.z;
+  float sz = aSz*uProj/max(depth,.5);
+  float k = coc(depth);
+  float tot = clamp(sz + k*.9, 1.2, 90.);
+  gl_PointSize = tot; vB = clamp(k/tot,0.,1.);
+  vA = clamp(sz*sz/(tot*tot)+.03,0.,1.)*e*uFade*(.6+.4*sin(uTime*1.3+aSeed*40.))*smoothstep(1.5,8.,depth);
+  vW = aSeed;
+  gl_Position = projectionMatrix*mv;
+}`;
+const odFS = `
+varying float vA, vB, vW;
+void main(){
+  vec2 uv = gl_PointCoord*2.-1.; float d = length(uv); if(d>1.) discard;
+  float a = mix(exp(-d*d*5.), smoothstep(1.,.8,d)*.45, vB)*vA;
+  vec3 col = mix(vec3(.82,.88,1.), vec3(1.,.8,.58), step(.62,vW));
+  gl_FragColor = vec4(col*a, a);
+}`;
+
+/* ── traits de plume : rubans à épaisseur variable en pixels (orbites, repère XYZ) ── */
+const penVS = GLSL_HEAD + GLSL_NOISE + `
+uniform float uRev, uFade, uHov, uXYZ;
+attribute vec3 aA, aB; attribute float aDel, aId, aT, aSide, aSeed, aKind, aW, aNext;
+varying float vSide, vA, vCore, vT, vSeed, vKind; varying vec3 vCol;
+void main(){
+  float rA = ease((uRev-aDel)/.35);
+  vec3 p = aA*rA, pn = aB*rA;
+  vec4 mv = modelViewMatrix*vec4(p,1.); float depth = -mv.z;
+  vec4 c0 = projectionMatrix*mv;
+  vec4 c1 = projectionMatrix*modelViewMatrix*vec4(pn,1.);
+  vec2 s0 = c0.xy/c0.w*uRes*.5, s1 = c1.xy/c1.w*uRes*.5;
+  vec2 dir = s1-s0; float dl = length(dir); dir = dl>1e-5 ? dir/dl : vec2(1.,0.);
+  if(aNext < aT) dir = -dir;
+  vec2 nrm = vec2(-dir.y, dir.x);
+  float hi = abs(aId-uHov)<.5 ? 1. : 0.;
+  float press = aKind<.5 ? .3 + .7*pow(sin(3.14159*aT), .45) : pow(sin(3.14159*aT), 1.3);
+  press *= .7 + .6*vnoise(vec2(aT*14., aSeed*30.));
+  float ink = max(.6, aW*press*(1.+hi*.6));
+  float k = coc(depth)*.55;
+  float wpx = ink + k + 1.2;
+  vec2 off = nrm*aSide*wpx*.5;
+  c0.xy += off/(uRes*.5)*c0.w;
+  gl_Position = c0;
+  vSide = aSide; vCore = ink/wpx; vT = aT; vSeed = aSeed; vKind = aKind;
+  float draw = clamp((uRev - aDel + .05)/.75, 0., 1.);
+  float drawn = 1. - smoothstep(draw-.015, draw, aT);
+  float base = aKind<.5 ? .5 : .3*uXYZ;
+  base = mix(base, .85, hi*.6*step(aKind,.5));
+  vA = base*uFade*drawn*step(.001,rA)*min(1., ink/wpx*1.6)*smoothstep(1.5,6.,depth);
+  float tip = exp(-pow((draw-aT)*60.,2.))*step(draw,.999)*step(.001,draw);
+  vA += tip*.9*uFade;
+  vCol = aKind<.5 ? mix(vec3(.9,.93,.98), vec3(1.,.8,.58), hi*.7) : vec3(.7,.76,.85);
+}`;
+const penFS = GLSL_NOISE + `
+varying float vSide, vA, vCore, vT, vSeed, vKind; varying vec3 vCol;
+void main(){
+  float s = abs(vSide);
+  float a = 1. - smoothstep(max(vCore*.55,.0), 1., s);
+  float dry = smoothstep(.15, .62, vnoise(vec2(vT*900.*(vKind<.5?1.:.4), vSide*1.6 + vSeed*50.)));
+  a *= mix(1., .35 + .65*dry, vKind<.5 ? .55 : .3);
+  a *= vA;
+  gl_FragColor = vec4(vCol*a, a);
+}`;
+
+/* ── étiquettes manuscrites (plan face caméra, flou de Poisson, grain d'encre) ── */
+const labelVS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
+const labelFS = GLSL_NOISE + `
+uniform sampler2D uTex; uniform vec2 uBlur, uTexSize; uniform float uOp, uTime, uDry, uSeed; uniform vec3 uCol;
+varying vec2 vUv;
+void main(){
+  float a = 0.;
+  if(uBlur.y < .003){ a = texture2D(uTex, vUv).a; }
+  else { for(int i=0;i<18;i++){ float fi = float(i); float r = sqrt((fi+.5)/18.); float th = fi*2.39996;
+      a += texture2D(uTex, vUv + vec2(cos(th),sin(th))*r*uBlur).a; } a /= 18.; }
+  vec2 px = vUv*uTexSize;
+  float streak = vnoise(vec2(px.x*.02, px.y*.25) + uSeed*10.);
+  a *= mix(1., smoothstep(.1,.58, streak*.75 + a*.5), uDry);
+  a *= .82 + .18*hash(floor(px*.5) + vec2(floor(uTime*7.)*.37, uSeed));
+  float sp = step(.998, hash(floor(px*.34) + floor(uTime*3.) + uSeed))*a*uDry;
+  float o = a*uOp;
+  gl_FragColor = vec4(uCol*o + vec3(1.,.95,.85)*sp*uOp*.8, o);
+}`;
+const FONTS = { sun: ['Mrs Saint Delafield', 300, .75], l1: ['Homemade Apple', 78, .3], l2: ['Mrs Saint Delafield', 104, .2] };
+const MONO = 'DM Mono';
+const fontReady = {};
+function ensureFont(f) {
+  if (!document.fonts || !document.fonts.load) return Promise.resolve();
+  if (!fontReady[f]) fontReady[f] = Promise.race([document.fonts.load(`300 64px "${f}"`, 'hasard éèàçœ'), new Promise(r => setTimeout(r, 2500))]).catch(() => { });
+  return fontReady[f];
+}
+function drawLabel(lines, family, px, glow, weight = '') {
+  if (!Array.isArray(lines)) lines = [lines];
+  const c = document.createElement('canvas'), ctx = c.getContext('2d');
+  const font = `${weight} ${px}px "${family}", 'Segoe Script', cursive`;
+  ctx.font = font;
+  const w = Math.ceil(Math.max(...lines.map(l => ctx.measureText(l).width)));
+  const lh = px * 1.25, padX = Math.ceil(px * .75), padY = Math.ceil(px * .6);
+  c.width = Math.min(4096, w + padX * 2); c.height = Math.ceil(lh * lines.length) + padY * 2;
+  ctx.font = font; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'center'; ctx.fillStyle = '#fff';
+  lines.forEach((l, k) => { const y = padY + px * .95 + k * lh;
+    if (glow) { ctx.shadowColor = 'rgba(255,255,255,.5)'; ctx.shadowBlur = px * .2; ctx.fillText(l, c.width / 2, y); ctx.shadowBlur = px * .04; }
+    ctx.fillText(l, c.width / 2, y); });
+  const tex = new THREE.CanvasTexture(c);
+  tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.anisotropy = 4;
+  return { tex, aspect: c.width / c.height, size: [c.width, c.height] };
+}
+function labelMesh(d, h, col, dry, seed) {
+  const mat = new THREE.ShaderMaterial({ vertexShader: labelVS, fragmentShader: labelFS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTex: { value: d.tex }, uBlur: { value: new THREE.Vector2() }, uTexSize: { value: new THREE.Vector2(d.size[0], d.size[1]) }, uOp: { value: 0 }, uTime: U.uTime, uDry: { value: dry }, uSeed: { value: seed * 10 }, uCol: { value: new V3(...col) } } });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
+  mesh.scale.set(h * d.aspect, h, 1); mesh.frustumCulled = false; mesh.renderOrder = 3;
+  return mesh;
+}
+function disposeLabel(m) { if (m.parent) m.parent.remove(m); m.geometry.dispose(); m.material.uniforms.uTex.value.dispose(); m.material.dispose(); }
+
+/* ── soleil : disque granulé, couronne, pointes, et les spécialités (pulsar, Wolf-Rayet, double, variable…) ── */
+const sunVS = `varying vec2 vUv; void main(){ vUv = position.xy; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
+const sunFS = GLSL_NOISE + `
+uniform float uTime, uRho, uGran, uScale, uSpots, uCorona, uSpike, uPuls, uShell, uBeam, uBin, uFade, uBlurK, uSeed, uBirth, uAspect;
+uniform vec3 uCol, uHot, uComp;
+varying vec2 vUv;
+void main(){
+  vec2 uv = vUv; float t = uTime;
+  float rho = uRho*(1.+uPuls*.075*sin(t*1.6))*uBirth;
+  float r = length(uv), ang = atan(uv.y, uv.x);
+  float rr = r/max(rho,.001);
+  vec3 col = vec3(0.);
+  float soft = .018 + uBlurK*.5;
+  float disk = smoothstep(1.+soft, 1.-soft, rr);
+  if(rr < 1.6){
+    float mu = sqrt(max(0.,1.-rr*rr));
+    vec2 sp = uv/max(rho,.001);
+    vec2 q = sp*uScale + vec2(t*.05, -t*.032) + uSeed*10.;
+    q += .38*vec2(fbm(q*1.6+t*.07), fbm(q*1.6+5.2-t*.06));
+    float g = fbm(q);
+    float cells = smoothstep(.3,.74,g);
+    float limb = pow(mu,.5)*.7+.3;
+    vec3 surf = mix(uCol*.55, uHot, cells*uGran*(1.-uBlurK*.6))*limb*1.0;
+    float spot = smoothstep(.6,.68, fbm(sp*2.3 + uSeed*7. + t*.012))*uSpots*mu;
+    surf *= 1.-.62*spot;
+    float puff = 1. + (uGran>1.2 ? .5*fbm(vec2(ang*3., t*.1)+uSeed) : 0.);
+    col += surf*disk;
+  }
+  float d = max(r - rho, 0.);
+  float halo = exp(-d/(rho*.5))*.42 + exp(-d/(rho*1.8))*.17 + exp(-d/(rho*4.5))*.045;
+  col += uCol*halo*uCorona;
+  float stream = pow(vnoise(vec2(ang*3.+uSeed*9., t*.15 + r*3.)), 2.)*exp(-d/(rho*1.5))*step(rho, r);
+  col += uHot*stream*.3*uCorona;
+  float s1 = exp(-abs(uv.y)/(rho*.05))*exp(-abs(uv.x)/(rho*3.6)) + exp(-abs(uv.x)/(rho*.05))*exp(-abs(uv.y)/(rho*3.6));
+  vec2 ur = vec2(uv.x+uv.y, uv.x-uv.y)*.7071;
+  float s2 = (exp(-abs(ur.y)/(rho*.04))*exp(-abs(ur.x)/(rho*1.6)) + exp(-abs(ur.x)/(rho*.04))*exp(-abs(ur.y)/(rho*1.6)))*.5;
+  col += uHot*(s1*.6 + s2)*uSpike*(1.-uBlurK*.7)*.5;
+  if(uBeam > .01){
+    float ax = t*1.35 + uSeed*6.; vec2 dv = vec2(cos(ax), sin(ax)); float al = dot(uv,dv), pe = dot(uv, vec2(-dv.y, dv.x));
+    float bm = exp(-pow(pe/(rho*.22+abs(al)*.05),2.))*exp(-abs(al)/(rho*7.))*smoothstep(rho*.4, rho*1.2, abs(al));
+    col += vec3(.55,.78,1.)*bm*uBeam*.9;
+    col += vec3(.5,.7,1.)*exp(-pow((r-rho*2.4)/(rho*.1),2.))*.25*uBeam*(.6+.4*sin(t*3.));
+  }
+  if(uShell > .01){
+    float R = rho*(2.5 + .14*sin(t*.5)), w = rho*.2;
+    float f = .45 + .9*fbm(vec2(ang*5.+uSeed*20., t*.18 + r*2.));
+    col += mix(uHot, vec3(.7,.85,1.), .5)*exp(-pow((r-R)/w,2.))*f*.7*uShell;
+    col += uCol*exp(-pow((r-R*1.55)/(w*1.6),2.))*f*.22*uShell;
+  }
+  if(uBin > .01){
+    float a2 = t*.22 + uSeed*6.283;
+    vec2 c = vec2(cos(a2), sin(a2)*.5)*rho*3.4;
+    float dc = length(uv-c);
+    float rc = rho*.27;
+    col += uComp*(smoothstep(rc*1.15, rc*.9, dc)*.9 + exp(-dc/(rc*1.6))*.5 + exp(-dc/(rc*6.))*.08)*uBin;
+  }
+  col = mix(vec3(dot(col, vec3(.333))), col, 1.4);
+  col = 1.-exp(-max(col, 0.)*.95);
+  col *= (1.-smoothstep(.5, .97, r))*uFade;
+  float a = clamp(max(col.r,max(col.g,col.b)), 0., 1.);
+  gl_FragColor = vec4(col, a);
+}`;
+function sunMesh(sc) {
+  const rho = .2;
+  const mat = new THREE.ShaderMaterial({ vertexShader: sunVS, fragmentShader: sunFS, transparent: true, depthWrite: false, depthTest: false,
+    blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor,
+    uniforms: { uTime: U.uTime, uRho: { value: rho }, uGran: { value: sc.gran }, uScale: { value: sc.scale }, uSpots: { value: sc.spots }, uCorona: { value: 1 },
+      uSpike: { value: sc.spikes }, uPuls: { value: sc.puls }, uShell: { value: sc.shell }, uBeam: { value: sc.beam }, uBin: { value: sc.bin ? 1 : 0 },
+      uFade: { value: 0 }, uBlurK: { value: 0 }, uSeed: { value: (sc.id * 0.6180339) % 1 }, uBirth: { value: 0 }, uAspect: { value: 1 },
+      uCol: { value: new V3(...sc.col) }, uHot: { value: new V3(...sc.hot) }, uComp: { value: new V3(...sc.comp) } } });
+  const R = (.34 + .085 * sc.s) * sc.giant;
+  const H = R / rho;
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+  mesh.scale.set(H, H, 1); mesh.frustumCulled = false; mesh.renderOrder = 2;
+  mesh.userData.R = R; mesh.userData.H = H;
+  return mesh;
+}
+
+/* ── fils de lumière : trajectoires qui se tracent du survol vers les mots en réserve ── */
+const thVS = `attribute float aA; varying float vA; void main(){ vA = aA; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`;
+const thFS = `varying float vA; void main(){ gl_FragColor = vec4(vec3(1.,.84,.62)*vA, vA); }`;
+function makeThreads(maxThreads = 24, segs = 16) {
+  const N = maxThreads * segs * 2;
+  const pos = new Float32Array(N * 3), a = new Float32Array(N);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('aA', new THREE.BufferAttribute(a, 1));
+  const m = new THREE.ShaderMaterial({ vertexShader: thVS, fragmentShader: thFS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending });
+  const l = new THREE.LineSegments(g, m); l.frustumCulled = false; l.renderOrder = 1;
+  l.userData = { max: maxThreads, segs };
+  return l;
+}
+
+/* ── redimensionnement et réglages optiques ── */
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  const buf = renderer.getDrawingBufferSize(new THREE.Vector2());
+  U.uPix.value = buf.y; U.uProj.value = buf.y / (2 * TANH);
+  U.uRes.value.set(buf.x, buf.y);
+}
+addEventListener('resize', resize); resize();
+
+/* ═════════════ Galexico · 3. Accueil : la carte des langues ═════════════
+   Le Français au centre, ses langues cousines au loin (floues, courte focale). Positions : proximité grossière, pas une mesure. */
+const GALAXIES = [
+  { id: 'fr', name: 'Le Français', pos: [0, 0, 0], radius: 44, n: SMALL ? 36000 : 78000, tint: [1, .76, .48], cold: [.6, .75, .98], arms: 3, twist: 3.1, rings: 24, spin: .2, label: 'Le Français', lh: 30, ready: true },
+  { id: 'oc', name: 'Occitan', pos: [-48, 6, 33], radius: 10, n: 9100, tint: [1, .8, .35], cold: [.9, .82, .6], arms: 2, twist: 2.6, rings: 6, spin: .4, label: 'Occitan', lh: 6.8 },
+  { id: 'ca', name: 'Catalan', pos: [-66, -9, 50], radius: 11, n: 9750, tint: [1, .62, .3], cold: [1, .8, .55], arms: 2, twist: 3, rings: 6, spin: .38, label: 'Catalan', lh: 6.8 },
+  { id: 'it', name: 'Italien', pos: [72, 14, 27], radius: 19, n: 16900, tint: [1, .58, .5], cold: [.98, .72, .8], arms: 3, twist: 3.4, rings: 9, spin: .3, label: 'Italien', lh: 8.4 },
+  { id: 'co', name: 'Corse', pos: [95, -12, 69], radius: 7, n: 5200, tint: [.5, .95, .85], cold: [.6, .9, 1], arms: 0, twist: 0, rings: 4, spin: .5, label: 'Corse', lh: 5.7 },
+  { id: 'es', name: 'Espagnol', pos: [-114, -4, 10], radius: 22, n: 18200, tint: [1, .45, .25], cold: [1, .72, .5], arms: 3, twist: 3.2, rings: 10, spin: .28, label: 'Espagnol', lh: 8.7 },
+  { id: 'pt', name: 'Portugais', pos: [-156, 16, -24], radius: 13, n: 11050, tint: [.95, .78, .3], cold: [.7, .85, .6], arms: 2, twist: 2.8, rings: 7, spin: .34, label: 'Portugais', lh: 7.2 },
+  { id: 'la', name: 'Latin', pos: [24, 48, -108], radius: 30, n: 20800, tint: [.95, .9, .74], cold: [.8, .82, .88], arms: 0, twist: 0, rings: 16, spin: .1, gain: .7, label: 'Latin', lh: 9.9, bulge: .12, flat: .5 },
+  { id: 'ro', name: 'Roumain', pos: [154, 6, -55], radius: 13, n: 10400, tint: [.85, .55, .95], cold: [.7, .7, 1], arms: 2, twist: 3.2, rings: 7, spin: .3, label: 'Roumain', lh: 7.2 },
+  { id: 'br', name: 'Breton', pos: [-52, -26, -112], radius: 8, n: 6500, tint: [.55, .72, .95], cold: [.7, .8, .9], arms: 0, twist: 0, rings: 5, spin: .45, label: 'Breton', lh: 6.1 },
+  { id: 'eu', name: 'Basque', pos: [40, 30, 134], radius: 9, n: 7150, tint: [.78, .55, 1], cold: [.9, .72, 1], arms: 0, twist: 0, rings: 4, spin: .45, label: 'Basque · isolat', lh: 6.1 },
+  { id: 'en', name: 'Anglais', pos: [187, -22, 86], radius: 30, n: 19500, tint: [.62, .78, 1], cold: [.82, .9, 1], arms: 4, twist: 3, rings: 12, spin: .26, label: 'Anglais', lh: 9.5 },
+  { id: 'de', name: 'Allemand', pos: [131, 42, -108], radius: 21, n: 15600, tint: [.8, .88, 1], cold: [.65, .75, .95], arms: 3, twist: 3.6, rings: 9, spin: .28, label: 'Allemand', lh: 8.4 }
+];
+const HOME = { built: false, items: [], hov: -1, fade: 1, fadeT: 1, keep: 0, keepT: 0, ph: 1.04, camR: SMALL ? 300 : 215 };
+
+async function buildHome() {
+  await Promise.all([ensureFont(FONTS.sun[0]), ensureFont(FONTS.l1[0]), ensureFont(MONO)]);
+  GALAXIES.forEach((G, k) => {
+    const pts = makeGalaxy({ seed: 'gx-' + G.id, n: G.n, radius: G.radius, tint: G.tint, cold: G.cold, arms: G.arms, twist: G.twist, rings: G.rings, spin: G.spin, gain: G.gain, bulge: G.bulge, flat: G.flat,
+      tilt: [(k % 3 - 1) * .5 + .25, k * 1.7, (k % 2 ? .1 : -.14)] });
+    pts.position.set(...G.pos); scene.add(pts);
+    const main = G.id === 'fr';
+    const d = drawLabel(G.label, main ? FONTS.sun[0] : FONTS.l1[0], main ? 300 : 70, main);
+    const lab = labelMesh(d, G.lh, main ? [1, .93, .8] : [.9, .86, .78], main ? .55 : .35, k * .13);
+    scene.add(lab);
+    HOME.items.push({ G, pts, lab, d, w: new V3(...G.pos), gain: 1, main });
+  });
+  HOME.built = true;
+}
+
+/* mise à jour : opacités, flou des étiquettes, focus */
+const _hv = new V3(), _hv2 = new V3();
+function updateHome(dt, camUp, fwd) {
+  HOME.fade = lerp(HOME.fade, HOME.fadeT, 1 - Math.exp(-dt * (HOME.fadeT > HOME.fade ? 1.8 : 1.5)));
+  HOME.keep = lerp(HOME.keep, HOME.keepT, 1 - Math.exp(-dt * 1.4));
+  const f = HOME.fade;
+  HOME.items.forEach((it, k) => {
+    const fp = it.main ? Math.max(f, HOME.keep) : f;
+    it.pts.visible = fp > .004;
+    it.pts.userData.U.uFade.value = fp * (it.main ? 1 : (HOME.hov === k ? 1.35 : 1));
+    it.lab.visible = f > .004;
+    it.pts.rotation.y += dt * (it.main ? .004 : .01) * (k % 2 ? 1 : -1);
+    const lift = it.main ? -it.G.radius * .66 : it.G.radius * .95;
+    it.lab.position.copy(it.w).addScaledVector(camUp, lift);
+    it.lab.quaternion.copy(camera.quaternion);
+    const depth = Math.max(1, _hv.subVectors(it.lab.position, camera.position).dot(fwd));
+    const k2 = U.uAp.value * Math.abs(depth - U.uFocus.value) / depth * U.uPix.value * .65;
+    const pxH = it.G.lh * U.uProj.value / depth;
+    const by = clamp(k2 / pxH * .42, 0, .22);
+    const u = it.lab.material.uniforms; u.uBlur.value.set(by / it.d.aspect, by);
+    const hov = HOME.hov === k;
+    u.uOp.value = f * (it.main ? .92 : hov ? 1.1 : .8) / (1 + k2 * .01) * (it.G.ready || !hov ? 1 : 1);
+  });
+}
+function pickGalaxy(cx, cy) {
+  if (!HOME.built || HOME.fade < .5) return -1;
+  let best = -1, bd = 1e9;
+  const ppw = innerHeight / (2 * TANH);
+  HOME.items.forEach((it, k) => {
+    _hv.copy(it.w).project(camera); if (_hv.z > 1) return;
+    const depth = camera.position.distanceTo(it.w);
+    const sx = (_hv.x + 1) / 2 * innerWidth, sy = (1 - _hv.y) / 2 * innerHeight;
+    const rad = Math.max(it.main ? 40 : 26, it.G.radius * ppw / depth * (it.main ? .6 : .85));
+    const d = Math.hypot(cx - sx, cy - sy) / rad;
+    if (d < 1 && d < bd) { bd = d; best = k; }
+  });
+  return best;
+}
+
+/* ═════════════ Galexico · 4. Constellation d'un mot : soleil, orbites tournantes, réserve floue, fils de lumière ═════════════ */
+const graphs = [];
+let cur = null;
+const D0 = 6;
+const AXL = g => Math.max(2.4, g.camR * .07);
+const cam = { th: .6, ph: 1.28, r: 235, tTh: .6, tPh: 1.28, tR: 235, target: new V3(), tTarget: new V3() };
+
+function starTint(id, level) {
+  const c = tempRGB(tempOf(rarityOf(id)));
+  const k = level === 1 ? .32 : .2;
+  return [c[0] + (1 - c[0]) * k, c[1] + (1 - c[1]) * k, c[2] + (1 - c[2]) * k];
+}
+
+function graphFromLexicon(id, from, opt = {}) {
+  const ringMax = opt.ring ?? 16, per = opt.per ?? 4, withRes = opt.reserve !== false;
+  const nodes = [], idx = new Map();
+  const add = (wid, o) => { if (idx.has(wid)) return idx.get(wid); const i = nodes.length; nodes.push(Object.assign({ wid, label: LX.words[wid], parents: [] }, o)); idx.set(wid, i); return i; };
+  const sun = add(id, { level: 0, w: 1 });
+  const R1 = nbrs(id).slice(0, ringMax);
+  const top = R1.length ? R1[0].u : 1;
+  R1.forEach((n, i) => { const j = add(n.id, { level: 1, rank: i + 1, u: n.u, w: n.u / top }); nodes[j].parents.push(sun); });
+  if (withRes) {
+    const ringSet = new Set(R1.map(n => n.id)); let cnt = 0;
+    outer: for (const n of R1) {
+      const a = idx.get(n.id); let k = 0;
+      for (const m of nbrs(n.id)) {
+        if (m.id === id || ringSet.has(m.id)) continue;
+        if (!idx.has(m.id)) { if (cnt >= 118) continue; cnt++; }
+        const j = add(m.id, { level: 2, u: m.u, w: .5 });
+        if (!nodes[j].parents.includes(a)) nodes[j].parents.push(a);
+        if (++k >= 7) break;
+      }
+    }
+  }
+  const A = opt.game ? [] : antsOf(id).slice(0, 10);
+  A.forEach(a => { if (!idx.has(a.id)) add(a.id, { level: 3, w: .5 }); });
+  nodes.forEach(x => { x.zipf = zipfOf(x.wid); x.deg = LX.deg[x.wid]; x.sz = sizeOf(x.wid); x.col = starTint(x.wid, x.level); });
+  return { centre: id, label: LX.words[id], from, nodes, per, total: LX.deg[id], nAnt: antsOf(id).length, sc: starClass(id), game: opt.game || null };
+}
+
+function randQuat(R, maxTilt) {
+  const e = new THREE.Euler((R() - .5) * 2 * maxTilt, R() * Math.PI * 2, (R() - .5) * maxTilt, 'YXZ');
+  return new THREE.Quaternion().setFromEuler(e);
+}
+function layout(g) {
+  const R = rng(g.label), n = g.nodes, per = g.per;
+  n.forEach(x => x.pos = new V3());
+  const L1 = n.map((x, i) => i).filter(i => n[i].level === 1);
+  const nShell = Math.ceil(L1.length / per);
+  g.shells = [];
+  for (let k = 0; k < nShell; k++) {
+    const tilt = (k % 2 ? -1 : 1) * (.16 + R() * .34), yaw = R() * Math.PI * 2, roll = (R() - .5) * .5;
+    g.shells.push({ q: new THREE.Quaternion().setFromEuler(new THREE.Euler(tilt, yaw, roll, 'YXZ')), phase: R() * Math.PI * 2, members: [] });
+  }
+  L1.forEach((i, k) => {
+    const x = n[i], sh = Math.floor(k / per), S = g.shells[sh];
+    x.shell = sh;
+    x.d = Math.min(D0 * 4, D0 * Math.pow(1 / Math.max(x.w, .02), .6)) + (per > 4 ? sh * .4 : 0);
+    x.th0 = S.phase + (k % per) / per * Math.PI * 2 + (R() - .5) * .5;
+    x.om = .9 / Math.pow(x.d, 1.5) * (1 + (R() - .5) * .2);
+    x.orb = { q: S.q, r: x.d };
+    S.members.push(i);
+  });
+  const maxD = Math.max(D0, ...L1.map(i => n[i].d)); g.maxD = maxD;
+  n.forEach((x, i) => {
+    if (x.level === 2) { const rad = maxD * 1.08 + 3 + R() * maxD * .8; x.d = rad; x.th0 = R() * Math.PI * 2; x.om = (R() < .15 ? -1 : 1) * .7 / Math.pow(rad, 1.5) * (.8 + R() * .4); x.orb = { q: randQuat(R, 1.1), r: rad }; }
+    if (x.level === 3) { const rad = maxD * 1.18 + R() * 3.5; x.d = rad; x.th0 = R() * Math.PI * 2; x.om = .5 / Math.pow(rad, 1.5); x.orb = { q: new THREE.Quaternion().setFromEuler(new THREE.Euler(1.2 + R() * .25, R() * 6, 0, 'YXZ')), r: rad }; }
+  });
+  const nRing = Math.max(1, L1.length);
+  n.forEach(x => {
+    x.delay = x.level === 0 ? 0 : x.level === 1 ? .16 + (x.rank - 1) / Math.max(1, nRing - 1) * .55 : x.level === 2 ? .78 + R() * .3 : 1 + R() * .2; x.seed = R();
+    if (x.orb) posAt(x, 0);
+  });
+  g.camR = clamp(maxD * 3.1 + 9, 36, 120);
+  return g;
+}
+function posAt(x, t) {
+  const th = x.th0 + x.om * t;
+  x.pos.set(Math.cos(th) * x.orb.r, 0, Math.sin(th) * x.orb.r).applyQuaternion(x.orb.q);
+}
+
+function buildGraph(g, origin) {
+  layout(g);
+  const group = new THREE.Group(); group.position.copy(origin); scene.add(group);
+  const GU = Object.assign({}, U, { uRev: { value: 0 }, uFade: { value: 0 }, uHov: { value: -1 } });
+  g.group = group; g.U = GU; g.fade = 0; g.fadeT = 1; g.anim = null; g.labels = []; g.hov = -1; g.t0 = performance.now(); g.birth = 0;
+  const n = g.nodes, N = n.length;
+  const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), size = new Float32Array(N), del = new Float32Array(N), seed = new Float32Array(N),
+    awake = new Float32Array(N), lvl = new Float32Array(N), idx = new Float32Array(N), lit = new Float32Array(N);
+  n.forEach((x, i) => {
+    col.set(x.col, i * 3);
+    size[i] = x.level === 0 ? 0 : x.level === 1 ? .62 + .09 * x.sz * (.6 + .5 * x.w) : x.level === 2 ? .4 + .035 * x.sz : .55;
+    x.size = x.level === 0 ? g.sc.s : size[i];
+    del[i] = x.delay; seed[i] = x.seed; lvl[i] = x.level; idx[i] = i; x.lit = 0; x.vis = 1; x.visT = 1;
+    x.awake = x.awakeT = x.level === 2 ? .22 : x.level === 3 ? .55 : 1;
+    if (g.game && x.level === 1) x.awake = x.awakeT = .1;
+    if (g.game && x.level > 0) { x.vis = x.visT = 0; }
+    awake[i] = x.awake;
+  });
+  const g1 = new THREE.BufferGeometry();
+  g.posAttr = new THREE.BufferAttribute(pos, 3); g.posAttr.setUsage(THREE.DynamicDrawUsage);
+  g.awakeAttr = new THREE.BufferAttribute(awake, 1); g.awakeAttr.setUsage(THREE.DynamicDrawUsage);
+  g.litAttr = new THREE.BufferAttribute(lit, 1); g.litAttr.setUsage(THREE.DynamicDrawUsage);
+  g1.setAttribute('position', g.posAttr);
+  [['aColor', col, 3], ['aSize', size, 1], ['aDelay', del, 1], ['aSeed', seed, 1], ['aLevel', lvl, 1], ['aIdx', idx, 1]].forEach(([k, a, s]) => g1.setAttribute(k, new THREE.BufferAttribute(a, s)));
+  g1.setAttribute('aAwake', g.awakeAttr); g1.setAttribute('aLit', g.litAttr);
+  const pts = new THREE.Points(g1, new THREE.ShaderMaterial({ uniforms: GU, vertexShader: nodeVS, fragmentShader: nodeFS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending }));
+  pts.frustumCulled = false; pts.renderOrder = 2; group.add(pts);
+
+  /* poussière en orbite */
+  const R = rng(g.label + 'poudre');
+  const dA = { aR: [], aTh: [], aOm: [], aY: [], aSz: [], aSeed: [], aDel: [], aQ: [] };
+  const grain = (r, th, om, y, sz, del, q) => { dA.aR.push(r); dA.aTh.push(th); dA.aOm.push(om); dA.aY.push(y); dA.aSz.push(sz); dA.aSeed.push(R()); dA.aDel.push(del); dA.aQ.push(q.x, q.y, q.z, q.w); };
+  const perOrb = SMALL ? 46 : 84;
+  n.forEach(x => { if (x.level !== 1) return;
+    for (let k = 0; k < perOrb; k++) { const j = gauss(R) * .09; grain(x.d * (1 + j), R() * 6.2832, x.om * (1 + gauss(R) * .06), gauss(R) * x.d * .014, .02 + R() * R() * .06, x.delay, x.orb.q); } });
+  for (let k = 0; k < (SMALL ? 260 : 700); k++) { const q = randQuat(R, 1.2), r = g.maxD * (.5 + R() * 1.5); grain(r, R() * 6.2832, .6 / Math.pow(r, 1.5) * (.7 + R() * .6), gauss(R) * r * .05, .02 + R() * .05, .6 + R() * .5, q); }
+  const gd = new THREE.BufferGeometry(); const nd = dA.aR.length;
+  gd.setAttribute('position', new THREE.BufferAttribute(new Float32Array(nd * 3), 3));
+  Object.keys(dA).forEach(k => gd.setAttribute(k, new THREE.BufferAttribute(new Float32Array(dA[k]), k === 'aQ' ? 4 : 1)));
+  const dust = new THREE.Points(gd, new THREE.ShaderMaterial({ uniforms: GU, vertexShader: odVS, fragmentShader: odFS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending }));
+  dust.frustumCulled = false; dust.renderOrder = 1; group.add(dust);
+
+  /* traits de plume : orbites, repère */
+  const strokes = [];
+  n.forEach((x, i) => { if (x.level !== 1) return;
+    const start = x.th0 + .4 + R() * 1.2, span = Math.PI * 2 + .25 + R() * .35, M = 150; const P = [];
+    for (let s = 0; s <= M; s++) { const th = start + span * s / M; const wob = 1 + Math.sin(th * 3 + x.seed * 9) * .008;
+      P.push(new V3(Math.cos(th) * x.d * wob, 0, Math.sin(th) * x.d * wob).applyQuaternion(x.orb.q)); }
+    strokes.push({ kind: 0, P, del: x.delay, id: i, w: 1.5 + 1.1 * x.w, seed: R() }); });
+  const AX = AXL(g);
+  [[AX, 0, 0], [0, AX, 0], [0, 0, AX]].forEach(v => { const P = []; for (let s = 0; s <= 10; s++) P.push(new V3(...v).multiplyScalar(s / 10)); strokes.push({ kind: 4, P, del: .05, id: -9, w: 1, seed: R() }); });
+  let V = 0; strokes.forEach(s => { s.M = s.P.length - 1; V += s.M * 6; });
+  const A = { aA: new Float32Array(V * 3), aB: new Float32Array(V * 3), aT: new Float32Array(V), aNext: new Float32Array(V), aSide: new Float32Array(V), aSeed: new Float32Array(V), aKind: new Float32Array(V), aW: new Float32Array(V), aDel: new Float32Array(V), aId: new Float32Array(V) };
+  let v = 0;
+  const put = (s, k, side) => { const t = k / s.M, tn = k < s.M ? (k + 1) / s.M : (k - 1) / s.M; const p = s.P[k], q = s.P[k < s.M ? k + 1 : k - 1];
+    A.aA.set([p.x, p.y, p.z], v * 3); A.aB.set([q.x, q.y, q.z], v * 3); A.aT[v] = t; A.aNext[v] = tn; A.aSide[v] = side; A.aSeed[v] = s.seed; A.aKind[v] = s.kind; A.aW[v] = s.w; A.aDel[v] = s.del; A.aId[v] = s.id; v++; };
+  strokes.forEach(s => { for (let k = 0; k < s.M; k++) { put(s, k, -1); put(s, k, 1); put(s, k + 1, -1); put(s, k, 1); put(s, k + 1, 1); put(s, k + 1, -1); } });
+  const g2 = new THREE.BufferGeometry();
+  g2.setAttribute('position', new THREE.BufferAttribute(new Float32Array(V * 3), 3));
+  [['aA', 3], ['aB', 3], ['aT', 1], ['aNext', 1], ['aSide', 1], ['aSeed', 1], ['aKind', 1], ['aW', 1], ['aDel', 1], ['aId', 1]].forEach(([k, s]) => g2.setAttribute(k, new THREE.BufferAttribute(A[k], s)));
+  const pen = new THREE.Mesh(g2, new THREE.ShaderMaterial({ uniforms: GU, vertexShader: penVS, fragmentShader: penFS, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
+  pen.frustumCulled = false; pen.renderOrder = 1; group.add(pen);
+
+  /* soleil */
+  g.sunM = sunMesh(g.sc); group.add(g.sunM);
+  /* fils de lumière */
+  g.threads = makeThreads(); group.add(g.threads); g.th = { list: [], F: 0, FT: 0 };
+  g.objs = [pts, dust, pen, g.sunM, g.threads];
+  graphs.push(g);
+  makeLabels(g);
+  return g;
+}
+
+async function makeLabels(g) {
+  const my = (g.labelBuild = (g.labelBuild || 0) + 1);
+  await Promise.all([ensureFont(FONTS.sun[0]), ensureFont(FONTS.l1[0]), ensureFont(FONTS.l2[0]), ensureFont(MONO)]);
+  if (my !== g.labelBuild || g.dead) return;
+  clearLabels(g);
+  const add = (m, info) => { g.group.add(m); g.labels.push(Object.assign({ mesh: m }, info)); };
+  const sunR = g.sunM.userData.R;
+  g.nodes.forEach((x, i) => {
+    const f = x.level === 0 ? FONTS.sun : x.level === 1 ? FONTS.l1 : FONTS.l2;
+    const d = drawLabel(x.label, f[0], f[1], x.level < 2);
+    const h = g.camR * (x.level === 0 ? .17 : x.level === 1 ? .05 : .034);
+    x.lh = h; x.lift = x.level === 0 ? sunR * 1.1 + h * .3 : x.size * .5 + h * .3;
+    const col = x.level === 0 ? [1, .95, .86] : x.level === 1 ? [1, .86, .68] : x.level === 2 ? [.82, .88, .98] : [.88, .38, .3];
+    add(labelMesh(d, h, col, f[2], x.seed), { i, h, aspect: d.aspect, role: 'word' });
+    if (x.level === 1 && !g.game) {
+      const p = x.pos;
+      const dc = drawLabel([`x ${fmt(p.x)}  y ${fmt(p.y)}  z ${fmt(p.z)}`, `d ${fmtD(x.d)} u`], MONO, 40, false, '300');
+      const hx = g.camR * .043; x.xlift = -(x.size * .5 + hx * .42);
+      add(labelMesh(dc, hx, [.74, .82, .92], .05, x.seed), { i, h: hx, aspect: dc.aspect, role: 'xyz', d });
+    }
+  });
+  if (!g.game) g.shells.forEach((S, k) => { if (!S.members.length) return;
+    const far = S.members.reduce((a, b) => g.nodes[a].d > g.nodes[b].d ? a : b);
+    const x = g.nodes[far]; const th = x.th0 + Math.PI * .62;
+    const pos = new V3(Math.cos(th) * x.d * 1.03, 0, Math.sin(th) * x.d * 1.03).applyQuaternion(S.q);
+    const dn = drawLabel(`n=${k + 1}`, MONO, 44, false, '300');
+    const hs = g.camR * .03; add(labelMesh(dn, hs, [.7, .78, .9], .05, k), { fixed: pos, delayOf: far, h: hs, aspect: dn.aspect, role: 'shell' });
+  });
+  [['x', [2.75, 0, 0]], ['y', [0, 2.75, 0]], ['z', [0, 0, 2.75]]].forEach(([t, p]) => {
+    const da = drawLabel(t, MONO, 44, false, '300');
+    const ha = g.camR * .026; add(labelMesh(da, ha, [.7, .78, .9], .05, 1), { fixed: new V3(...p).multiplyScalar(AXL(g) / 2.4), delayOf: 0, h: ha, aspect: da.aspect, role: 'axis' });
+  });
+}
+function clearLabels(g) { g.labels.forEach(l => disposeLabel(l.mesh)); g.labels = []; }
+function disposeGraph(g) {
+  g.dead = true; clearLabels(g);
+  g.objs.forEach(o => { g.group.remove(o); o.geometry.dispose(); o.material.dispose(); });
+  scene.remove(g.group);
+  const k = graphs.indexOf(g); if (k >= 0) graphs.splice(k, 1);
+}
+
+/* ── positions, révélation, survol ── */
+const tmpV = new V3(), tmpA = new V3(), tmpB = new V3(), tmpC = new V3();
+const revealOf = (g, x) => { const t = clamp((g.U.uRev.value - x.delay) / .35, 0, 1); return 1 - Math.pow(1 - t, 3); };
+function worldPos(g, x, out) { return out.copy(x.pos).multiplyScalar(revealOf(g, x)).add(g.group.position); }
+
+function pick(cx, cy) {
+  const g = cur; if (!g || g.fade < .5) return -1;
+  let best = -1, bd = 1e9;
+  const ppw = innerHeight / (2 * TANH);
+  g.nodes.forEach((x, i) => {
+    if (x.level === 3 && !STATE.ant) return;
+    if (g.game && x.level > 0 && !x.found) return;
+    if (revealOf(g, x) < .5) return;
+    worldPos(g, x, tmpV); const depth = tmpV.distanceTo(camera.position);
+    tmpV.project(camera); if (tmpV.z > 1) return;
+    const sx = (tmpV.x + 1) / 2 * innerWidth, sy = (1 - tmpV.y) / 2 * innerHeight;
+    const rad = x.level === 0 ? Math.max(30, g.sunM.userData.R * ppw / depth * .95) : Math.max(15, x.size * ppw / depth * .35);
+    let d = Math.hypot(cx - sx, cy - sy);
+    const lh = (x.lh || 1) * ppw / depth, ly = sy - (x.lift || 1) * ppw / depth;
+    if (Math.abs(cy - ly) < lh * .32 && Math.abs(cx - sx) < lh * 2.4) d = Math.min(d, rad * .7);
+    const lim = x.level === 2 && x.awake < .5 ? rad * .85 : rad * 1.4;
+    if (d < lim && d < bd) { bd = d; best = i; }
+  });
+  return best;
+}
+
+/* fils de lumière : du nœud survolé vers ses mots en réserve (ou vers ses parents) */
+function startThreads(g, i) {
+  const x = g.nodes[i]; const tg = [];
+  if (x.level === 1) g.nodes.forEach((y, j) => { if (y.level === 2 && y.parents.includes(i)) tg.push(j); });
+  else if (x.level === 2) x.parents.forEach(p => tg.push(p));
+  const now = performance.now();
+  g.th.list = tg.slice(0, g.threads.userData.max).map((j, k) => ({ a: i, b: j, t0: now + k * 55, played: false }));
+  g.th.FT = tg.length ? 1 : 0;
+}
+function updateThreads(g, dt, now) {
+  const T = g.th; T.F = lerp(T.F, T.FT, 1 - Math.exp(-dt * (T.FT > T.F ? 12 : 5)));
+  const { max, segs } = g.threads.userData; const P = g.threads.geometry.attributes.position, Aa = g.threads.geometry.attributes.aA;
+  let w = 0;
+  T.list.forEach((th, ti) => {
+    if (ti >= max) return;
+    const p = clamp((now - th.t0) / 650, 0, 1);
+    if (p > 0 && !th.played) { th.played = true; if (window.GXA) GXA.tick(); }
+    const xa = g.nodes[th.a], xb = g.nodes[th.b];
+    tmpA.copy(xa.pos).multiplyScalar(revealOf(g, xa)); tmpB.copy(xb.pos).multiplyScalar(revealOf(g, xb));
+    tmpC.copy(tmpA).add(tmpB).multiplyScalar(.5);
+    const L = tmpA.distanceTo(tmpB); tmpV.subVectors(tmpB, tmpA).cross(camera.up).normalize().multiplyScalar(L * .16 * (ti % 2 ? 1 : -1)); tmpC.add(tmpV);
+    const e = 1 - Math.pow(1 - p, 3), vis = Math.ceil(e * segs);
+    for (let s = 0; s < segs; s++) {
+      const t0 = s / segs, t1 = (s + 1) / segs;
+      const on = s < vis;
+      [[t0, 0], [t1, 1]].forEach(([t, k]) => {
+        const u = 1 - t, X = u * u * tmpA.x + 2 * u * t * tmpC.x + t * t * tmpB.x, Y = u * u * tmpA.y + 2 * u * t * tmpC.y + t * t * tmpB.y, Z = u * u * tmpA.z + 2 * u * t * tmpC.z + t * t * tmpB.z;
+        P.setXYZ(w, X, Y, Z); Aa.setX(w, on ? (.62 - .3 * t) * T.F * (p < 1 ? 1 : .8) : 0); w++; });
+    }
+  });
+  for (; w < max * segs * 2; w++) { P.setXYZ(w, 0, 0, 0); Aa.setX(w, 0); }
+  P.needsUpdate = true; Aa.needsUpdate = true;
+  if (T.FT === 0 && T.F < .01) T.list = [];
+}
+let hov = -1, hovSince = 0;
+function setHover(i) {
+  if (i === hov) return; const prev = hov; hov = i; hovSince = performance.now();
+  const g = cur;
+  if (g) {
+    g.U.uHov.value = i;
+    g.nodes.forEach((x, j) => { if (x.level === 2) x.awakeT = (i >= 0 && (x.parents.includes(i) || j === i)) ? 1 : .22; });
+    if (i >= 0 && g.nodes[i].level > 0) { startThreads(g, i); if (window.GXA) GXA.hoverNote(g.nodes[i]); } else g.th.FT = 0;
+  }
+  canvas.classList.toggle('pointing', i >= 0);
+  if (window.onHoverChange) onHoverChange(i, prev);
+}
+
+/* ── mise à jour par image d'un graphe ── */
+const camUp = new V3(), fwd = new V3(), wp = new V3();
+let LAST_DT = .016;
+function updateGraph(g, dt, now) {
+  LAST_DT = dt;
+  g.fade = lerp(g.fade, g.fadeT, 1 - Math.exp(-dt * (g.fadeT > g.fade ? 6 : 2.6)));
+  g.U.uFade.value = g.fade;
+  if (g.anim && now >= g.anim.t0) { const t = clamp((now - g.anim.t0) / g.anim.dur, 0, 1); const e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    g.U.uRev.value = lerp(g.anim.from, g.anim.to, e); if (t >= 1) g.anim = null; }
+  const tsec = (now - g.t0) / 1000;
+  const P = g.posAttr.array;
+  g.nodes.forEach((x, i) => {
+    if (x.orb) { posAt(x, tsec); P[i * 3] = x.pos.x; P[i * 3 + 1] = x.pos.y; P[i * 3 + 2] = x.pos.z; }
+    if (Math.abs(x.awake - x.awakeT) > .002) { x.awake = lerp(x.awake, x.awakeT, 1 - Math.exp(-dt * 4.5)); g.awakeAttr.array[i] = x.awake; g.awakeDirty = true; }
+    if (x.lit > .001 || x.litDirty) { x.lit = Math.max(0, x.lit - dt * .5); g.litAttr.array[i] = x.lit + (x.found ? .25 : 0); g.litDirty = true; x.litDirty = x.lit > .001; }
+    x.vis = lerp(x.vis, x.visT, 1 - Math.exp(-dt * 6));
+  });
+  g.posAttr.needsUpdate = true;
+  if (g.awakeDirty) { g.awakeAttr.needsUpdate = true; g.awakeDirty = false; }
+  if (g.litDirty) { g.litAttr.needsUpdate = true; g.litDirty = false; }
+  /* soleil : face caméra, naissance (petite étoile qui grandit), flou de profondeur */
+  const sm = g.sunM, su = sm.material.uniforms;
+  sm.quaternion.copy(camera.quaternion);
+  su.uFade.value = g.fade; su.uBirth.value = (g.birth = lerp(g.birth, 1, 1 - Math.exp(-dt * 1.6)));
+  const depth = Math.max(1, wp.copy(g.group.position).sub(camera.position).dot(fwd));
+  const kpx = U.uAp.value * Math.abs(depth - U.uFocus.value) / depth * U.uPix.value;
+  su.uBlurK.value = clamp(kpx / Math.max(4, sm.userData.R * U.uProj.value / depth), 0, 1.5);
+  updateThreads(g, dt, now);
+}
+
+/* étiquettes : flou, ordre, anti-chevauchement dans l'espace écran */
+function updateLabelsOf(g, focusDist) {
+  const proj = U.uProj.value, pix = U.uPix.value, apv = U.uAp.value;
+  const boxes = [];
+  g.labels.forEach(L => {
+    const m = L.mesh, u = m.material.uniforms;
+    let e, x = null;
+    if (L.fixed) { e = revealOf(g, g.nodes[L.delayOf]); m.position.copy(L.fixed).multiplyScalar(e); }
+    else { x = g.nodes[L.i]; e = revealOf(g, x);
+      const lift = L.role === 'xyz' ? x.xlift : x.lift;
+      m.position.copy(x.pos).multiplyScalar(e).addScaledVector(camUp, lift * e);
+      if (L.role === 'xyz') { const p = x.pos; L.d && 0; } }
+    m.quaternion.copy(camera.quaternion);
+    wp.copy(m.position).add(g.group.position);
+    const depth = Math.max(.5, tmpV.subVectors(wp, camera.position).dot(fwd));
+    let k = apv * Math.abs(depth - focusDist) / depth * pix + (x ? (1 - x.awake) * 12 * (pix / 1400) : 0);
+    const pxH = L.h * proj / depth;
+    const by = clamp(k / pxH * .42, 0, .32);
+    u.uBlur.value.set(by / L.aspect, by);
+    let op = e;
+    if (x) {
+      if (x.level === 0) op *= clamp(g.birth * 1.4 - .35, 0, 1);
+      if (x.level === 2) op *= .25 + .75 * x.awake;
+      if (x.level === 3) op *= U.uAnt.value * .85;
+      if (L.role === 'xyz') op *= U.uXYZ.value * (g.U.uHov.value === L.i ? 1 : .55) * clamp((e - .5) * 2, 0, 1);
+      if (g.U.uHov.value === L.i) op = Math.min(1.25, op * 1.35);
+      op *= x.vis;
+    } else op *= U.uXYZ.value * .55 * (g.game ? 0 : 1);
+    op /= (1 + k * .012);
+    op *= clamp((depth - 3) / 5, 0, 1) * g.fade;
+    if (x && L.role === 'word' && x.level <= 1) {
+      tmpV.copy(wp).project(camera);
+      const ppw = innerHeight / (2 * TANH) / depth;
+      boxes.push({ L, sx: (tmpV.x + 1) / 2 * innerWidth, sy: (1 - tmpV.y) / 2 * innerHeight, hw: L.h * L.aspect * ppw * .41, hh: L.h * ppw * .2, depth, sun: x.level === 0, hov: g.U.uHov.value === L.i, vis: x.vis });
+    }
+    L.op = op;
+  });
+  boxes.sort((a, b) => (b.sun - a.sun) || (b.hov - a.hov) || (a.depth - b.depth));
+  const kept = [];
+  boxes.forEach(B => {
+    const hit = B.vis > .3 && kept.some(K => Math.abs(B.sx - K.sx) < B.hw + K.hw && Math.abs(B.sy - K.sy) < B.hh + K.hh);
+    B.L.dc = lerp(B.L.dc ?? 1, hit ? .22 : 1, 1 - Math.exp(-LAST_DT * 8));
+    g.nodes[B.L.i].dc = B.L.dc;
+    if (!hit && B.vis > .3) kept.push(B);
+  });
+  g.labels.forEach(L => { L.mesh.material.uniforms.uOp.value = L.op * (L.role === 'word' ? (L.dc ?? 1) : L.role === 'xyz' ? (g.nodes[L.i].dc ?? 1) : 1); });
+}
+
+/* ── changer de soleil ── */
+function startReveal(g, delay) { g.anim = { from: 0, to: 1.35, t0: performance.now() + delay, dur: REDUCED ? 500 : 3400 }; }
+function install(g, origin, delay) {
+  setHover(-1);
+  graphs.forEach(o => { if (o !== g) o.fadeT = 0; });
+  buildGraph(g, origin); cur = g;
+  startReveal(g, delay);
+  cam.tTarget.copy(origin); cam.tR = g.camR * (camera.aspect < 1 ? 1 / Math.max(.55, camera.aspect * 1.25) : 1);
+  if (window.onInstall) onInstall(g);
+  return g;
+}
+
+/* ═════════════ Galexico · 7. Son (WebAudio, tout est synthétisé : aucun fichier audio) ═════════════
+   Nappe : trois couches (grave / médium / aigu), désaccordées, filtrées, modulées très lentement, qui glissent d'un accord à l'autre selon le type de soleil.
+   Survol : tic sec et aigu (bruit filtré + minuscule note de gamme pentatonique). Mots trouvés : cloche. Chrono : tic de bois. */
+function makeEngine(ctx, dest) {
+  const E = {}, sr = ctx.sampleRate, T0 = () => ctx.currentTime;
+  const P = (semi, base) => base * Math.pow(2, semi / 12);
+
+  /* bruit blanc (2 s) */
+  const nb = ctx.createBuffer(1, sr * 2, sr), nd = nb.getChannelData(0); let sd = 12345;
+  for (let i = 0; i < nd.length; i++) { sd = (sd * 16807) % 2147483647; nd[i] = sd / 1073741823.5 - 1; }
+
+  /* chaîne maître : volume → compresseur doux → sortie */
+  const master = ctx.createGain(); master.gain.value = 0;
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -15; comp.knee.value = 20; comp.ratio.value = 3.2; comp.attack.value = .012; comp.release.value = .35;
+  master.connect(comp); comp.connect(dest);
+
+  /* réverbération : réponse impulsionnelle générée (5,5 s, queue sombre) */
+  const irLen = Math.floor(sr * 5.5), ir = ctx.createBuffer(2, irLen, sr);
+  for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); let y = 0, s2 = 777 + c * 91;
+    for (let i = 0; i < irLen; i++) { s2 = (s2 * 16807) % 2147483647; const x = s2 / 1073741823.5 - 1, t = i / irLen;
+      y += (x - y) * (.62 - .52 * t); d[i] = y * Math.pow(1 - t, 2.7) * (t < .004 ? t / .004 : 1) * 2.1; } }
+  const rev = ctx.createConvolver(); rev.buffer = ir;
+  const revIn = ctx.createGain(), revOut = ctx.createGain(); revOut.gain.value = .5;
+  revIn.connect(rev); rev.connect(revOut); revOut.connect(master);
+  const dry = ctx.createGain(); dry.gain.value = 1; dry.connect(master);
+  const route = (node, send) => { node.connect(dry); if (send > 0) { const s = ctx.createGain(); s.gain.value = send; node.connect(s); s.connect(revIn); } };
+  const pan = v => { if (!ctx.createStereoPanner) return null; const p = ctx.createStereoPanner(); p.pan.value = v; return p; };
+
+  /* ── nappe harmonique ── */
+  const PAD = .15;
+  const pad = ctx.createGain(); pad.gain.value = 0; route(pad, .62);
+  const breath = ctx.createGain(); breath.gain.value = 1; breath.connect(pad);
+  const lfoB = ctx.createOscillator(); lfoB.frequency.value = .055; const lfoBg = ctx.createGain(); lfoBg.gain.value = .16; lfoB.connect(lfoBg); lfoBg.connect(breath.gain); lfoB.start();
+  const voices = [];
+  const mkVoice = (type, tone, oct, gain, det, panV, bus) => {
+    const o = ctx.createOscillator(); o.type = type; o.detune.value = det; o.frequency.value = 110;
+    const g = ctx.createGain(); g.gain.value = gain; o.connect(g);
+    const p = pan(panV); if (p) { g.connect(p); p.connect(bus); } else g.connect(bus);
+    o.start(); voices.push({ o, tone, oct, g, gain }); return g;
+  };
+  /* grave : sinus + triangle + quinte */
+  const lowBus = ctx.createGain(); lowBus.gain.value = 1; lowBus.connect(breath);
+  mkVoice('sine', 0, 0, .30, 0, 0, lowBus); mkVoice('triangle', 0, 1, .12, 5, -.2, lowBus); mkVoice('sine', 1, 1, .10, -4, .25, lowBus);
+  /* médium : dents de scie filtrées, filtre qui respire */
+  const midF = ctx.createBiquadFilter(); midF.type = 'lowpass'; midF.frequency.value = 760; midF.Q.value = .8;
+  const midBus = ctx.createGain(); midBus.gain.value = 1; midF.connect(midBus); midBus.connect(breath);
+  const lfoF = ctx.createOscillator(); lfoF.frequency.value = .043; const lfoFg = ctx.createGain(); lfoFg.gain.value = 330; lfoF.connect(lfoFg); lfoFg.connect(midF.frequency); lfoF.start();
+  [[0, -9, -.5], [0, 8, .45], [1, -6, .3], [1, 7, -.35], [2, -8, .5], [2, 9, -.45], [3, -5, -.2], [3, 6, .2]].forEach(([tone, det, pv]) => mkVoice('sawtooth', tone, 2, .026, det, pv, midF));
+  /* aigu : sinus qui scintillent (trémolos lents, décalés) */
+  const hiA = ctx.createGain(), hiB = ctx.createGain(); hiA.gain.value = .7; hiB.gain.value = .7; hiA.connect(breath); hiB.connect(breath);
+  const tr1 = ctx.createOscillator(), tr2 = ctx.createOscillator(); tr1.frequency.value = .171; tr2.frequency.value = .113;
+  const tg1 = ctx.createGain(), tg2 = ctx.createGain(); tg1.gain.value = .5; tg2.gain.value = .5; tr1.connect(tg1); tr2.connect(tg2); tg1.connect(hiA.gain); tg2.connect(hiB.gain); tr1.start(); tr2.start();
+  mkVoice('sine', 1, 4, .032, 3, -.55, hiA); mkVoice('sine', 2, 4, .030, -3, .5, hiA); mkVoice('sine', 3, 4, .026, 5, -.15, hiB); mkVoice('sine', 2, 5, .014, -5, .6, hiB); mkVoice('sine', 3, 5, .012, 4, -.6, hiB);
+
+  const MOODS = { M: [0, 7, 10, 15], K: [0, 7, 12, 15], G: [0, 7, 12, 16], F: [0, 7, 14, 16], A: [0, 7, 11, 16], B: [0, 7, 11, 18], O: [0, 7, 14, 18], home: [0, 7, 14, 19] };
+  E.mood = (sp, size = 5, bright = .5, glide = 2.6) => {
+    const iv = MOODS[sp] || MOODS.home, root = P(clamp(Math.round(5.5 - size), -5, 5), 55), t = T0();
+    voices.forEach(v => v.o.frequency.setTargetAtTime(P(iv[v.tone], root) * Math.pow(2, v.oct), t, glide));
+    midF.frequency.setTargetAtTime(520 + 900 * bright, t, 3);
+    hiA.gain.setTargetAtTime(.35 + .75 * bright, t, 3); hiB.gain.setTargetAtTime(.35 + .75 * bright, t, 3);
+  };
+  E.start = (fade = 3.2) => { pad.gain.setTargetAtTime(PAD, T0(), fade / 3); master.gain.setTargetAtTime(.85, T0(), .6); E.mood('home', 5, .45, .01); };
+  E.setMuted = m => master.gain.setTargetAtTime(m ? 0 : .85, T0(), .25);
+  E.padLevel = (v, tc = 1.2) => pad.gain.setTargetAtTime(v * PAD, T0(), tc);
+
+  /* ── tic de survol : sec, court, aigu ── */
+  const PENTA = [0, 2, 4, 7, 9, 12, 14, 16]; let pi = 2;
+  E.tick = (when = T0(), vel = 1) => {
+    pi = clamp(pi + (Math.random() < .5 ? -1 : 1) * (1 + (Math.random() < .3)), 0, PENTA.length - 1);
+    const t = when, src = ctx.createBufferSource(); src.buffer = nb;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 6200 + Math.random() * 2600; bp.Q.value = 5;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.2 * vel, t + .0008); g.gain.exponentialRampToValueAtTime(.0001, t + .02);
+    src.connect(bp); bp.connect(g);
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = P(PENTA[pi], 1318.5);
+    const og = ctx.createGain(); og.gain.setValueAtTime(0, t); og.gain.linearRampToValueAtTime(.045 * vel, t + .0012); og.gain.exponentialRampToValueAtTime(.0001, t + .085);
+    o.connect(og);
+    const mix = ctx.createGain(); g.connect(mix); og.connect(mix);
+    const p = pan((Math.random() - .5) * 1.2); if (p) { mix.connect(p); route(p, .14); } else route(mix, .14);
+    src.start(t, Math.random() * 1.8, .03); o.start(t); o.stop(t + .1);
+  };
+  /* note douce quand on survole un mot : plus aiguë si le mot est rare */
+  E.note = (rar = .5, when = T0()) => {
+    const f = P(PENTA[Math.floor(clamp(rar, 0, .999) * 7)], 392) * (Math.random() < .5 ? 1 : 2);
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(.032, when + .012); g.gain.exponentialRampToValueAtTime(.0001, when + .55);
+    o.connect(g); route(g, .7); o.start(when); o.stop(when + .6);
+  };
+  /* cloche : mot trouvé (monte dans la gamme à chaque mot) */
+  const FOUND = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21];
+  E.found = (n = 0, when = T0(), vel = 1) => {
+    const f = P(FOUND[Math.min(n, FOUND.length - 1)], 523.25);
+    [[1, 1, 2.4], [2.003, .5, 1.7], [2.76, .34, 1.1], [5.4, .13, .5]].forEach(([r, a, d]) => {
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f * r;
+      const g = ctx.createGain(); g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(.11 * a * vel, when + .004); g.gain.exponentialRampToValueAtTime(.0001, when + d);
+      o.connect(g); route(g, .6); o.start(when); o.stop(when + d + .05); });
+  };
+  E.clock = (urgent = false, when = T0()) => {
+    const src = ctx.createBufferSource(); src.buffer = nb;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = urgent ? 2300 : 1500; bp.Q.value = 3;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(urgent ? .24 : .12, when + .001); g.gain.exponentialRampToValueAtTime(.0001, when + .045);
+    src.connect(bp); bp.connect(g); route(g, .08); src.start(when, Math.random() * 1.8, .06);
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = urgent ? 330 : 220; const og = ctx.createGain();
+    og.gain.setValueAtTime(0, when); og.gain.linearRampToValueAtTime(urgent ? .08 : .045, when + .002); og.gain.exponentialRampToValueAtTime(.0001, when + .07);
+    o.connect(og); route(og, .05); o.start(when); o.stop(when + .08);
+  };
+  E.gong = (when = T0()) => {
+    [[1, 1, 3.8], [2.32, .55, 2.8], [3.97, .3, 1.9], [5.5, .16, 1.2]].forEach(([r, a, d]) => {
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = 110 * r;
+      const g = ctx.createGain(); g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(.2 * a, when + .01); g.gain.exponentialRampToValueAtTime(.0001, when + d);
+      o.connect(g); route(g, .7); o.start(when); o.stop(when + d + .05); });
+  };
+  E.miss = (when = T0()) => {
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(330, when); o.frequency.exponentialRampToValueAtTime(196, when + .32);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(.06, when + .02); g.gain.exponentialRampToValueAtTime(.0001, when + .5);
+    o.connect(g); route(g, .4); o.start(when); o.stop(when + .55);
+  };
+  E.ask = (when = T0()) => { [0, 7].forEach((s, k) => E.found(s === 0 ? 3 : 5, when + k * .11, .55)); };
+  /* montée : on entre dans la nébuleuse */
+  E.riser = (dur = 3.4, when = T0()) => {
+    const src = ctx.createBufferSource(); src.buffer = nb; src.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.4; bp.frequency.setValueAtTime(180, when); bp.frequency.exponentialRampToValueAtTime(5200, when + dur);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, when); g.gain.linearRampToValueAtTime(.2, when + dur * .85); g.gain.linearRampToValueAtTime(0, when + dur + .5);
+    src.connect(bp); bp.connect(g); route(g, .5); src.start(when); src.stop(when + dur + .6);
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(70, when); o.frequency.exponentialRampToValueAtTime(300, when + dur);
+    const og = ctx.createGain(); og.gain.setValueAtTime(0, when); og.gain.linearRampToValueAtTime(.07, when + dur * .9); og.gain.linearRampToValueAtTime(0, when + dur + .3);
+    o.connect(og); route(og, .4); o.start(when); o.stop(when + dur + .4);
+    const b = ctx.createOscillator(); b.type = 'sine'; b.frequency.setValueAtTime(62, when + dur); b.frequency.exponentialRampToValueAtTime(36, when + dur + 1.4);
+    const bg = ctx.createGain(); bg.gain.setValueAtTime(0, when + dur); bg.gain.linearRampToValueAtTime(.3, when + dur + .02); bg.gain.exponentialRampToValueAtTime(.0001, when + dur + 1.6);
+    b.connect(bg); route(bg, .3); b.start(when + dur); b.stop(when + dur + 1.7);
+  };
+  return E;
+}
+
+const GXA = {
+  ctx: null, eng: null, muted: lsGet('gx-mute') === 1, pending: null,
+  start() {
+    if (this.eng) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    try { this.ctx = new AC({ latencyHint: 'interactive' }); } catch (_) { return; }
+    this.eng = makeEngine(this.ctx, this.ctx.destination); this.eng.start(); this.eng.setMuted(this.muted);
+    if (this.pending) { this.eng.mood(...this.pending); }
+  },
+  mood(sc) { const a = sc ? [sc.sp, sc.s, clamp((sc.T - 2800) / 22000, 0, 1)] : ['home', 5, .45]; this.pending = a; if (this.eng) this.eng.mood(...a); },
+  tick(v) { if (this.eng && !this.muted) this.eng.tick(undefined, v); },
+  hoverNote(node) { if (this.eng && !this.muted && node) this.eng.note(rarityOf(node.wid)); },
+  found(n) { if (this.eng && !this.muted) this.eng.found(n); },
+  clock(u) { if (this.eng && !this.muted) this.eng.clock(u); },
+  gong() { if (this.eng && !this.muted) this.eng.gong(); },
+  miss() { if (this.eng && !this.muted) this.eng.miss(); },
+  ask() { if (this.eng && !this.muted) this.eng.ask(); },
+  riser(d) { if (this.eng && !this.muted) this.eng.riser(d); },
+  padLevel(v) { if (this.eng) this.eng.padLevel(v); },
+  setMuted(m) { this.muted = m; lsSet('gx-mute', m ? 1 : 0); if (this.eng) this.eng.setMuted(m); }
+};
+['pointerdown', 'keydown', 'touchend'].forEach(ev => addEventListener(ev, () => GXA.start(), { once: false, passive: true, capture: true }));
+
+/* ═════════════ Galexico · 5. Interface : caméra, souris, recherche, fiche, traductions, navigation ═════════════ */
+const SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+const ptr = { x: innerWidth / 2, y: innerHeight / 2, down: false, moved: false, inside: false, sx: 0, sy: 0, pts: new Map(), pinch: 0 };
+let lastInteract = performance.now(), apertureV = 62;
+cam.k = 5; cam.kt = 2.2;
+const CAM_LIM = () => STATE.mode === 'home' ? [90, 520] : (cur ? [cur.camR * .22, cur.camR * 3.4] : [14, 160]);
+
+/* ── caméra orbitale ── */
+function applyCamera(dt, now) {
+  const k = 1 - Math.exp(-dt * cam.k), kt = 1 - Math.exp(-dt * cam.kt);
+  if (STATE.rot && now - lastInteract > 2600 && !ptr.down) cam.tTh += dt * (STATE.mode === 'home' ? .012 : .02);
+  cam.th = lerp(cam.th, cam.tTh, k); cam.ph = lerp(cam.ph, cam.tPh, k); cam.r = lerp(cam.r, cam.tR, k);
+  cam.target.lerp(cam.tTarget, kt);
+  const sp = Math.sin(cam.ph);
+  camera.position.set(cam.target.x + cam.r * sp * Math.cos(cam.th), cam.target.y + cam.r * Math.cos(cam.ph), cam.target.z + cam.r * sp * Math.sin(cam.th));
+  camera.lookAt(cam.target); camera.updateMatrixWorld();
+  const vsT = STATE.game ? (GM.phase === 'riddle' || GM.phase === 'between' ? .165 : .05) : 0;
+  cam.vs = lerp(cam.vs || 0, vsT, 1 - Math.exp(-dt * 3));
+  if (Math.abs(cam.vs) > .002) camera.setViewOffset(innerWidth, innerHeight, 0, -innerHeight * cam.vs, innerWidth, innerHeight);
+  else if (camera.view && camera.view.enabled) { camera.clearViewOffset(); }
+  camUp.set(0, 1, 0).applyQuaternion(camera.quaternion); camera.getWorldDirection(fwd);
+}
+
+/* ── optique : mise au point qui glisse, ouverture, repère d'échelle ── */
+let scaleT = 0;
+function updateOptics(dt, now) {
+  let tgt;
+  if (STATE.mode === 'home') { const it = HOME.items[HOME.hov >= 0 ? HOME.hov : 0]; tgt = it ? camera.position.distanceTo(it.w) : cam.r; }
+  else if (cur && hov >= 0) { worldPos(cur, cur.nodes[hov], tmpV); tgt = camera.position.distanceTo(tmpV); }
+  else tgt = camera.position.distanceTo(cam.target);
+  U.uFocus.value = lerp(U.uFocus.value, tgt, 1 - Math.exp(-dt * (hov >= 0 ? 6 : 3)));
+  const v = apertureV / 100; cam.apMul = lerp(cam.apMul ?? .22, STATE.mode === 'home' ? .22 : 1, 1 - Math.exp(-dt * 1.5)); U.uAp.value = .06 * Math.pow(v / .62, 1.5) * cam.apMul;
+  U.uCenter.value.copy(cam.target);
+  U.uXYZ.value = lerp(U.uXYZ.value, STATE.xyz ? 1 : 0, 1 - Math.exp(-dt * 6));
+  U.uAnt.value = lerp(U.uAnt.value, STATE.ant ? 1 : 0, 1 - Math.exp(-dt * 4));
+  U.uTime.value = now / 1000;
+  if (now - scaleT > 450) { scaleT = now;
+    const depth = camera.position.distanceTo(cam.target), ppw = innerHeight / (2 * TANH) / depth, unit = 64 / ppw;
+    const nice = [.1, .2, .5, 1, 2, 5, 10, 20, 50, 100, 200, 500].reduce((a, b) => Math.abs(Math.log(b / unit)) < Math.abs(Math.log(a / unit)) ? b : a);
+    $('scaleTxt').textContent = nice.toString().replace('.', ',') + ' u'; $('scaleTxt').previousElementSibling.style.width = Math.round(nice / unit * 64) + 'px';
+    $('optic').textContent = 'mise au point ' + fmtD(U.uFocus.value, 0) + ' u'; }
+}
+const fnum = () => 1.2 + 14 * Math.pow(1 - apertureV / 100, 3);
+$('aperture').addEventListener('input', e => { apertureV = +e.target.value; $('fnum').textContent = 'f/' + fnum().toFixed(1).replace('.', ',').replace(',0', ''); });
+
+/* ── souris et toucher ── */
+const tip = $('tip');
+function placeTip() {
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ptr.x + 18, y = ptr.y + 20; if (x + w > innerWidth - 8) x = ptr.x - w - 16; if (y + h > innerHeight - 8) y = ptr.y - h - 16;
+  tip.style.transform = `translate(${Math.max(8, x)}px,${Math.max(8, y)}px)`;
+}
+function tipHTML(g, i) {
+  const x = g.nodes[i], df = defSync(x.wid);
+  const dtxt = df === undefined ? 'chargement de la définition…' : df ? df.s : 'pas de définition dans le Wiktionnaire';
+  let h = `<strong>${esc(x.label)}</strong><span class="df ${df === undefined ? 'wait' : ''}">${esc(dtxt)}</span>`;
+  if (x.level === 0) h += `<em>soleil</em> · ${esc(g.sc.name)} · classe ${g.sc.sp}`;
+  else if (x.level === 1) { const p = x.pos; h += `<span class="xyz">x ${fmt(p.x)}  y ${fmt(p.y)}  z ${fmt(p.z)}</span><br>d ${fmtD(x.d)} u · lien <em>${Math.round(x.w * 100)} %</em> · n=${x.shell + 1}`; }
+  else if (x.level === 2) h += `en réserve · synonyme de <em>${esc(x.parents.map(p => g.nodes[p].label).slice(0, 2).join(', '))}</em><br>clique pour y aller`;
+  else h += `<em>antonyme</em> · l’antimatière de ${esc(g.label)}`;
+  return h;
+}
+function onHoverChange(i, prev) {
+  if (STATE.mode !== 'field' || !cur || i < 0) { tip.classList.add('off'); return; }
+  tip.innerHTML = tipHTML(cur, i); tip.classList.remove('off'); placeTip();
+  const g = cur, wid = g.nodes[i].wid;
+  if (defSync(wid) === undefined) defOf(wid).then(() => { if (hov === i && cur === g) { tip.innerHTML = tipHTML(g, i); placeTip(); } });
+}
+const HOMEREL = { fr: 'langue romane · la seule cartographiée pour l’instant', oc: 'langue d’oc, romane, voisine du français', ca: 'langue romane des Pyrénées orientales', it: 'langue romane, sœur par le latin', co: 'proche de l’italien de Toscane', es: 'langue romane de la péninsule Ibérique', pt: 'langue romane, cousine de l’espagnol', la: 'l’ancêtre commun des langues romanes', ro: 'langue romane isolée à l’est', br: 'langue celtique parlée en Bretagne', eu: 'isolat : aucune parenté connue', en: 'germanique, mais gorgé de mots venus du français', de: 'langue germanique' };
+function setHomeHover(k) {
+  if (k === HOME.hov) return; HOME.hov = k; canvas.classList.toggle('pointing', k >= 0);
+  if (k < 0) { tip.classList.add('off'); return; }
+  const G = HOME.items[k].G; GXA.tick(.7);
+  tip.innerHTML = `<strong>${esc(G.name)}</strong><span class="df">${esc(HOMEREL[G.id] || '')}</span>` + (G.ready ? `<em>${nf(LX.n || 119884)} mots</em> · clique pour y entrer` : 'dictionnaire à venir');
+  tip.classList.remove('off'); placeTip();
+}
+function updateHover(now) {
+  if (ptr.down || !ptr.inside || TOUCH) return;
+  if (STATE.mode === 'home') setHomeHover(pickGalaxy(ptr.x, ptr.y));
+  else if (cur && !modalOpen()) { const i = pick(ptr.x, ptr.y); setHover(i); if (i >= 0) placeTip(); }
+}
+const modalOpen = () => !$('help').hidden || !$('gmModal').hidden;
+canvas.addEventListener('pointerdown', e => {
+  GXA.start(); canvas.setPointerCapture(e.pointerId); ptr.pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  ptr.down = true; ptr.moved = false; ptr.sx = e.clientX; ptr.sy = e.clientY; ptr.x = e.clientX; ptr.y = e.clientY; lastInteract = performance.now();
+  if (ptr.pts.size === 2) { const [a, b] = [...ptr.pts.values()]; ptr.pinch = Math.hypot(a.x - b.x, a.y - b.y); ptr.moved = true; }
+});
+canvas.addEventListener('pointermove', e => {
+  ptr.x = e.clientX; ptr.y = e.clientY; ptr.inside = true; lastInteract = performance.now();
+  const p = ptr.pts.get(e.pointerId); if (!p) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+  if (ptr.pts.size === 2) { const [a, b] = [...ptr.pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y); if (ptr.pinch) zoomBy(ptr.pinch / d); ptr.pinch = d; return; }
+  if (!ptr.moved && Math.hypot(e.clientX - ptr.sx, e.clientY - ptr.sy) > 6) { ptr.moved = true; canvas.classList.add('grabbing'); }
+  if (ptr.moved) { cam.tTh -= dx * .0055; cam.tPh = clamp(cam.tPh - dy * .0055, .25, Math.PI - .25); }
+});
+function endPtr(e, cancel) {
+  const had = ptr.pts.delete(e.pointerId); if (!had) return;
+  if (ptr.pts.size < 2) ptr.pinch = 0;
+  if (ptr.pts.size === 0) { ptr.down = false; canvas.classList.remove('grabbing'); if (!ptr.moved && !cancel) onTap(e.clientX, e.clientY); }
+}
+canvas.addEventListener('pointerup', e => endPtr(e, false));
+canvas.addEventListener('pointercancel', e => endPtr(e, true));
+canvas.addEventListener('pointerleave', () => { ptr.inside = false; if (!TOUCH) { if (STATE.mode === 'home') setHomeHover(-1); else setHover(-1); } });
+function zoomBy(f) { const [a, b] = CAM_LIM(); cam.tR = clamp(cam.tR * f, a, b); lastInteract = performance.now(); }
+canvas.addEventListener('wheel', e => { e.preventDefault(); zoomBy(Math.exp(clamp(e.deltaY, -120, 120) * .0013)); }, { passive: false });
+
+function onTap(x, y) {
+  if (modalOpen()) return;
+  if (STATE.mode === 'home') {
+    const k = pickGalaxy(x, y); if (k < 0) { setHomeHover(-1); return; }
+    if (TOUCH && HOME.hov !== k) { ptr.x = x; ptr.y = y; setHomeHover(k); return; }
+    activateGalaxy(k); return;
+  }
+  if (!cur || STATE.game) return;
+  const i = pick(x, y);
+  if (i < 0) { if (TOUCH) setHover(-1); return; }
+  if (TOUCH && hov !== i) { ptr.x = x; ptr.y = y; setHover(i); placeTip(); return; }
+  activateNode(i);
+}
+function activateGalaxy(k) {
+  const G = HOME.items[k].G;
+  if (G.id === 'fr') enterField();
+  else say(`Le dictionnaire <b>${esc(G.name)}</b> viendra plus tard. Pour l’instant, seul le français est cartographié.`);
+}
+function activateNode(i) {
+  const g = cur, x = g.nodes[i];
+  if (x.level === 0) { GXA.tick(); $('card').classList.remove('off', 'mini'); return; }
+  setHover(-1); goWord(x.wid, { g, node: x });
+}
+
+/* ── entrer dans la nébuleuse / revenir à la carte ── */
+async function enterField(wordId) {
+  if (STATE.mode !== 'home') return;
+  if (!LX.ready) { $('hint').textContent = 'La carte se charge, encore un instant…'; try { await LX.loading; } catch (_) { return; } }
+  STATE.mode = 'field'; document.body.classList.replace('home', 'field');
+  HOME.fadeT = 0; HOME.keepT = .9; setHomeHover(-1); tip.classList.add('off');
+  cam.k = 1.15; cam.kt = 1.15; cam.tR = 74; cam.tPh = 1.12; cam.tTarget.set(0, 0, 0);
+  GXA.riser(3.4); setTimeout(() => { cam.k = 5; cam.kt = 2.2; }, 3600);
+  if (wordId == null) { say('Écris un mot, ou lance le <b>hasard</b> pour jouer.', 7000); renderSugg(); if (!TOUCH) setTimeout(() => $('word').focus({ preventScroll: true }), 1800); }
+  else setTimeout(() => goWord(wordId), 1500);
+}
+function goHome() {
+  if (STATE.mode === 'home') return;
+  if (STATE.game) { quitGame(true); }
+  STATE.mode = 'home'; document.body.classList.replace('field', 'home');
+  setHover(-1); tip.classList.add('off'); $('card').classList.add('off');
+  graphs.forEach(g => g.fadeT = 0); cur = null; HOME.fadeT = 1; HOME.keepT = 0;
+  cam.k = 1.3; cam.kt = 1.3; cam.tR = HOME.camR; cam.tPh = HOME.ph; cam.tTarget.set(0, 0, 0); setTimeout(() => { cam.k = 5; cam.kt = 2.2; }, 3000);
+  GXA.mood(null); history.replaceState(null, '', location.pathname + location.search);
+}
+$('home').addEventListener('click', goHome);
+
+/* ── passer d'un mot à l'autre ── */
+const TRAIL = [];
+function goWord(id, via) {
+  if (STATE.mode !== 'field' || id == null || id < 0) return;
+  const prev = cur; let origin; HOME.keepT = .32;
+  if (via && via.g) origin = via.g.group.position.clone().addScaledVector(via.node.pos, revealOf(via.g, via.node));
+  else { const R = rng('origine-' + LX.words[id]), r = 5 + R() * 15, th = R() * 6.2832; origin = new V3(Math.cos(th) * r, (R() - .5) * 4, Math.sin(th) * r); }
+  const L = origin.length(); if (L > 32) origin.multiplyScalar(32 / L);
+  const g = graphFromLexicon(id, prev ? prev.label : null, { ring: 16, per: 4, reserve: true });
+  install(g, origin, prev ? 260 : 300);
+  if (!TRAIL.length || TRAIL[TRAIL.length - 1].id !== id) { TRAIL.push({ id, label: LX.words[id] }); if (TRAIL.length > 40) TRAIL.shift(); }
+  try { history.replaceState(null, '', '#' + encodeURIComponent(LX.words[id])); } catch (_) { }
+  $('word').value = ''; renderSugg();
+  if (g.total === 0) say(`Aucun synonyme connu pour <b>${esc(g.label)}</b> dans le dictionnaire. Essaie un mot voisin.`, 6000);
+  else if (g.total <= 2) say(`<b>${esc(g.label)}</b> n’a que ${g.total} synonyme${g.total > 1 ? 's' : ''} connu${g.total > 1 ? 's' : ''} : une étoile solitaire.`, 5200);
+}
+function onInstall(g) {
+  GXA.mood(g.sc); GXA.tick(1.2);
+  const sc = g.sc;
+  $('cWord').textContent = g.label;
+  $('cKlass').innerHTML = `<span class="dot" style="color:rgb(${sc.col.map(c => Math.round(c * 255)).join(',')});background:currentColor"></span><span>${esc(sc.name)} · classe ${sc.sp}</span>`;
+  $('cDef').innerHTML = '<em>définition…</em>';
+  defOf(g.centre).then(d => { if (cur !== g) return; const pos = posOf(g.centre);
+    $('cDef').innerHTML = d ? `${pos ? `<em>${esc(pos)}</em> · ` : ''}${esc(d.l)}` : '<em>pas de définition dans le Wiktionnaire</em>'; });
+  $('cMeta').innerHTML = `<b>${g.total}</b> synonyme${g.total > 1 ? 's' : ''} · taille <b>${sc.s.toFixed(1).replace('.', ',')}</b>/10<br>rareté : <b>${sc.rare}</b> · fréquence ${sc.z.toFixed(1).replace('.', ',')}/8<br>${g.nAnt ? `<b>${g.nAnt}</b> contraire${g.nAnt > 1 ? 's' : ''} (étoile double)` : 'aucun contraire connu'}<br><span class="xyz">x +0,00  y +0,00  z +0,00 · d 0,00 u</span>`;
+  $('cLink').href = 'https://fr.wiktionary.org/wiki/' + encodeURIComponent(g.label);
+  $('card').classList.remove('off'); $('card').classList.toggle('mini', SMALL);
+  closeTr();
+  const shown = g.nodes.filter(x => x.level === 1).length;
+  $('stats').innerHTML = `<b>${nf(LX.n)}</b> mots dans le dictionnaire<br><b>${shown}</b> synonymes en orbite sur <b>${g.total}</b>`;
+  renderTrail();
+}
+function renderTrail() {
+  const t = TRAIL.slice(-7);
+  $('trail').innerHTML = t.map((x, k) => `${k ? '<i>→</i>' : ''}<button data-id="${x.id}" ${k === t.length - 1 ? 'aria-current="true"' : ''}>${esc(x.label)}</button>`).join('');
+}
+$('trail').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.getAttribute('aria-current') !== 'true') goWord(+b.dataset.id); });
+$('cWord').addEventListener('click', () => { if (SMALL) $('card').classList.toggle('mini'); });
+
+/* ── traductions : liste verticale, 20 langues les plus parlées ── */
+const LANGS20 = [['en', 'Anglais', 'English'], ['zh', 'Chinois', '中文'], ['hi', 'Hindi', 'हिन्दी'], ['es', 'Espagnol', 'Español'], ['ar', 'Arabe', 'العربية'], ['bn', 'Bengali', 'বাংলা'], ['pt', 'Portugais', 'Português'],
+  ['ru', 'Russe', 'Русский'], ['ur', 'Ourdou', 'اردو'], ['id', 'Indonésien', 'Indonesia'], ['de', 'Allemand', 'Deutsch'], ['ja', 'Japonais', '日本語'], ['pcm', 'Pidgin nigérian', 'Naijá'], ['arz', 'Arabe égyptien', 'مصرى'],
+  ['mr', 'Marathi', 'मराठी'], ['te', 'Télougou', 'తెలుగు'], ['tr', 'Turc', 'Türkçe'], ['ta', 'Tamoul', 'தமிழ்'], ['yue', 'Cantonais', '粵語'], ['vi', 'Vietnamien', 'Tiếng Việt']];
+function closeTr() { $('trBox').hidden = true; $('trBtn').setAttribute('aria-expanded', 'false'); }
+$('trBtn').addEventListener('click', async () => {
+  const open = $('trBox').hidden; if (!open) { closeTr(); return; }
+  const g = cur; if (!g) return;
+  $('trBox').hidden = false; $('trBtn').setAttribute('aria-expanded', 'true');
+  $('trList').innerHTML = '<li class="wait"><span class="lg">…</span><span class="tw">chargement</span></li>'; $('trNote').textContent = '';
+  const tr = (await trOf(g.centre)) || {}; if (cur !== g) return;
+  let n = 0;
+  $('trList').innerHTML = LANGS20.map(([c, fr, nat]) => { const v = tr[c]; if (v && v.length) n++;
+    return v && v.length ? `<li><span class="lg">${esc(fr)}<small>${esc(nat)}</small></span><span class="tw" lang="${c}">${v.map(t => esc(t[0])).join(' · ')}</span>${v.some(t => t[1]) ? `<span class="ro">${v.map(t => esc(t[1] || '')).filter(Boolean).join(' · ')}</span>` : ''}</li>`
+      : `<li class="wait"><span class="lg">${esc(fr)}<small>${esc(nat)}</small></span><span class="tw">—</span></li>`; }).join('');
+  $('trNote').innerHTML = n ? `${n} langue${n > 1 ? 's' : ''} sur 20 renseignée${n > 1 ? 's' : ''} dans le Wiktionnaire (CC BY-SA 3.0). Les « — » restent à écrire : <a href="${esc($('cLink').href)}" target="_blank" rel="noopener">complète-les là-bas</a>.`
+    : `Le Wiktionnaire ne donne encore aucune traduction pour ce mot dans ces 20 langues. <a href="${esc($('cLink').href)}" target="_blank" rel="noopener">Voir la page</a>.`;
+});
+
+/* ── recherche, suggestions, dictée ── */
+const SEEDS = ['hasard', 'amour', 'courage', 'vite', 'lumière', 'mer', 'peur', 'joie', 'ruse', 'silence', 'voyage', 'étrange'];
+function renderSugg() {
+  if (!LX.ready) return;
+  const q = $('word').value.trim(); let ids;
+  if (q) ids = suggest(q, 12); else ids = SEEDS.map(find).filter(i => i >= 0);
+  $('sugg').innerHTML = ids.map(i => `<button type="button" class="chip" data-id="${i}">${esc(LX.words[i])}<small>${LX.deg[i]}</small></button>`).join('');
+}
+$('word').addEventListener('input', renderSugg);
+$('sugg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { $('word').blur(); goWord(+b.dataset.id); } });
+$('form').addEventListener('submit', e => {
+  e.preventDefault(); GXA.start(); const raw = $('word').value.trim(); if (!raw) return;
+  const id = find(raw);
+  if (id < 0) { const s = suggest(raw, 3).map(i => LX.words[i]); say(`« ${esc(raw)} » n’est pas dans le dictionnaire.` + (s.length ? ` Essaie : <b>${s.map(esc).join('</b>, <b>')}</b>.` : ''), 5500); return; }
+  $('word').blur(); goWord(id);
+});
+let dict = null;
+$('mic').addEventListener('click', () => {
+  GXA.start();
+  if (!SRC) { say('La dictée vocale n’existe pas dans ce navigateur. Utilise Chrome, Edge ou Safari — ou écris le mot.'); return; }
+  if (dict) { try { dict.stop(); } catch (_) { } return; }
+  const r = dict = new SRC(); r.lang = 'fr-FR'; r.interimResults = true; r.maxAlternatives = 1;
+  $('mic').classList.add('listening');
+  r.onresult = ev => { let t = ''; for (const res of ev.results) t += res[0].transcript; $('word').value = t.replace(/[.!?]/g, '').trim(); renderSugg(); if (ev.results[ev.results.length - 1].isFinal) { try { r.stop(); } catch (_) { } $('form').requestSubmit(); } };
+  r.onerror = ev => { if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') say('Le micro est bloqué. Autorise-le dans la barre d’adresse, ou écris le mot.'); else if (ev.error !== 'no-speech' && ev.error !== 'aborted') say('Dictée interrompue (' + esc(ev.error) + ').'); };
+  r.onend = () => { dict = null; $('mic').classList.remove('listening'); };
+  try { r.start(); } catch (_) { dict = null; $('mic').classList.remove('listening'); }
+});
+
+/* ── réglages, aide, clavier ── */
+function bindToggle(id, key, cb) { const b = $(id); b.addEventListener('click', () => { STATE[key] = !STATE[key]; b.setAttribute('aria-pressed', STATE[key]); cb && cb(); }); }
+bindToggle('bXYZ', 'xyz'); bindToggle('bAnt', 'ant', () => { if (STATE.ant) say('<b>Antimatière</b> : les contraires apparaissent, en rouge, sur une couche inclinée.', 4200); });
+bindToggle('bRot', 'rot');
+$('bSnd').addEventListener('click', () => { GXA.start(); const m = !GXA.muted; GXA.setMuted(m); $('bSnd').setAttribute('aria-pressed', !m); $('bSnd').textContent = m ? 'son ✕' : 'son ♪'; });
+if (GXA.muted) { $('bSnd').setAttribute('aria-pressed', 'false'); $('bSnd').textContent = 'son ✕'; }
+function openHelp() {
+  const m = LX.man || {};
+  $('hData').innerHTML = `Les <b>synonymes</b> viennent de <a href="https://www.jeuxdemots.org/jdm-about.php" target="_blank" rel="noopener">JeuxDeMots</a>, réseau lexical bâti par des milliers de joueurs (domaine public, CC0), croisés avec les rubriques « synonymes » du Wiktionnaire. ` +
+    `Les <b>définitions</b> et les <b>traductions</b> viennent du <a href="https://fr.wiktionary.org" target="_blank" rel="noopener">Wiktionnaire</a> (CC BY-SA 3.0, ses contributeurs). Les <b>fréquences</b> viennent de <a href="https://github.com/rspeer/wordfreq" target="_blank" rel="noopener">wordfreq</a> (R. Speer, CC BY-SA 4.0). ` +
+    `Polices Homemade Apple, Mrs Saint Delafield et DM Mono (SIL OFL), moteur 3D Three.js (MIT). Le tout tient dans ${nf(m.n || 0)} mots et ${nf(m.edges || 0)} liens, chargés dans ton navigateur : rien n’est envoyé nulle part. ` +
+    `Les données de JeuxDeMots sont collaboratives, donc imparfaites : un lien étrange est possible. Les définitions et traductions héritent de la licence CC BY-SA 3.0.`;
+  $('help').hidden = false; $('bClose').focus();
+}
+$('bHelp').addEventListener('click', openHelp); $('bClose').addEventListener('click', () => { $('help').hidden = true; });
+$('help').addEventListener('click', e => { if (e.target === $('help')) $('help').hidden = true; });
+addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!$('help').hidden) $('help').hidden = true; else if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return; }
+  if (e.key === '/' && STATE.mode === 'field' && !STATE.game && document.activeElement !== $('word') && document.activeElement !== $('gmInput')) { e.preventDefault(); $('word').focus(); }
+});
+
+/* ── carte d'accueil : langues ── */
+function buildLangRow() {
+  $('langrow').innerHTML = GALAXIES.map((G, k) => `<button class="chip ${G.id === 'fr' ? 'fr' : 'soon'}" data-k="${k}" ${G.id === 'fr' ? '' : 'title="dictionnaire à venir"'}>${esc(G.name)}</button>`).join('');
+}
+$('langrow').addEventListener('click', e => { const b = e.target.closest('button'); if (b) activateGalaxy(+b.dataset.k); });
+$('langrow').addEventListener('pointerover', e => { const b = e.target.closest('button'); if (b && !TOUCH) HOME.hov = +b.dataset.k; });
+$('langrow').addEventListener('pointerleave', () => { if (!TOUCH) HOME.hov = -1; });
+
+/* ── titre écrit à la plume ── */
+async function penTitle() {
+  const el = $('penTitle'), sub = $('sub'); el.style.setProperty('--pen', '0%'); sub.style.opacity = 0;
+  await ensureFont(FONTS.sun[0]);
+  if (REDUCED) { el.style.setProperty('--pen', '110%'); sub.style.opacity = 1; return; }
+  const t0 = performance.now(), D = 3400;
+  await new Promise(res => { const st = now => { const t = clamp((now - t0) / D, 0, 1), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    el.style.setProperty('--pen', (e * 108) + '%'); if (t < 1) requestAnimationFrame(st); else res(); }; requestAnimationFrame(st); });
+  sub.style.transition = 'opacity 1.6s'; sub.style.opacity = 1;
+}
+
+/* ═════════════ Galexico · 6. Le jeu : un mot, une minute, des synonymes à dire à voix haute ═════════════ */
+const LEVELS = [[2, 'échauffement'], [4, 'facile'], [6, 'moyen'], [8, 'costaud'], [16, 'expert'], [32, 'légendaire']];
+const GM = { level: lsGet('gx-level') || 4, phase: 'idle', dur: 60000, riddleDur: 20000 };
+const $gm = { modal: $('gmModal'), box: $('game') };
+/* nuances écrites à la main (le reste des devinettes s'appuie sur la définition du Wiktionnaire) ; clé : mot>synonyme */
+const NUANCE = {
+  'hasard>sort': 'Un hasard, mais aussi une malédiction.', 'hasard>fortune': 'Un heureux hasard.', 'hasard>fatalité': 'Un hasard inéluctable.', 'hasard>destin': 'Un hasard qui était écrit d’avance.',
+  'hasard>chance': 'Quand le hasard sourit.', 'hasard>aléa': 'Le petit imprévu qui fait tout basculer.', 'hasard>coïncidence': 'Deux faits sans lien qui tombent ensemble.',
+  'hasard>accident': 'Un hasard qui tourne mal.', 'hasard>risque': 'Quand le hasard peut coûter cher.', 'hasard>circonstance': 'Ce qui entoure et décide.'
+};
+const gmFoundEl = $('gmFound');
+
+/* ── choix du mot ── */
+function pickGameWord(level) {
+  const need = Math.ceil(level * 1.25);
+  for (let t = 0; t < 3000; t++) {
+    const id = randomId({ minDeg: Math.min(need, 40), maxId: level >= 16 ? 60000 : 30000 });
+    if (nbrs(id).length >= need) return id;
+  }
+  for (let id = 0; id < LX.n; id++) if (LX.deg[id] > 0 && nbrs(id).length >= need && !isLow(id)) return id;
+  return randomId();
+}
+
+/* ── fenêtre de niveau ── */
+function openGameModal() {
+  if (STATE.mode !== 'field' || STATE.game) return;
+  GXA.start();
+  let sel = LEVELS.some(l => l[0] === GM.level) ? GM.level : 4;
+  $gm.modal.innerHTML = `<div class="gm-card" role="dialog" aria-labelledby="gmT">
+    <h3 id="gmT">Le jeu</h3>
+    <p>Un mot tiré au hasard. Une minute. Dites à voix haute autant de ses synonymes que possible : chaque mot juste allume une étoile de sa constellation. Ceux qui manquent deviennent des devinettes de vingt secondes.</p>
+    <div class="lvls">${LEVELS.map(l => `<button class="lvl ${l[0] === sel ? 'sel' : ''}" data-n="${l[0]}" aria-label="${l[0]} synonymes, ${l[1]}">${l[0]}</button>`).join('')}</div>
+    <div class="lvlname" id="gmLvlName"></div>
+    <p>Combien de synonymes à trouver ? Le navigateur va demander l’accès au micro : parlez à voix haute, à tour de rôle ou tous ensemble. Sans micro, on tape les réponses.</p>
+    <div class="row"><button class="bigbtn" id="gmGo">C’est parti</button><button class="chip" id="gmCancel">annuler</button></div></div>`;
+  const nm = () => { $('gmLvlName').textContent = (LEVELS.find(l => l[0] === sel) || [0, ''])[1] + (sel >= 16 ? ' · mots très riches seulement' : ''); }; nm();
+  $gm.modal.hidden = false;
+  $gm.modal.querySelector('.lvls').addEventListener('click', e => { const b = e.target.closest('.lvl'); if (!b) return; sel = +b.dataset.n;
+    $gm.modal.querySelectorAll('.lvl').forEach(x => x.classList.toggle('sel', x === b)); nm(); GXA.tick(); });
+  $('gmCancel').onclick = () => { $gm.modal.hidden = true; };
+  $('gmGo').onclick = () => { GM.level = sel; lsSet('gx-level', sel); $gm.modal.hidden = true; startGame(sel); };
+  $gm.modal.onclick = e => { if (e.target === $gm.modal) $gm.modal.hidden = true; };
+}
+$('dice').addEventListener('click', openGameModal);
+
+/* ── démarrage ── */
+function startGame(level) {
+  const id = pickGameWord(level), acc = nbrs(id);
+  const g = graphFromLexicon(id, null, { ring: 48, per: 8, reserve: false, game: true });
+  const R = rng('jeu-' + LX.words[id] + Math.random()), r = 4 + R() * 14, th = R() * 6.2832;
+  const origin = new V3(Math.cos(th) * r, (R() - .5) * 3, Math.sin(th) * r);
+  Object.assign(GM, { id, label: LX.words[id], level, acc, g, phase: 'wait', found: [], missing: [], rid: null, t0: 0, lastSec: -1, micOn: false, noMic: false, keyMap: new Map(), seen: new Set(), riddles: [], done: false });
+  acc.forEach(a => GM.keyMap.set(gkey(LX.words[a.id]), a.id));
+  STATE.game = GM; document.body.classList.add('playing'); setHover(-1); tip.classList.add('off'); $('card').classList.add('off');
+  install(g, origin, 150); cam.tPh = 1.18; cam.tR = g.camR * (camera.aspect < 1 ? 1.5 : 1.05);
+  GXA.padLevel(.55); GXA.ask();
+  const L = GM.label[0].toUpperCase() + GM.label.slice(1);
+  $('gmAsk').innerHTML = `Trouvez au moins ${level} synonymes du mot :<br><b>${esc(L)}</b>`;
+  $('gmCount').innerHTML = Array.from({ length: Math.min(level, 32) }, () => '<i></i>').join('');
+  $('gmAsk').hidden = false; $('gmRiddle').hidden = true; $('gmHeard').textContent = ''; $('gmClock').hidden = false; $('gmClock').classList.remove('late');
+  setSand(1); $('gmSec').textContent = '60';
+  $gm.box.hidden = false; $('gmInput').value = '';
+  /* le micro est demandé maintenant (geste de l'utilisateur) ; le chrono part dès que le micro écoute, sinon au bout de 5 s, sans prévenir */
+  let started = false; const go = () => { if (started || GM.id !== id || GM.phase !== 'wait') return; started = true; GM.phase = 'main'; GM.t0 = performance.now(); };
+  const ok = startRec(go);
+  setTimeout(go, ok ? 5000 : 900);
+}
+const gkey = s => norm(s).replace(/['’\-]/g, ' ').replace(/[^a-z0-9 ]+/g, '').replace(/\s+/g, ' ').trim();
+
+/* ── micro ── */
+function micUI(on, txt) { if (txt) GM.micMsg = txt; $('gmMic').classList.toggle('on', on); $('gmMicTxt').textContent = txt || (on ? 'le micro écoute' : (GM.noMic && GM.micMsg) || 'micro coupé'); }
+function startRec(onStart) {
+  if (!SRC) { micUI(false, 'pas de dictée ici : tapez les réponses'); GM.noMic = true; return false; }
+  const r = GM.rec = new SRC(); r.lang = 'fr-FR'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
+  r.onstart = () => { GM.micOn = true; micUI(true); onStart && onStart(); };
+  r.onresult = ev => {
+    const line = []; let last = '';
+    for (let i = 0; i < ev.results.length; i++) { const res = ev.results[i];
+      const alts = res.isFinal ? Array.from(res, a => a.transcript) : [res[0].transcript];
+      line.push(alts.join(' ')); last = res[0].transcript; }
+    $('gmHeard').textContent = last.trim().slice(-70);
+    onHeard(line.join(' '));
+  };
+  r.onerror = ev => {
+    if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') { GM.noMic = true; micUI(false, 'micro bloqué : tapez les réponses'); onStart && onStart(); }
+    else if (ev.error === 'network' || ev.error === 'audio-capture' || ev.error === 'language-not-supported') { GM.noMic = true; micUI(false, 'dictée indisponible ici : tapez les réponses'); onStart && onStart(); }
+  };
+  r.onend = () => { GM.micOn = false; if (GM.rec === r && !GM.noMic && STATE.game === GM && GM.phase !== 'end') { micUI(false, 'le micro redémarre…'); setTimeout(() => { if (GM.rec === r) { try { r.start(); } catch (_) { } } }, 220); } else micUI(false); };
+  try { r.start(); return true; } catch (_) { GM.noMic = true; micUI(false, 'micro indisponible : tapez les réponses'); return false; }
+}
+function stopRec() { const r = GM.rec; GM.rec = null; if (r) { r.onend = null; r.onresult = null; try { r.abort(); } catch (_) { } } micUI(false); }
+$('gmForm').addEventListener('submit', e => { e.preventDefault(); const v = $('gmInput').value; $('gmInput').value = ''; if (v.trim()) { $('gmHeard').textContent = v.trim(); onHeard(v); } });
+
+/* ── reconnaissance des mots dits (idempotente : on rejoue tout le texte à chaque événement) ── */
+function lookup(c) {
+  let id = GM.keyMap.get(c); if (id != null) return id;
+  if (/[sx]$/.test(c)) { id = GM.keyMap.get(c.slice(0, -1)); if (id != null) return id; }
+  if (/aux$/.test(c)) { id = GM.keyMap.get(c.slice(0, -3) + 'al'); if (id != null) return id; }
+  return null;
+}
+function onHeard(text) {
+  if (STATE.game !== GM || GM.phase === 'end' || GM.phase === 'between') return;
+  const tk = gkey(text).split(' ').filter(Boolean), hits = [];
+  for (let n = 4; n >= 1; n--) for (let i = 0; i + n <= tk.length; i++) { const id = lookup(tk.slice(i, i + n).join(' ')); if (id != null && !hits.includes(id)) hits.push(id); }
+  hits.forEach(id => { if (gkey(LX.words[id]) === gkey(GM.label)) return; accept(id); });
+}
+function accept(id) {
+  if (GM.found.some(f => f.id === id)) return;
+  if (GM.phase === 'main' || GM.phase === 'wait') { markFound(id, 'time'); return; }
+  if (GM.phase === 'riddle' && GM.rid) {
+    if (id === GM.rid.id) { markFound(id, 'riddle'); riddleDone(true); }
+    else if (GM.missing.some(m => m.id === id)) { markFound(id, 'riddle'); GM.missing = GM.missing.filter(m => m.id !== id); GM.riddles = GM.riddles.filter(m => m.id !== id); say('Bonus : un autre mot manquant trouvé. La devinette reste ouverte.', 2600); }
+  }
+}
+function markFound(id, how) {
+  const g = GM.g, x = g.nodes.find(n => n.wid === id && n.level === 1); if (!x) return;
+  GM.found.push({ id, label: LX.words[id], how });
+  x.found = true; x.visT = 1; x.awakeT = 1; x.lit = 1; x.litDirty = true;
+  const n = GM.found.length; GXA.found(n - 1);
+  const dots = $('gmCount').children; for (let i = 0; i < Math.min(n, dots.length); i++) dots[i].classList.add('on');
+  gmFoundEl.textContent = LX.words[id]; gmFoundEl.classList.remove('pop'); void gmFoundEl.offsetWidth; gmFoundEl.classList.add('pop');
+  if (n === GM.level && how === 'time') say('Objectif atteint ! Continuez : chaque étoile compte.', 3000);
+  if (GM.found.length >= GM.acc.length) { if (GM.phase === 'main') endMain(); }
+}
+
+/* ── chrono et sablier ── */
+function setSand(f) {
+  f = clamp(f, 0, 1); const top = $('sandTop'), bot = $('sandBot'), fall = $('sandFall');
+  top.setAttribute('y', 6 + 26 * (1 - f)); top.setAttribute('height', 26 * f);
+  bot.setAttribute('height', 26 * (1 - f)); bot.setAttribute('y', 58 - 26 * (1 - f)); fall.setAttribute('opacity', f > .003 && f < .999 ? .9 : 0);
+}
+function gameTick(now) {
+  const G = GM; if (STATE.game !== G) return;
+  if (G.phase === 'main') {
+    const rem = Math.max(0, G.dur - (now - G.t0)), sec = Math.ceil(rem / 1000);
+    setSand(rem / G.dur);
+    if (sec !== G.lastSec) { G.lastSec = sec; $('gmSec').textContent = sec; $('gmClock').classList.toggle('late', sec <= 10); GXA.clock(sec <= 10); }
+    if (rem <= 0) endMain();
+  } else if (G.phase === 'riddle' && G.rid) {
+    const el = now - G.rid.t0, rem = Math.max(0, G.riddleDur - el), sec = Math.ceil(rem / 1000);
+    setSand(rem / G.riddleDur); $('gmBar').style.transform = `scaleX(${rem / G.riddleDur})`;
+    if (sec !== G.lastSec) { G.lastSec = sec; $('gmSec').textContent = sec; $('gmClock').classList.toggle('late', sec <= 5); if (sec <= 5) GXA.clock(true); }
+    if (el > 8000 && G.rid.hint < 1) { G.rid.hint = 1; drawSlots(); }
+    if (el > 14000 && G.rid.hint < 2) { G.rid.hint = 2; drawSlots(); }
+    if (rem <= 0 && !G.rid.over) riddleOver();
+  }
+}
+
+/* ── fin de la minute, devinettes ── */
+async function endMain() {
+  if (GM.phase !== 'main') return; GM.phase = 'between'; GXA.gong();
+  const acc = GM.acc.filter(a => !GM.found.some(f => f.id === a.id));
+  GM.missing = acc.slice(0, 7).map(a => ({ id: a.id, label: LX.words[a.id], u: a.u }));
+  $('gmAsk').innerHTML = GM.missing.length ? `Temps écoulé : <b>${GM.found.length}</b> trouvé${GM.found.length > 1 ? 's' : ''}.<br>Place aux devinettes.` : `Tous les synonymes sont trouvés. <b>Bravo.</b>`;
+  $('gmClock').hidden = true;
+  await Promise.all(GM.missing.map(m => defOf(m.id)));
+  await sleep(2200); if (STATE.game !== GM) return;
+  GM.riddles = GM.missing.slice(); GM.total = GM.riddles.length;
+  nextRiddle();
+}
+function maskDef(def, label) {
+  if (!def) return ''; const stem = label.replace(/(er|ir|re|e|s|x)$/i, ''); if (stem.length < 3) return def;
+  return def.replace(new RegExp('\\b' + stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\p{L}\\-]*', 'giu'), '…');
+}
+function clueFor(m) {
+  const nu = NUANCE[gkey(GM.label) + '>' + gkey(m.label)];
+  const d = defSync(m.id); const dd = d ? maskDef(d.s, m.label) : '';
+  if (nu) return { clue: nu, sub: dd };
+  if (dd) {
+    const weak = dd.length < 16 || gkey(dd).split(' ').includes(gkey(GM.label));
+    const fam = isLow(m.id) ? ' (registre familier)' : '';
+    return { clue: dd.charAt(0).toUpperCase() + dd.slice(1) + (/[.!?…]$/.test(dd) ? '' : '.') + fam, sub: '', weak };
+  }
+  return { clue: `Un autre mot pour « ${GM.label} », sans définition connue.`, sub: '' };
+}
+function nextRiddle() {
+  if (STATE.game !== GM) return;
+  const m = GM.riddles.shift();
+  if (!m) { finish(); return; }
+  const c = clueFor(m), k = GM.total - GM.riddles.length;
+  GM.phase = 'riddle'; GM.rid = { id: m.id, label: m.label, t0: performance.now(), hint: c.weak ? 1 : 0, over: false, c };
+  $('gmAsk').hidden = true;
+  $('gmKicker').textContent = `devinette ${k} sur ${GM.total} · un synonyme de ${GM.label.toUpperCase()}`;
+  $('gmClue').textContent = c.clue; $('gmRiddle').hidden = false; $('gmClock').hidden = false; $('gmClock').classList.remove('late');
+  GM.lastSec = -1; drawSlots(); GXA.ask();
+}
+function drawSlots() {
+  const r = GM.rid; if (!r) return; const w = r.label, chars = [...w];
+  const isL = ch => /[\p{L}]/u.test(ch), last = chars.map(isL).lastIndexOf(true);
+  $('gmSlots').textContent = chars.map((ch, i) => !isL(ch) ? (ch === ' ' ? ' ' : ch) : r.over ? ch : (r.hint >= 1 && i === 0) || (r.hint >= 2 && i === last) ? ch : '_').join(' ');
+  const letters = chars.filter(isL).length, pos = posOf(r.id);
+  $('gmSub').textContent = r.over ? `C’était : ${r.label}` : [pos, `${letters} lettres`, r.hint >= 1 ? `commence par « ${chars[0]} »` : '', r.c.sub && r.hint >= 1 ? r.c.sub : ''].filter(Boolean).join(' · ');
+}
+function riddleOver() {
+  const r = GM.rid; if (!r || r.over) return; r.over = true; GXA.miss(); drawSlots();
+  const x = GM.g.nodes.find(n => n.wid === r.id); if (x) { x.visT = 1; x.awakeT = .55; }
+  setTimeout(() => { if (STATE.game === GM && GM.rid === r) { GM.rid = null; nextRiddle(); } }, 2300);
+}
+function riddleDone(ok) {
+  const r = GM.rid; if (!r) return; r.over = true; GM.rid = null; $('gmSub').textContent = 'Bien vu !';
+  setTimeout(() => { if (STATE.game === GM) nextRiddle(); }, 1500);
+}
+$('gmSkip').addEventListener('click', () => { if (GM.phase === 'riddle' && GM.rid && !GM.rid.over) riddleOver(); });
+
+/* ── bilan ── */
+function finish() {
+  if (STATE.game !== GM) return; GM.phase = 'end'; stopRec(); $('gmRiddle').hidden = true; $('gmClock').hidden = true; GXA.gong();
+  const tF = GM.found.filter(f => f.how === 'time'), rF = GM.found.filter(f => f.how === 'riddle');
+  const ok = tF.length >= GM.level, rest = GM.acc.filter(a => !GM.found.some(f => f.id === a.id)).slice(0, 18);
+  $('gmAsk').innerHTML = `<b>${esc(GM.label[0].toUpperCase() + GM.label.slice(1))}</b>`;
+  $gm.modal.innerHTML = `<div class="gm-card"><h3>${ok ? (tF.length >= GM.level * 1.5 ? 'Magistral' : 'Bravo') : tF.length >= GM.level / 2 ? 'Presque' : 'Courage'}</h3>
+    <p><b style="color:var(--amber);font-weight:400">${tF.length}</b> synonyme${tF.length > 1 ? 's' : ''} de « ${esc(GM.label)} » en une minute (objectif : ${GM.level})${rF.length ? `, et <b style="color:var(--good);font-weight:400">${rF.length}</b> de plus aux devinettes` : ''}. Il y en avait ${GM.acc.length} dans le dictionnaire.</p>
+    <div class="words">${tF.map(f => `<span class="ok">${esc(f.label)}</span>`).join('')}${rF.map(f => `<span class="rid">${esc(f.label)}</span>`).join('')}${rest.map(a => `<span>${esc(LX.words[a.id])}</span>`).join('')}</div>
+    <p style="font-size:11px">Orange : trouvés dans la minute · vert : aux devinettes · gris : restés dans l’ombre.</p>
+    <div class="row"><button class="bigbtn" id="gmAgain">Rejouer</button><button class="chip" id="gmLvl">autre niveau</button><button class="chip" id="gmExplore">explorer « ${esc(GM.label)} »</button><button class="chip" id="gmEnd">terminer</button></div></div>`;
+  $('gmAsk').hidden = false; $gm.modal.hidden = false; $gm.modal.onclick = null;
+  $('gmAgain').onclick = () => { $gm.modal.hidden = true; quitGame(false); startGame(GM.level); };
+  $('gmLvl').onclick = () => { $gm.modal.hidden = true; quitGame(false); openGameModal(); };
+  $('gmExplore').onclick = () => { $gm.modal.hidden = true; const id = GM.id; quitGame(false); goWord(id); };
+  $('gmEnd').onclick = () => { $gm.modal.hidden = true; quitGame(true); };
+}
+
+/* ── sortie ── */
+function quitGame(toField) {
+  if (!STATE.game) return; stopRec(); GM.phase = 'end';
+  STATE.game = null; document.body.classList.remove('playing'); $gm.box.hidden = true; $gm.modal.hidden = true; GXA.padLevel(1); gmFoundEl.classList.remove('pop');
+  if (GM.g && cur === GM.g) { GM.g.fadeT = 0; cur = null; }
+  if (toField !== false && STATE.mode === 'field') { const id = GM.id; cam.tR = 44; cam.tPh = 1.32; if (toField === 'explore') goWord(id); else $('card').classList.add('off'); }
+}
+$('gmQuit').addEventListener('click', () => { if (GM.phase === 'end') return; quitGame('explore'); });
+
+/* ═════════════ Galexico · 9. Démarrage et boucle de rendu ═════════════ */
+(function grain() { /* grain de pellicule : une tuile de bruit */
+  const c = document.createElement('canvas'); c.width = c.height = 220; const x = c.getContext('2d'), d = x.createImageData(220, 220);
+  for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  x.putImageData(d, 0, 0); $('grain').style.backgroundImage = `url(${c.toDataURL()})`;
+})();
+
+cam.th = .6; cam.tTh = .6; cam.ph = HOME.ph; cam.tPh = HOME.ph; cam.r = HOME.camR; cam.tR = HOME.camR;
+document.body.classList.add('home');
+buildLangRow();
+
+const DT_MAX = +new URLSearchParams(location.search).get('dtmax') || .1;
+let lastT = performance.now(), slowT = 0, slowN = 0, frames = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(DT_MAX, Math.max(.001, (now - lastT) / 1000)); lastT = now; frames++;
+  applyCamera(dt, now);
+  updateOptics(dt, now);
+  updateHover(now);
+  if (HOME.built) updateHome(dt, camUp, fwd);
+  for (const g of graphs.slice()) {
+    updateGraph(g, dt, now);
+    if (g !== cur && g.fadeT === 0 && g.fade < .012) disposeGraph(g);
+  }
+  graphs.forEach(g => updateLabelsOf(g, U.uFocus.value));
+  gameTick(now);
+  renderer.render(scene, camera);
+  /* qualité adaptative : si la machine peine, on baisse la résolution interne */
+  if (frames > 90) { slowT = slowT * .97 + dt * .03; if (slowT > .036 && ++slowN > 60) { slowN = 0; const pr = renderer.getPixelRatio(); if (pr > .7) { renderer.setPixelRatio(Math.max(.7, pr * .8)); resize(); slowT = .02; } } else if (slowT <= .036) slowN = 0; }
+}
+
+(async function boot() {
+  penTitle();
+  const fill = $('loadfill'), hint = $('hint');
+  const lp = loadLexicon(p => { fill.style.width = Math.round(p * 100) + '%'; });
+  buildHome().catch(e => console.error(e));
+  requestAnimationFrame(frame);
+  try { await lp; } catch (err) { hint.textContent = 'Le dictionnaire n’a pas pu se charger (' + err.message + '). Recharge la page.'; return; }
+  $('loadbar').style.opacity = 0; hint.textContent = 'Clique sur « Le Français » pour y entrer.'; hint.classList.add('pulse');
+  const h = decodeURIComponent(location.hash.slice(1) || '');
+  if (h) { const id = find(h); if (id >= 0) enterField(id); }
+  window.__gx = { ready: true };
+})();
+
+</script>
+</body>
+</html>
