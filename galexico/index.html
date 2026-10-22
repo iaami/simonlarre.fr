@@ -174,10 +174,12 @@ body.home .dock>*{pointer-events:none}
 .tip{position:fixed;left:0;top:0;pointer-events:none;padding:9px 12px 8px;border-radius:12px;background:rgba(11,13,18,.84);border:1px solid var(--glass-edge);
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:11px;line-height:1.6;letter-spacing:.04em;color:var(--dim);font-variant-numeric:tabular-nums;max-width:290px;transition:opacity .2s;z-index:5}
 .tip.off{opacity:0}
-.tip strong{display:block;font-family:var(--f-pen);font-weight:400;font-size:16px;line-height:1.7;color:var(--ink);letter-spacing:0}
+.tip strong{display:block;font-family:system-ui,-apple-system,'Segoe UI','Noto Sans',sans-serif;font-weight:600;font-size:14.5px;line-height:1.5;color:var(--ink);letter-spacing:.01em}
 .tip .df{display:block;margin:1px 0 4px;font-family:system-ui,-apple-system,'Segoe UI','Noto Sans',sans-serif;font-size:12px;line-height:1.45;color:var(--ink);letter-spacing:.01em;font-weight:300}
 .tip .df.wait{color:var(--faint)}
-.tip .xyz{color:var(--ink)}
+.tip .lg{display:block;font-family:system-ui,-apple-system,'Segoe UI','Noto Sans',sans-serif;font-size:11px;line-height:1.5;color:var(--dim);letter-spacing:.02em}
+.tip .lg b{color:var(--ink);font-weight:500}
+.tip .lg.xr{margin-top:3px;color:var(--amber)}
 .tip em{font-style:normal;color:var(--amber)}
 
 .toast{position:fixed;left:50%;bottom:calc(168px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:max-content;max-width:calc(100vw - 32px);z-index:6;
@@ -289,6 +291,44 @@ body.playing .tr *,body.playing .dock *{pointer-events:none!important}
   .gm-count{max-width:300px}
 }
 
+/* ───────── accueil : adage tournant ───────── */
+.title .adage{margin:14px 0 0;display:flex;flex-direction:column;align-items:center;gap:3px;min-height:46px;text-transform:none;letter-spacing:0;color:var(--ink);opacity:.92}
+.adage span{font-family:var(--f-pen);font-size:clamp(15px,1.7vw,20px);line-height:1.5;opacity:0;transition:opacity 1.6s ease;text-shadow:0 0 22px rgba(240,163,85,.3);text-align:center}
+.adage small{font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);opacity:0;transition:opacity 1.6s ease}
+.adage.on span{opacity:1}.adage.on small{opacity:1}
+@media (prefers-reduced-motion:reduce){.adage span,.adage small{transition:none}}
+/* ───────── historique : bouton retour ───────── */
+.navrow{display:flex;align-items:center;gap:8px}
+.back{appearance:none;flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--glass-edge);background:var(--glass);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:border-color .2s,opacity .2s}
+.back svg{width:15px;height:15px}
+.back:hover:not(:disabled){border-color:rgba(240,163,85,.6);color:var(--amber)}
+.back:disabled{opacity:.3;cursor:default}
+.back:focus-visible{outline:1px solid var(--amber);outline-offset:3px}
+/* ───────── panneau coordonnées ───────── */
+.coords{margin-top:4px;padding:7px 10px;border-radius:10px;background:rgba(11,13,18,.7);border:1px solid var(--glass-edge);font-size:10.5px;line-height:1.6;letter-spacing:.05em;color:var(--dim);font-variant-numeric:tabular-nums;max-width:280px;transition:opacity .25s;pointer-events:none}
+.coords.off{opacity:0}
+.coords b{color:var(--amber);font-weight:400}
+.coords .xyz{color:var(--ink)}
+body.playing .coords,body.home .coords{opacity:0!important}
+/* ───────── fiche : équivalents dans d'autres langues ───────── */
+.card .xref{display:flex;flex-direction:column;gap:5px}
+.card .xref .xl{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+.card .xref .xc{display:flex;flex-wrap:wrap;gap:5px}
+.chip.xr{padding:4px 9px;font-family:system-ui,-apple-system,'Segoe UI','Noto Sans',sans-serif;font-size:12px;letter-spacing:.01em;color:var(--ink)}
+.chip.xr small{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-right:3px}
+.chip.xr.same{border-style:dashed}
+.help .who{color:var(--ink);padding:10px 12px;border-left:2px solid var(--amber);background:rgba(240,163,85,.06);border-radius:0 10px 10px 0;line-height:1.65}
+
+@media (max-width:700px){
+  .title p#sub{font-size:8.5px;letter-spacing:.24em;margin-top:0}
+  .title .adage{margin-top:4px;min-height:38px;gap:1px}
+  .adage span{font-size:15px}
+  .tl .navrow{margin-top:30px}
+  .card.mini .xref{display:none}
+  .adage small{display:none}
+  .card .xref .xc{max-height:92px;overflow:auto}
+}
+
 </style>
 </head>
 <body>
@@ -302,20 +342,20 @@ body.playing .tr *,body.playing .dock *{pointer-events:none!important}
   <i class="ra-a">α 04h</i><i class="ra-b">α 12h</i><i class="ra-c">α 20h</i>
   <i class="de-a">δ +45°</i><i class="de-b">δ 0°</i><i class="de-c">δ −45°</i>
 </div>
-<header class="title" id="title"><h1><span id="penTitle">Galexico</span></h1><p id="sub">dictionnaire galactique des synonymes</p></header>
+<header class="title" id="title"><h1><span id="penTitle">Galexico</span></h1><p id="sub">dictionnaire galactique des synonymes</p><p class="adage" id="adage" aria-live="off"><span id="adageTxt"></span><small id="adageLg"></small></p></header>
 
 <header class="hud tl" id="hudTL">
   <button class="mark" id="home" aria-label="Retour à la carte des langues" title="Retour à la carte des langues">Galexico</button>
   <div class="stats" id="stats"></div>
-  <nav class="trail" id="trail" aria-label="Parcours"></nav>
+  <div class="navrow"><button class="back" id="back" aria-label="Mot précédent" title="Mot précédent (Retour arrière)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H6M11 6l-6 6 6 6"/></svg></button><nav class="trail" id="trail" aria-label="Historique"></nav></div>
 </header>
 
 <nav class="hud tr" aria-label="Réglages">
   <button class="chip" id="bXYZ" aria-pressed="true" title="Coordonnées X Y Z et distance au soleil">coordonnées</button>
   <button class="chip" id="bAnt" aria-pressed="false" title="Antonymes : l’antimatière du mot">antimatière</button>
-  <button class="chip" id="bRot" aria-pressed="true" title="Rotation lente quand tu ne touches à rien">dérive</button>
+  <button class="chip" id="bRot" aria-pressed="true" title="Dérive : rotation lente de la caméra et gravitation des astres — décoche pour tout figer">dérive</button>
   <button class="chip" id="bSnd" aria-pressed="true" aria-expanded="false" aria-controls="sndBox" title="Son : volume et ambiance">son ♪</button>
-  <button class="chip" id="bHelp" aria-label="Aide, sources et licences">?</button>
+  <button class="chip" id="bHelp" aria-label="À propos : le créateur, l’aide, les sources et les licences" title="À propos de Galexico · créé par Simon Larré">?</button>
   <div class="sndbox" id="sndBox" hidden role="group" aria-label="Réglages du son">
     <label for="vol">volume</label>
     <input type="range" id="vol" min="0" max="100" value="70" aria-label="Volume">
@@ -332,6 +372,7 @@ body.playing .tr *,body.playing .dock *{pointer-events:none!important}
   <div class="lens"><label for="aperture">ouverture</label><input type="range" id="aperture" min="0" max="100" value="62"><span id="fnum">f/2</span></div>
   <div class="scale"><i></i><span id="scaleTxt">5 u</span></div>
   <div id="optic"></div>
+  <div class="coords off" id="coords" aria-live="off"></div>
 </div>
 
 <aside class="card off" id="card" aria-live="polite">
@@ -339,6 +380,7 @@ body.playing .tr *,body.playing .dock *{pointer-events:none!important}
   <div class="klass" id="cKlass"></div>
   <div class="def" id="cDef"></div>
   <div class="meta" id="cMeta"></div>
+  <div class="xref" id="cXref" hidden></div>
   <div class="row">
     <button class="chip" id="trBtn" aria-expanded="false" aria-controls="trBox">traductions · 20 langues ▾</button>
     <a class="chip" id="cLink" href="https://fr.wiktionary.org/" target="_blank" rel="noopener">Wiktionnaire ↗</a>
@@ -422,7 +464,8 @@ body.playing .tr *,body.playing .dock *{pointer-events:none!important}
 <div class="help" id="help" hidden>
   <div role="dialog" aria-labelledby="hTitle">
     <h3 id="hTitle">Galexico</h3>
-    <p>La carte céleste de la langue française, avec ses langues cousines (italien, espagnol, portugais, catalan, occitan, roumain, corse, latin, breton, basque, anglais, allemand) et trois petits dictionnaires : l’ancien français, le gaulois et l’argot des années 90. Dans une langue cousine, les voisins d’un mot sont ceux qui partagent son sens, souvent à travers leurs équivalents français : un rapprochement par le sens, pas une généalogie. Chaque mot est une étoile, ses synonymes tournent autour de lui. Glisse pour tourner autour du système, molette ou pincement pour zoomer. Survole une étoile : la mise au point glisse vers elle, sa définition apparaît et ses propres synonymes, jusque-là flous, s’éveillent. Clique : elle devient le nouveau soleil. Sur écran tactile, un premier toucher vise, le second bascule. <kbd>/</kbd> pour écrire, <kbd>Échap</kbd> pour fermer.</p>
+    <p class="who">Galexico est l’œuvre de <b>Simon Larré</b>, réalisateur, motion designer et grand passionné de lettres et de langues. Les mots sont sa matière première, et cette carte est sa façon de les faire voyager. Si les jeux de lettres vous amusent, une autre application existe aussi, consacrée aux <b>anagrammes</b> : <a href="https://simonlarre.fr/mamagrane/" target="_blank" rel="noopener">MamaGranne</a>. Le reste du travail de Simon est sur <a href="https://simonlarre.fr/" target="_blank" rel="noopener">simonlarre.fr</a>.</p>
+    <p>La carte céleste de la langue française, avec ses langues cousines (italien, espagnol, portugais, catalan, occitan, roumain, corse, latin, breton, basque, anglais, allemand) et trois petits dictionnaires : l’ancien français (du IXe au XIVe siècle, de 842 à 1350 environ), le gaulois et l’argot des années 90. Dans une langue cousine, les voisins d’un mot sont ceux qui partagent son sens, souvent à travers leurs équivalents français : un rapprochement par le sens, pas une généalogie. Chaque mot est une étoile, ses synonymes tournent autour de lui. Glisse pour tourner autour du système, molette ou pincement pour zoomer. Survole une étoile : la mise au point glisse vers elle, sa définition et sa nature grammaticale apparaissent et ses propres synonymes, jusque-là flous, s’éveillent. Le bouton « coordonnées » affiche la position de l’étoile survolée ; « dérive » fige la caméra et la gravitation. <kbd>Retour arrière</kbd> ramène au mot précédent, et un mot qui existe dans une autre langue propose une téléportation vers cette galaxie. Clique : elle devient le nouveau soleil. Sur écran tactile, un premier toucher vise, le second bascule. <kbd>/</kbd> pour écrire, <kbd>Échap</kbd> pour fermer.</p>
     <h4>Taille et couleur des étoiles</h4>
     <p>La taille, de 1 à 10, suit le nombre de synonymes du mot. La couleur suit sa rareté, comme dans le ciel : les étoiles rouges sont les plus communes, les bleues les plus rares. Les mots très rares et peu fournis deviennent des naines blanches ou des pulsars, les mots communs et riches des géantes rouges. Un mot qui a des contraires est une étoile double.</p>
     <h4>Orbites et coordonnées</h4>
@@ -430,7 +473,7 @@ body.playing .tr *,body.playing .dock *{pointer-events:none!important}
     <p><code>d = 6 u × (force du plus proche ÷ force du mot)<sup>0,6</sup></code></p>
     <p>X, Y et Z donnent la position dans le repère du soleil. Seule la distance <code>d</code> a un sens linguistique ; l’orientation des orbites est tirée du mot lui-même.</p>
     <h4>Jeu</h4>
-    <p>Le dé orange « Quizz » tire un mot et un objectif : 2, 4, 6, 8, 16 ou 32 synonymes à citer à voix haute en une minute. Le chrono part dès que la consigne apparaît. Chaque mot juste allume son étoile. Les mots manquants deviennent des devinettes de vingt secondes. La dictée vocale demande l’accès au micro et marche dans Chrome, Edge et Safari ; sans micro, tape les réponses.</p>
+    <p>Le dé orange « Quizz » tire un mot dans la langue où tu te trouves et un objectif : 2, 4, 6, 8, 16 ou 32 synonymes à citer à voix haute en une minute (les niveaux disponibles dépendent de la richesse du dictionnaire). Le chrono part dès que la consigne apparaît. Chaque mot juste allume son étoile. Les mots manquants deviennent des devinettes de vingt secondes. La dictée vocale demande l’accès au micro et marche dans Chrome, Edge et Safari, dans la langue de la galaxie (français, italien, espagnol, portugais, catalan, roumain, basque, anglais, allemand) ; pour le latin, le corse, l’occitan et le breton, aucun navigateur n’a de dictée : elle utilise la langue voisine la plus proche, avec moins de précision. Sans micro, tape les réponses.</p>
     <h4>Données et licences</h4>
     <p id="hData"></p>
     <div class="row"><button class="chip" id="bClose">fermer</button></div>
@@ -531,18 +574,20 @@ async function loadMini(id) {
   const n = j.w.length, o = { id, mini: true, ready: true, n, words: j.w, keys: j.w.map(norm), map: new Map(), man: null, defs: j.d.map(x => x ? { s: x, l: x } : null), tags: j.t, seeds: j.seeds, era: j.era };
   o.zipf = Uint8Array.from(j.z); o.flags = Uint8Array.from(j.f); o.deg = new Uint8Array(n);
   o.keys.forEach((k, i) => { const p = o.map.get(k); if (p === undefined || (!(o.flags[p] & 128) && (o.flags[i] & 128))) o.map.set(k, i); });
+  o.exact = new Map(); j.w.forEach((w, i) => { const k = w.toLowerCase(), p = o.exact.get(k); if (p === undefined || (!(o.flags[p] & 128) && (o.flags[i] & 128))) o.exact.set(k, i); });   /* « casă » et « casa » ne sont pas le même mot */
   let E = 0; j.nb.forEach(r => E += r.length / 2);
   o.eo = new Uint32Array(n + 1); o.ea = new Uint32Array(E); let c = 0;
   j.nb.forEach((r, i) => { o.eo[i] = c; for (let k = 0; k < r.length; k += 2) o.ea[c++] = (r[k] << 8) | r[k + 1]; o.deg[i] = Math.min(255, r.length / 2); });
   o.eo[n] = c; o.ao = new Uint32Array(n + 1); o.aa = new Uint32Array(0);
   o.nNative = o.flags.reduce((a, f) => a + (f & 128 ? 1 : 0), 0);
-  o.maxLevel = id === 'arg' ? 8 : 0;
+  /* niveaux du Quizz : 2, 4, 6, 8, 16, 32 synonymes ; un niveau n'est proposé que si assez de mots de la langue ont ≥ ⌈1,25 × niveau⌉ voisins */
+  o.maxLevel = 0; for (const L of [2, 4, 6, 8, 16, 32]) { const need = Math.ceil(L * 1.25); let c = 0; for (let i = 0; i < n && c < 25; i++) if ((o.flags[i] & 128) && o.deg[i] >= need) c++; if (c >= 25) o.maxLevel = L; else break; }
   return (MINIS[id] = o);
 }
 async function useLex(id) {
   if (id === LEXID) return;
   const t = id === 'fr' ? (FRDATA || { id: 'fr', mini: false, ready: false, n: 0, words: [], keys: [], zipf: null, flags: null, deg: null, eo: null, ea: null, ao: null, aa: null, map: new Map(), defs: null, tags: null, seeds: null, era: '', maxLevel: 32 }) : await loadMini(id);
-  Object.assign(LX, t); LEXID = id; DEFMEM.clear(); TRMEM.clear();
+  Object.assign(LX, t); LX.exact = t.exact || null; LEXID = id; DEFMEM.clear(); TRMEM.clear();
 }
 
 /* ── accès ── */
@@ -580,6 +625,7 @@ async function trOf(id) {
 const ART = /^(?:le |la |les |l'|un |une |des |du |de la |de l'|d'|au |aux )/;
 function find(raw) {
   let k = norm(raw); if (!k) return -1;
+  if (LX.exact) { const e = LX.exact.get(raw.trim().toLowerCase()); if (e !== undefined) return e; }
   const tryK = s => LX.map.has(s) ? LX.map.get(s) : -1;
   let id = tryK(k); if (id >= 0) return id;
   const k2 = k.replace(ART, ''); if (k2 !== k) { id = tryK(k2); if (id >= 0) return id; }
@@ -647,6 +693,33 @@ function starClass(id) {
   return o;
 }
 
+/* ── « existe aussi en… » : index croisé des équivalents entre langues (traductions du Wiktionnaire) et des mots de même graphie ── */
+const XR = { loading: null, concepts: null, map: new Map() };
+const LANGNAME = { fr: 'Français', it: 'Italien', es: 'Espagnol', pt: 'Portugais', ca: 'Catalan', oc: 'Occitan', ro: 'Roumain', co: 'Corse', la: 'Latin', br: 'Breton', eu: 'Basque', en: 'Anglais', de: 'Allemand' };
+function loadXref() {
+  if (XR.loading) return XR.loading;
+  XR.loading = fetchBytes(DATA_URL + 'xref.json.gz').then(b => {
+    const C = JSON.parse(new TextDecoder().decode(b)); XR.concepts = C;
+    const add = (k, i) => { const a = XR.map.get(k); if (!a) XR.map.set(k, [i]); else if (a.length < 3 && !a.includes(i)) a.push(i); };
+    C.forEach((c, i) => { add('fr:' + norm(c[0]), i); for (let k = 1; k < c.length; k++) { const m = c[k], same = m[0] === '~', body = same ? m.slice(1) : m, p = body.indexOf(':'); add(body.slice(0, p) + ':' + norm(body.slice(p + 1)), i); } });
+    return XR;
+  }).catch(() => { XR.loading = null; return null; });
+  return XR.loading;
+}
+/* équivalents d'un mot (langue courante, mot) dans les autres langues : [{ code, word, same }] */
+function xrefOf(code, word) {
+  if (!XR.concepts) return [];
+  const idx = XR.map.get(code + ':' + norm(word)); if (!idx) return [];
+  const out = [], seen = new Set([code]);
+  for (const i of idx) {
+    const c = XR.concepts[i];
+    if (!seen.has('fr') && !(code === 'fr')) { seen.add('fr'); out.push({ code: 'fr', word: c[0], same: false }); }
+    for (let k = 1; k < c.length; k++) { const m = c[k], same = m[0] === '~', body = same ? m.slice(1) : m, p = body.indexOf(':'), lc = body.slice(0, p), w = body.slice(p + 1);
+      if (lc === code || seen.has(lc)) continue; seen.add(lc); out.push({ code: lc, word: w, same }); }
+  }
+  return out;
+}
+
 /* ═════════════ Galexico · 2. Moteur de rendu (Three.js) : profondeur de champ, plume, soleils, galaxies ═════════════ */
 const canvas = $('gl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
@@ -658,7 +731,8 @@ const camera = new THREE.PerspectiveCamera(FOV, 1, .1, 3000);
 const V3 = THREE.Vector3;
 const TANH = Math.tan(THREE.MathUtils.degToRad(FOV) / 2);
 
-const U = { uTime: { value: 0 }, uFocus: { value: 120 }, uAp: { value: .06 }, uPix: { value: 1000 }, uProj: { value: 1000 }, uRes: { value: new THREE.Vector2(1, 1) },
+const ORB = { t: 0, speed: 1 };   /* horloge de la gravitation : s'arrête quand « dérive » est coupée */
+const U = { uTime: { value: 0 }, uOrb: { value: 0 }, uFocus: { value: 120 }, uAp: { value: .06 }, uPix: { value: 1000 }, uProj: { value: 1000 }, uRes: { value: new THREE.Vector2(1, 1) },
   uAnt: { value: 0 }, uXYZ: { value: 1 }, uCenter: { value: new V3() }, uDust: { value: 1 } };
 
 const GLSL_NOISE = `
@@ -667,7 +741,7 @@ float vnoise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
   return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x), mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x), f.y); }
 float fbm(vec2 p){ float a=.5, s=0.; for(int i=0;i<5;i++){ s+=a*vnoise(p); p=p*2.03+vec2(17.1,3.7); a*=.5; } return s; }`;
 const GLSL_HEAD = `
-uniform float uTime,uFocus,uAp,uPix,uProj,uAnt;
+uniform float uTime,uOrb,uFocus,uAp,uPix,uProj,uAnt;
 uniform vec2 uRes;
 float coc(float depth){ return uAp*abs(depth-uFocus)/max(depth,.1)*uPix; }
 float ease(float x){ x=clamp(x,0.,1.); return 1.-pow(1.-x,3.); }
@@ -725,7 +799,7 @@ attribute vec3 aCol; attribute float aSize, aSeed;
 varying vec3 vCol; varying float vA, vB;
 void main(){
   float r = length(position.xz);
-  float a = atan(position.z, position.x) + uTime*uSpin/(r*.06+1.);
+  float a = atan(position.z, position.x) + uOrb*uSpin/(r*.06+1.);
   vec3 p = vec3(r*cos(a), position.y, r*sin(a));
   vec4 mv = modelViewMatrix*vec4(p,1.); float depth = -mv.z;
   float sz = aSize*uProj/max(depth,.5);
@@ -836,7 +910,7 @@ attribute float aR, aTh, aOm, aY, aSz, aSeed, aDel; attribute vec4 aQ;
 varying float vA, vB, vW;
 void main(){
   float e = ease((uRev-aDel)/.35);
-  float th = aTh + aOm*uTime;
+  float th = aTh + aOm*uOrb;
   vec3 p = rotQ(vec3(cos(th)*aR, aY, sin(th)*aR), aQ)*e;
   vec4 mv = modelViewMatrix*vec4(p,1.); float depth = -mv.z;
   float sz = aSz*uProj/max(depth,.5);
@@ -924,7 +998,7 @@ const MONO = 'DM Mono';
 const fontReady = {};
 function ensureFont(f) {
   if (!document.fonts || !document.fonts.load) return Promise.resolve();
-  if (!fontReady[f]) fontReady[f] = Promise.race([document.fonts.load(`300 64px "${f}"`, 'hasard éèàçœ'), new Promise(r => setTimeout(r, 2500))]).catch(() => { });
+  if (!fontReady[f]) fontReady[f] = Promise.race([document.fonts.load(`300 64px "${f}"`, 'hasard éèàçœ ăşșțāŏ'), new Promise(r => setTimeout(r, 2500))]).catch(() => { });
   return fontReady[f];
 }
 function drawLabel(lines, family, px, glow, weight = '') {
@@ -1059,22 +1133,22 @@ addEventListener('resize', resize); resize();
    Le Français au centre, ses langues cousines au loin (floues, courte focale). Positions : proximité grossière, pas une mesure. */
 const GALAXIES = [
   { id: 'fr', name: 'Le Français', pos: [0, 0, 0], radius: 44, n: SMALL ? 36000 : 78000, tint: [1, .76, .48], cold: [.6, .75, .98], arms: 3, twist: 3.1, rings: 24, spin: .2, label: 'Le Français', lh: 30, ready: true, count: '119 884 mots' },
-  { id: 'oc', name: 'Occitan', pos: [-48, 6, 33], radius: 10, n: 9100, tint: [1, .8, .35], cold: [.9, .82, .6], arms: 2, twist: 2.6, rings: 6, spin: .4, label: 'Occitan', lh: 6.8, ready: true, count: '34 459 mots' },
-  { id: 'ca', name: 'Catalan', pos: [-66, -9, 50], radius: 11, n: 9750, tint: [1, .62, .3], cold: [1, .8, .55], arms: 2, twist: 3, rings: 6, spin: .38, label: 'Catalan', lh: 6.8, ready: true, count: '38 314 mots' },
-  { id: 'it', name: 'Italien', pos: [72, 14, 27], radius: 19, n: 16900, tint: [1, .58, .5], cold: [.98, .72, .8], arms: 3, twist: 3.4, rings: 9, spin: .3, label: 'Italien', lh: 8.4, ready: true, count: '75 420 mots' },
-  { id: 'co', name: 'Corse', pos: [95, -12, 69], radius: 7, n: 5200, tint: [.5, .95, .85], cold: [.6, .9, 1], arms: 0, twist: 0, rings: 4, spin: .5, label: 'Corse', lh: 5.7, ready: true, count: '3 643 mots' },
-  { id: 'es', name: 'Espagnol', pos: [-114, -4, 10], radius: 22, n: 18200, tint: [1, .45, .25], cold: [1, .72, .5], arms: 3, twist: 3.2, rings: 10, spin: .28, label: 'Espagnol', lh: 8.7, ready: true, count: '46 981 mots' },
-  { id: 'pt', name: 'Portugais', pos: [-156, 16, -24], radius: 13, n: 11050, tint: [.95, .78, .3], cold: [.7, .85, .6], arms: 2, twist: 2.8, rings: 7, spin: .34, label: 'Portugais', lh: 7.2, ready: true, count: '35 791 mots' },
-  { id: 'la', name: 'Latin', pos: [24, 48, -108], radius: 30, n: 20800, tint: [.95, .9, .74], cold: [.8, .82, .88], arms: 0, twist: 0, rings: 16, spin: .1, gain: .7, label: 'Latin', lh: 9.9, bulge: .12, flat: .5, ready: true, count: '29 556 mots' },
-  { id: 'ro', name: 'Roumain', pos: [154, 6, -55], radius: 13, n: 10400, tint: [.85, .55, .95], cold: [.7, .7, 1], arms: 2, twist: 3.2, rings: 7, spin: .3, label: 'Roumain', lh: 7.2, ready: true, count: '29 932 mots' },
-  { id: 'br', name: 'Breton', pos: [-52, -26, -112], radius: 8, n: 6500, tint: [.55, .72, .95], cold: [.7, .8, .9], arms: 0, twist: 0, rings: 5, spin: .45, label: 'Breton', lh: 6.1, ready: true, count: '13 373 mots' },
-  { id: 'eu', name: 'Basque', pos: [40, 30, 134], radius: 9, n: 7150, tint: [.78, .55, 1], cold: [.9, .72, 1], arms: 0, twist: 0, rings: 4, spin: .45, label: 'Basque · isolat', lh: 6.1, ready: true, count: '20 920 mots' },
-  { id: 'en', name: 'Anglais', pos: [187, -22, 86], radius: 30, n: 19500, tint: [.62, .78, 1], cold: [.82, .9, 1], arms: 4, twist: 3, rings: 12, spin: .26, label: 'Anglais', lh: 9.5, ready: true, count: '121 349 mots' },
+  { id: 'oc', name: 'Occitan', pos: [-48, 6, 33], radius: 10, n: 9100, tint: [1, .8, .35], cold: [.9, .82, .6], arms: 2, twist: 2.6, rings: 6, spin: .4, label: 'Occitan', lh: 6.8, ready: true, count: '31 639 mots' },
+  { id: 'ca', name: 'Catalan', pos: [-66, -9, 50], radius: 11, n: 9750, tint: [1, .62, .3], cold: [1, .8, .55], arms: 2, twist: 3, rings: 6, spin: .38, label: 'Catalan', lh: 6.8, ready: true, count: '34 349 mots' },
+  { id: 'it', name: 'Italien', pos: [72, 14, 27], radius: 19, n: 16900, tint: [1, .58, .5], cold: [.98, .72, .8], arms: 3, twist: 3.4, rings: 9, spin: .3, label: 'Italien', lh: 8.4, ready: true, count: '61 102 mots' },
+  { id: 'co', name: 'Corse', pos: [95, -12, 69], radius: 7, n: 5200, tint: [.5, .95, .85], cold: [.6, .9, 1], arms: 0, twist: 0, rings: 4, spin: .5, label: 'Corse', lh: 5.7, ready: true, count: '2 632 mots' },
+  { id: 'es', name: 'Espagnol', pos: [-114, -4, 10], radius: 22, n: 18200, tint: [1, .45, .25], cold: [1, .72, .5], arms: 3, twist: 3.2, rings: 10, spin: .28, label: 'Espagnol', lh: 8.7, ready: true, count: '41 194 mots' },
+  { id: 'pt', name: 'Portugais', pos: [-156, 16, -24], radius: 13, n: 11050, tint: [.95, .78, .3], cold: [.7, .85, .6], arms: 2, twist: 2.8, rings: 7, spin: .34, label: 'Portugais', lh: 7.2, ready: true, count: '31 875 mots' },
+  { id: 'la', name: 'Latin', pos: [24, 48, -108], radius: 30, n: 20800, tint: [.95, .9, .74], cold: [.8, .82, .88], arms: 0, twist: 0, rings: 16, spin: .1, gain: .7, label: 'Latin', lh: 9.9, bulge: .12, flat: .5, ready: true, count: '27 203 mots' },
+  { id: 'ro', name: 'Roumain', pos: [154, 6, -55], radius: 13, n: 10400, tint: [.85, .55, .95], cold: [.7, .7, 1], arms: 2, twist: 3.2, rings: 7, spin: .3, label: 'Roumain', lh: 7.2, ready: true, count: '28 285 mots' },
+  { id: 'br', name: 'Breton', pos: [-52, -26, -112], radius: 8, n: 6500, tint: [.55, .72, .95], cold: [.7, .8, .9], arms: 0, twist: 0, rings: 5, spin: .45, label: 'Breton', lh: 6.1, ready: true, count: '11 591 mots' },
+  { id: 'eu', name: 'Basque', pos: [40, 30, 134], radius: 9, n: 7150, tint: [.78, .55, 1], cold: [.9, .72, 1], arms: 0, twist: 0, rings: 4, spin: .45, label: 'Basque · isolat', lh: 6.1, ready: true, count: '19 484 mots' },
+  { id: 'en', name: 'Anglais', pos: [187, -22, 86], radius: 30, n: 19500, tint: [.62, .78, 1], cold: [.82, .9, 1], arms: 4, twist: 3, rings: 12, spin: .26, label: 'Anglais', lh: 9.5, ready: true, count: '109 916 mots' },
   /* trois petits dictionnaires faits maison : le français d'avant, la langue d'avant lui, et celle des cours de lycée */
-  { id: 'fro', name: 'Ancien français', pos: [-64, 30, -70], radius: 17, n: 15500, tint: [.96, .8, .5], cold: [.78, .82, .95], arms: 2, twist: 2.4, rings: 10, spin: .14, label: 'Ancien français · dates', lh: 8.2, ready: true, count: '10 929 mots' },
+  { id: 'fro', name: 'Ancien français', pos: [-64, 30, -70], radius: 17, n: 15500, tint: [.96, .8, .5], cold: [.78, .82, .95], arms: 2, twist: 2.4, rings: 10, spin: .14, label: ['Ancien français', 'IXe – XIVe siècle'], lh: 12.4, ready: true, count: '10 929 mots' },
   { id: 'gaul', name: 'Gaulois', pos: [-98, -34, -148], radius: 10, n: 8200, tint: [.5, .92, .66], cold: [.7, .92, .85], arms: 0, twist: 0, rings: 5, spin: .42, label: 'Gaulois', lh: 6.4, ready: true, count: '364 mots' },
   { id: 'arg', name: "Argot 90's", pos: [46, -50, 54], radius: 13, n: 10800, tint: [1, .42, .74], cold: [.5, .88, 1], arms: 2, twist: 3.6, rings: 7, spin: .55, label: "Argot 90's", lh: 7.2, ready: true, count: '512 mots' },
-  { id: 'de', name: 'Allemand', pos: [131, 42, -108], radius: 21, n: 15600, tint: [.8, .88, 1], cold: [.65, .75, .95], arms: 3, twist: 3.6, rings: 9, spin: .28, label: 'Allemand', lh: 8.4, ready: true, count: '125 685 mots' }
+  { id: 'de', name: 'Allemand', pos: [131, 42, -108], radius: 21, n: 15600, tint: [.8, .88, 1], cold: [.65, .75, .95], arms: 3, twist: 3.6, rings: 9, spin: .28, label: 'Allemand', lh: 8.4, ready: true, count: '118 463 mots' }
 ];
 const HOME = { entered: 'fr', built: false, items: [], hov: -1, fade: 1, fadeT: 1, keep: 0, keepT: 0, ph: 1.04, camR: SMALL ? 300 : 215 };
 
@@ -1239,7 +1313,7 @@ function buildGraph(g, origin) {
   layout(g);
   const group = new THREE.Group(); group.position.copy(origin); scene.add(group);
   const GU = Object.assign({}, U, { uRev: { value: 0 }, uFade: { value: 0 }, uHov: { value: -1 } });
-  g.group = group; g.U = GU; g.fade = 0; g.fadeT = 1; g.anim = null; g.labels = []; g.hov = -1; g.t0 = performance.now(); g.birth = 0;
+  g.group = group; g.U = GU; g.fade = 0; g.fadeT = 1; g.anim = null; g.labels = []; g.hov = -1; g.t0 = performance.now(); g.orb0 = ORB.t; g.birth = 0;
   const n = g.nodes, N = n.length;
   const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), size = new Float32Array(N), del = new Float32Array(N), seed = new Float32Array(N),
     awake = new Float32Array(N), lvl = new Float32Array(N), idx = new Float32Array(N), lit = new Float32Array(N);
@@ -1431,7 +1505,7 @@ function updateGraph(g, dt, now) {
   g.U.uFade.value = g.fade;
   if (g.anim && now >= g.anim.t0) { const t = clamp((now - g.anim.t0) / g.anim.dur, 0, 1); const e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     g.U.uRev.value = lerp(g.anim.from, g.anim.to, e); if (t >= 1) g.anim = null; }
-  const tsec = (now - g.t0) / 1000;
+  const tsec = ORB.t - g.orb0;
   const P = g.posAttr.array;
   g.nodes.forEach((x, i) => {
     if (x.orb) { posAt(x, tsec); P[i * 3] = x.pos.x; P[i * 3 + 1] = x.pos.y; P[i * 3 + 2] = x.pos.z; }
@@ -1746,6 +1820,10 @@ const GXA = {
 
 /* ═════════════ Galexico · 5. Interface : caméra, souris, recherche, fiche, traductions, navigation ═════════════ */
 const SRC = window.SpeechRecognition || window.webkitSpeechRecognition;
+/* langue de la reconnaissance vocale selon la galaxie ; « ~ » = reconnaisseur voisin faute de mieux (latin, corse, occitan, breton n'ont pas de dictée native) */
+const VOICE = { fr: ['fr-FR'], arg: ['fr-FR'], fro: ['fr-FR'], gaul: ['fr-FR'], it: ['it-IT'], es: ['es-ES'], pt: ['pt-PT'], ca: ['ca-ES'], ro: ['ro-RO'], eu: ['eu-ES'], en: ['en-GB'], de: ['de-DE'], la: ['it-IT', 'italien'], co: ['it-IT', 'italien'], oc: ['ca-ES', 'catalan'], br: ['fr-FR', 'français'] };
+const voiceLang = () => (VOICE[LEXID] || VOICE.fr)[0];
+const voiceNote = () => { const v = VOICE[LEXID]; return v && v[1] ? v[1] : ''; };
 const ptr = { x: innerWidth / 2, y: innerHeight / 2, down: false, moved: false, inside: false, sx: 0, sy: 0, pts: new Map(), pinch: 0 };
 let lastInteract = performance.now(), apertureV = 62;
 cam.k = 5; cam.kt = 2.2;
@@ -1785,6 +1863,7 @@ function updateOptics(dt, now) {
   U.uXYZ.value = lerp(U.uXYZ.value, STATE.xyz ? 1 : 0, 1 - Math.exp(-dt * 6));
   U.uAnt.value = lerp(U.uAnt.value, STATE.ant ? 1 : 0, 1 - Math.exp(-dt * 4));
   U.uTime.value = now / 1000;
+  ORB.speed = lerp(ORB.speed, STATE.rot ? 1 : 0, 1 - Math.exp(-dt * 2.5)); ORB.t += dt * ORB.speed; U.uOrb.value = ORB.t;
   if (now - scaleT > 450) { scaleT = now;
     const depth = camera.position.distanceTo(cam.target), ppw = innerHeight / (2 * TANH) / depth, unit = 64 / ppw;
     const nice = [.1, .2, .5, 1, 2, 5, 10, 20, 50, 100, 200, 500].reduce((a, b) => Math.abs(Math.log(b / unit)) < Math.abs(Math.log(a / unit)) ? b : a);
@@ -1801,23 +1880,48 @@ function placeTip() {
   let x = ptr.x + 18, y = ptr.y + 20; if (x + w > innerWidth - 8) x = ptr.x - w - 16; if (y + h > innerHeight - 8) y = ptr.y - h - 16;
   tip.style.transform = `translate(${Math.max(8, x)}px,${Math.max(8, y)}px)`;
 }
+function langOf(id) { return LX.mini ? (LX.id === 'fro' ? (isNative(id) ? 'ancien français' : 'français') : LX.id === 'gaul' ? (isNative(id) ? 'gaulois' : 'français') : LX.id === 'arg' ? (isNative(id) ? 'argot des années 90' : 'français') : (isNative(id) ? COUSIN[LX.id][1] : 'français')) : 'français'; }
+function xrefShort(id) {   /* « aussi en : italien amore · espagnol amor … » (3 langues au plus) */
+  if (!XR.concepts) { loadXref(); return ''; }
+  const code = COUSIN[LX.id] ? LX.id : LX.id === 'fr' ? 'fr' : null; if (!code || !isNative(id) && LX.mini) return '';
+  const l = xrefOf(code, LX.words[id]).filter(x => !x.same).slice(0, 3); return l.length ? 'aussi en : ' + l.map(x => `${LANGNAME[x.code].toLowerCase()} <b>${esc(x.word)}</b>`).join(' · ') : '';
+}
 function tipHTML(g, i) {
   const x = g.nodes[i], df = defSync(x.wid);
   const dtxt = df === undefined ? 'chargement de la définition…' : df ? df.s : 'pas de définition dans le Wiktionnaire';
-  let h = `<strong>${esc(x.label)}</strong><span class="df ${df === undefined ? 'wait' : ''}">${esc(dtxt)}</span>`;
-  if (x.level === 0) h += `<em>soleil</em> · ${esc(g.sc.name)} · classe ${g.sc.sp}`;
-  else if (x.level === 1) { const p = x.pos; h += `<span class="xyz">x ${fmt(p.x)}  y ${fmt(p.y)}  z ${fmt(p.z)}</span><br>d ${fmtD(x.d)} u · lien <em>${Math.round(x.w * 100)} %</em> · n=${x.shell + 1}`; }
-  else if (x.level === 2) h += `en réserve · synonyme de <em>${esc(x.parents.map(p => g.nodes[p].label).slice(0, 2).join(', '))}</em><br>clique pour y aller`;
-  else h += `<em>antonyme</em> · l’antimatière de ${esc(g.label)}`;
+  const era = LX.mini && LX.tags && LX.tags[x.wid] ? LX.tags[x.wid] : '';
+  const meta = [posOf(x.wid), isLow(x.wid) ? 'familier' : '', langOf(x.wid), era].filter(Boolean).join(' · ');
+  let h = `<strong>${esc(x.label)}</strong><span class="df ${df === undefined ? 'wait' : ''}">${esc(dtxt)}</span><span class="lg">${esc(meta)}</span>`;
+  if (x.level === 1 && g.label) h += `<span class="lg">synonyme de ${esc(g.label)}</span>`;
+  else if (x.level === 2) h += `<span class="lg">synonyme de ${esc(x.parents.map(p => g.nodes[p].label).slice(0, 2).join(', '))}</span>`;
+  else if (x.level === 3) h += `<span class="lg">contraire de ${esc(g.label)}</span>`;
+  const xr = xrefShort(x.wid); if (xr) h += `<span class="lg xr">${xr}</span>`;
   return h;
 }
+/* panneau « coordonnées » : classe stellaire, X Y Z, distance, force du lien. Suit l'étoile survolée, sinon le soleil. */
+function coordsHTML(g, i) {
+  const x = g.nodes[i];
+  if (x.level === 0) return `<b>${esc(x.label)}</b> · soleil<br>${esc(g.sc.name)} · classe ${g.sc.sp}<br><span class="xyz">x +0,00  y +0,00  z +0,00 · d 0,00 u</span>`;
+  if (x.level === 1) { const p = x.pos; return `<b>${esc(x.label)}</b> · couche n=${x.shell + 1}<br><span class="xyz">x ${fmt(p.x)}  y ${fmt(p.y)}  z ${fmt(p.z)}</span><br>d ${fmtD(x.d)} u · lien ${Math.round(x.w * 100)} %`; }
+  if (x.level === 2) return `<b>${esc(x.label)}</b> · en réserve<br>synonyme de ${esc(x.parents.map(p => g.nodes[p].label).slice(0, 2).join(', '))}`;
+  return `<b>${esc(x.label)}</b> · antimatière<br>contraire de ${esc(g.label)}`;
+}
+function showCoords(g, i) {
+  const el = $('coords'); if (!el) return;
+  if (!g || STATE.mode !== 'field' || STATE.game) { el.classList.add('off'); return; }
+  const k = i != null && i >= 0 ? i : g.nodes.findIndex(n => n.level === 0);
+  if (k < 0) return; el.innerHTML = coordsHTML(g, k); el.classList.toggle('off', !STATE.xyz);
+}
 function onHoverChange(i, prev) {
-  if (STATE.mode !== 'field' || !cur || i < 0) { tip.classList.add('off'); return; }
+  if (STATE.mode !== 'field' || !cur) { tip.classList.add('off'); return; }
+  showCoords(cur, i);
+  if (i < 0) { tip.classList.add('off'); return; }
   tip.innerHTML = tipHTML(cur, i); tip.classList.remove('off'); placeTip();
   const g = cur, wid = g.nodes[i].wid;
   if (defSync(wid) === undefined) defOf(wid).then(() => { if (hov === i && cur === g) { tip.innerHTML = tipHTML(g, i); placeTip(); } });
+  if (!XR.concepts) loadXref().then(() => { if (hov === i && cur === g) { tip.innerHTML = tipHTML(g, i); placeTip(); } });
 }
-const HOMEREL = { fro: 'le français d’avant 1400, glosé en français moderne ; dates quand le Wiktionnaire les donne', gaul: 'langue celtique disparue, reconstruite à partir d’inscriptions et de mots cités', arg: 'le parler des cours de lycée des années 1990 : sélection éditoriale, non exhaustive', fr: 'langue romane · le grand dictionnaire', oc: 'langue d’oc, romane, voisine du français', ca: 'langue romane des Pyrénées orientales', it: 'langue romane, sœur par le latin', co: 'proche de l’italien de Toscane', es: 'langue romane de la péninsule Ibérique', pt: 'langue romane, cousine de l’espagnol', la: 'l’ancêtre commun des langues romanes', ro: 'langue romane isolée à l’est', br: 'langue celtique parlée en Bretagne', eu: 'isolat : aucune parenté connue', en: 'germanique, mais gorgé de mots venus du français', de: 'langue germanique' };
+const HOMEREL = { fro: 'le français du IXe au XIVe siècle (de 842 à 1350 environ), glosé en français moderne ; datation du mot quand le Wiktionnaire la donne', gaul: 'langue celtique disparue, reconstruite à partir d’inscriptions et de mots cités', arg: 'le parler des cours de lycée des années 1990 : sélection éditoriale, non exhaustive', fr: 'langue romane · le grand dictionnaire', oc: 'langue d’oc, romane, voisine du français', ca: 'langue romane des Pyrénées orientales', it: 'langue romane, sœur par le latin', co: 'proche de l’italien de Toscane', es: 'langue romane de la péninsule Ibérique', pt: 'langue romane, cousine de l’espagnol', la: 'l’ancêtre commun des langues romanes', ro: 'langue romane isolée à l’est', br: 'langue celtique parlée en Bretagne', eu: 'isolat : aucune parenté connue', en: 'germanique, mais gorgé de mots venus du français', de: 'langue germanique' };
 function setHomeHover(k) {
   if (k === HOME.hov) return; HOME.hov = k; canvas.classList.toggle('pointing', k >= 0);
   if (k < 0) { tip.classList.add('off'); return; }
@@ -1869,13 +1973,14 @@ function onTap(x, y) {
   activateNode(i);
 }
 let ENTERING = false;
-async function activateGalaxy(k) {
+async function activateGalaxy(k, word) {
   const G = HOME.items[k].G; if (ENTERING || STATE.mode !== 'home') return;
   if (!G.ready) { say(`Le dictionnaire <b>${esc(G.name)}</b> viendra plus tard.`); return; }
   ENTERING = true;
   try {
-    if (G.id !== LEXID) { say(`Ouverture de <b>${esc(G.name)}</b>…`, 2500); await useLex(G.id); TRAIL.length = 0; renderTrail(); }
-    HOME.entered = G.id; STATE.lang = G.id; FIELD_C.set(...G.pos); await enterField();
+    if (G.id !== LEXID) { say(`Ouverture de <b>${esc(G.name)}</b>…`, 2500); await useLex(G.id); resetTrail(); }
+    HOME.entered = G.id; STATE.lang = G.id; FIELD_C.set(...G.pos);
+    const wid = word ? find(word) : -1; await enterField(wid >= 0 ? wid : undefined);
   } catch (err) { say('Ce dictionnaire n’a pas pu s’ouvrir : ' + esc(err.message || err), 6000); await useLex('fr').catch(() => { }); HOME.entered = 'fr'; FIELD_C.set(0, 0, 0); }
   ENTERING = false;
 }
@@ -1909,9 +2014,29 @@ function goHome() {
 }
 $('home').addEventListener('click', goHome);
 
+/* ── « existe aussi en… » : équivalents dans les autres langues, avec téléportation ── */
+async function renderXref(g) {
+  const el = $('cXref'); el.hidden = true; el.innerHTML = '';
+  const code = COUSIN[LX.id] ? LX.id : LX.id === 'fr' ? 'fr' : null; if (!code || (LX.mini && !isNative(g.centre))) return;
+  await loadXref(); if (cur !== g || !XR.concepts) return;
+  const l = xrefOf(code, g.label); if (!l.length) return;
+  const mk = x => `<button class="chip xr ${x.same ? 'same' : ''}" data-code="${x.code}" data-word="${esc(x.word)}" title="${x.same ? 'même graphie : emprunt ou mot commun — ' : ''}téléporter vers ${LANGNAME[x.code]}"><small>${LANGNAME[x.code]}</small> ${esc(x.word)}</button>`;
+  const tr = l.filter(x => !x.same), sm = l.filter(x => x.same);
+  el.innerHTML = (tr.length ? `<div class="xl">se dit aussi · téléportation</div><div class="xc">${tr.map(mk).join('')}</div>` : '') + (sm.length ? `<div class="xl">même graphie dans</div><div class="xc">${sm.map(mk).join('')}</div>` : '');
+  el.hidden = false;
+}
+async function teleport(code, word) {
+  const k = GALAXIES.findIndex(x => x.id === code); if (k < 0 || !GALAXIES[k].ready || ENTERING) return;
+  say(`Téléportation vers <b>${esc(GALAXIES[k].name)}</b> : « ${esc(word)} »…`, 3200); GXA.riser && GXA.riser(1.6);
+  if (STATE.game) quitGame(false);
+  if (STATE.mode === 'field') goHome();
+  await sleep(700); await activateGalaxy(k, word);
+}
+$('cXref').addEventListener('click', e => { const b = e.target.closest('button.xr'); if (b) teleport(b.dataset.code, b.dataset.word); });
+
 /* ── passer d'un mot à l'autre ── */
-const TRAIL = [];
-function goWord(id, via) {
+const TRAIL = []; let TIDX = -1;   /* historique des mots visités, TIDX = mot affiché (en orange) */
+function goWord(id, via, opt) {
   if (STATE.mode !== 'field' || id == null || id < 0) return;
   const prev = cur; let origin; HOME.keepT = .32;
   if (via && via.g) origin = via.g.group.position.clone().addScaledVector(via.node.pos, revealOf(via.g, via.node));
@@ -1920,12 +2045,15 @@ function goWord(id, via) {
   const rel = origin.clone().sub(FIELD_C), L = rel.length(); if (L > 32) origin.copy(FIELD_C).addScaledVector(rel, 32 / L);
   const g = graphFromLexicon(id, prev ? prev.label : null, { ring: 16, per: 4, reserve: true });
   install(g, origin, prev ? 260 : 300);
-  if (!TRAIL.length || TRAIL[TRAIL.length - 1].id !== id) { TRAIL.push({ id, label: LX.words[id] }); if (TRAIL.length > 40) TRAIL.shift(); }
+  if (opt && opt.at != null) TIDX = opt.at;                                  /* retour / clic dans l'historique : on se déplace, on n'ajoute rien */
+  else if (!TRAIL.length || TRAIL[TIDX].id !== id) { TRAIL.length = TIDX + 1; TRAIL.push({ id, label: LX.words[id] }); if (TRAIL.length > 60) TRAIL.shift(); TIDX = TRAIL.length - 1; }
   try { history.replaceState(null, '', '#' + encodeURIComponent(LX.words[id])); } catch (_) { }
-  $('word').value = ''; renderSugg();
+  $('word').value = ''; renderSugg(); renderTrail();
   if (g.total === 0) say(`Aucun synonyme connu pour <b>${esc(g.label)}</b> dans le dictionnaire. Essaie un mot voisin.`, 6000);
   else if (g.total <= 2) say(`<b>${esc(g.label)}</b> n’a que ${g.total} synonyme${g.total > 1 ? 's' : ''} connu${g.total > 1 ? 's' : ''} : une étoile solitaire.`, 5200);
 }
+function goBack() { if (STATE.mode !== 'field' || STATE.game || TIDX <= 0) return; goWord(TRAIL[TIDX - 1].id, null, { at: TIDX - 1 }); }
+function resetTrail() { TRAIL.length = 0; TIDX = -1; renderTrail(); }
 function onInstall(g) {
   GXA.mood(g.sc); GXA.tick(1.2);
   const sc = g.sc;
@@ -1934,33 +2062,34 @@ function onInstall(g) {
   $('cDef').innerHTML = '<em>définition…</em>';
   defOf(g.centre).then(d => { if (cur !== g) return; const pos = posOf(g.centre);
     $('cDef').innerHTML = d ? `${pos ? `<em>${esc(pos)}</em> · ` : ''}${esc(d.l)}` : '<em>pas de définition dans le Wiktionnaire</em>'; });
-  const xyz = '<span class="xyz">x +0,00  y +0,00  z +0,00 · d 0,00 u</span>';
-  if (LX.mini) $('cMeta').innerHTML = `${wordEra(g.centre)}<br><b>${g.total}</b> mot${g.total > 1 ? 's' : ''} voisin${g.total > 1 ? 's' : ''} · taille <b>${sc.s.toFixed(1).replace('.', ',')}</b>/10<br>${LEXNOTE[LX.id]}<br>${xyz}`;
-  else $('cMeta').innerHTML = `<b>${g.total}</b> synonyme${g.total > 1 ? 's' : ''} · taille <b>${sc.s.toFixed(1).replace('.', ',')}</b>/10<br>rareté : <b>${sc.rare}</b> · fréquence ${sc.z.toFixed(1).replace('.', ',')}/8<br>${g.nAnt ? `<b>${g.nAnt}</b> contraire${g.nAnt > 1 ? 's' : ''} (étoile double)` : 'aucun contraire connu'}<br>${xyz}`;
+  if (LX.mini) $('cMeta').innerHTML = `${wordEra(g.centre)}<br><b>${g.total}</b> mot${g.total > 1 ? 's' : ''} voisin${g.total > 1 ? 's' : ''} · taille <b>${sc.s.toFixed(1).replace('.', ',')}</b>/10<br>${LEXNOTE[LX.id]}`;
+  else $('cMeta').innerHTML = `<b>${g.total}</b> synonyme${g.total > 1 ? 's' : ''} · taille <b>${sc.s.toFixed(1).replace('.', ',')}</b>/10<br>rareté : <b>${sc.rare}</b> · fréquence ${sc.z.toFixed(1).replace('.', ',')}/8<br>${g.nAnt ? `<b>${g.nAnt}</b> contraire${g.nAnt > 1 ? 's' : ''} (étoile double)` : 'aucun contraire connu'}`;
   $('cLink').href = 'https://fr.wiktionary.org/wiki/' + encodeURIComponent(g.label) + (LX.id === 'fro' ? '#fro' : LX.id === 'gaul' ? '#gaulois' : COUSIN[LX.id] && isNative(g.centre) ? '#' + COUSIN[LX.id][2] : '');
   $('trBtn').hidden = LX.mini;
   $('card').classList.remove('off'); $('card').classList.toggle('mini', SMALL);
   closeTr();
   const shown = g.nodes.filter(x => x.level === 1).length;
   $('stats').innerHTML = LX.mini ? `<b>${esc(LEXNAME[LX.id])}</b> · ${nf(LX.nNative)} mots<br><b>${shown}</b> voisins en orbite sur <b>${g.total}</b>` : `<b>${nf(LX.n)}</b> mots dans le dictionnaire<br><b>${shown}</b> synonymes en orbite sur <b>${g.total}</b>`;
-  renderTrail();
+  renderTrail(); showCoords(g, -1); renderXref(g);
 }
 /* langues cousines : mots de la langue (bleu clair) reliés à leurs équivalents français (ponts) et entre eux */
 const COUSIN = { it: ['Italien', 'italien', 'it'], es: ['Espagnol', 'espagnol', 'es'], pt: ['Portugais', 'portugais', 'pt'], ca: ['Catalan', 'catalan', 'ca'], oc: ['Occitan', 'occitan', 'oc'], ro: ['Roumain', 'roumain', 'ro'], co: ['Corse', 'corse', 'co'], la: ['Latin', 'latin', 'la'], br: ['Breton', 'breton', 'br'], eu: ['Basque', 'basque', 'eu'], en: ['Anglais', 'anglais', 'en'], de: ['Allemand', 'allemand', 'de'] };
-const LEXNAME = { fro: 'Ancien français', gaul: 'Gaulois', arg: 'Argot des années 90' }, LEXNOTE = { fro: 'les couleurs vont du blanc (ancien) au rouge (français d’aujourd’hui)', gaul: 'langue celtique, mots reconstruits ou attestés', arg: 'sélection éditoriale : mots du parler des années 1990' };
+const LEXNAME = { fro: 'Ancien français', gaul: 'Gaulois', arg: 'Argot des années 90' }, LEXNOTE = { fro: 'les couleurs vont du blanc (ancien, IXe–XIVe siècle) au rouge (français d’aujourd’hui)', gaul: 'langue celtique, mots reconstruits ou attestés', arg: 'sélection éditoriale : mots du parler des années 1990' };
 for (const k in COUSIN) { LEXNAME[k] = COUSIN[k][0]; LEXNOTE[k] = 'les voisins sont des mots de la langue ou leurs équivalents français : lien par le sens, pas par l’étymologie'; }
 function wordEra(id) {
   const nat = isNative(id), tag = LX.tags[id] || '';
-  if (LX.id === 'fro') return `<b>${nat ? 'ancien français' : 'français moderne'}</b>${tag ? ' · ' + esc(tag) : nat ? ' · avant 1400, date inconnue' : ''}`;
+  if (LX.id === 'fro') return `<b>${nat ? 'ancien français' : 'français moderne'}</b>${nat ? ' · IXe–XIVe siècle (842–v. 1350)' : ''}${tag && nat ? '<br>' + esc(tag) : ''}`;
   if (LX.id === 'gaul') return `<b>${nat ? 'gaulois' : 'français moderne'}</b>${nat ? ' · avant le Ve siècle' : ''}`;
   if (COUSIN[LX.id]) return `<b>${nat ? COUSIN[LX.id][1] : 'français'}</b>`;
   return `<b>${nat ? 'argot · années 90' : 'français courant'}</b>`;
 }
 function renderTrail() {
-  const t = TRAIL.slice(-7);
-  $('trail').innerHTML = t.map((x, k) => `${k ? '<i>→</i>' : ''}<button data-id="${x.id}" ${k === t.length - 1 ? 'aria-current="true"' : ''}>${esc(x.label)}</button>`).join('');
+  const n = TRAIL.length, W = 7, st = clamp(TIDX - 3, 0, Math.max(0, n - W)), t = TRAIL.slice(st, st + W);
+  $('back').disabled = TIDX <= 0;
+  $('trail').innerHTML = (st > 0 ? '<i>…</i>' : '') + t.map((x, k) => `${k || st > 0 ? '<i>→</i>' : ''}<button data-at="${st + k}" ${st + k === TIDX ? 'aria-current="true"' : ''}>${esc(x.label)}</button>`).join('') + (st + W < n ? '<i>→ …</i>' : '');
 }
-$('trail').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.getAttribute('aria-current') !== 'true') goWord(+b.dataset.id); });
+$('trail').addEventListener('click', e => { const b = e.target.closest('button'); if (b && b.getAttribute('aria-current') !== 'true') { const at = +b.dataset.at; goWord(TRAIL[at].id, null, { at }); } });
+$('back').addEventListener('click', goBack);
 $('cWord').addEventListener('click', () => { if (SMALL) $('card').classList.toggle('mini'); });
 
 /* ── traductions : liste verticale, 20 langues les plus parlées ── */
@@ -2003,8 +2132,8 @@ $('mic').addEventListener('click', () => {
   GXA.start();
   if (!SRC) { say('La dictée vocale n’existe pas dans ce navigateur. Utilise Chrome, Edge ou Safari — ou écris le mot.'); return; }
   if (dict) { try { dict.stop(); } catch (_) { } return; }
-  const r = dict = new SRC(); r.lang = 'fr-FR'; r.interimResults = true; r.maxAlternatives = 1;
-  $('mic').classList.add('listening');
+  const r = dict = new SRC(); r.lang = voiceLang(); r.interimResults = true; r.maxAlternatives = 1;
+  $('mic').classList.add('listening'); if (voiceNote()) say('Pas de dictée native pour cette langue : j’écoute avec le reconnaisseur <b>' + voiceNote() + '</b>, le plus proche. Parle lentement, ou écris le mot.', 5200);
   r.onresult = ev => { let t = ''; for (const res of ev.results) t += res[0].transcript; $('word').value = t.replace(/[.!?]/g, '').trim(); renderSugg(); if (ev.results[ev.results.length - 1].isFinal) { try { r.stop(); } catch (_) { } $('form').requestSubmit(); } };
   r.onerror = ev => { if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') say('Le micro est bloqué. Autorise-le dans la barre d’adresse, ou écris le mot.'); else if (ev.error !== 'no-speech' && ev.error !== 'aborted') say('Dictée interrompue (' + esc(ev.error) + ').'); };
   r.onend = () => { dict = null; $('mic').classList.remove('listening'); };
@@ -2013,8 +2142,8 @@ $('mic').addEventListener('click', () => {
 
 /* ── réglages, aide, clavier ── */
 function bindToggle(id, key, cb) { const b = $(id); b.addEventListener('click', () => { STATE[key] = !STATE[key]; b.setAttribute('aria-pressed', STATE[key]); cb && cb(); }); }
-bindToggle('bXYZ', 'xyz'); bindToggle('bAnt', 'ant', () => { if (STATE.ant) say('<b>Antimatière</b> : les contraires apparaissent, en rouge, sur une couche inclinée.', 4200); });
-bindToggle('bRot', 'rot');
+bindToggle('bXYZ', 'xyz', () => showCoords(cur, typeof hov === 'number' ? hov : -1)); bindToggle('bAnt', 'ant', () => { if (STATE.ant) say('<b>Antimatière</b> : les contraires apparaissent, en rouge, sur une couche inclinée.', 4200); });
+bindToggle('bRot', 'rot', () => say(STATE.rot ? '<b>Dérive</b> : la caméra et la gravitation des astres reprennent doucement.' : '<b>Dérive coupée</b> : plus rien ne tourne, ni la caméra ni les orbites.', 3600));
 /* son : la puce ouvre un petit panneau (réglette de volume, ambiance, couper) */
 const sndBox = $('sndBox');
 function sndUI() {
@@ -2047,6 +2176,7 @@ $('bHelp').addEventListener('click', openHelp); $('bClose').addEventListener('cl
 $('help').addEventListener('click', e => { if (e.target === $('help')) $('help').hidden = true; });
 addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (!sndBox.hidden) sndToggle(false); else if (!$('help').hidden) $('help').hidden = true; else if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return; }
+  if ((e.key === 'Backspace' || (e.key === 'ArrowLeft' && e.altKey)) && STATE.mode === 'field' && !STATE.game && !/INPUT|TEXTAREA/.test((document.activeElement || {}).tagName || '') && $('help').hidden) { e.preventDefault(); goBack(); return; }
   if (e.key === '/' && STATE.mode === 'field' && !STATE.game && document.activeElement !== $('word') && document.activeElement !== $('gmInput')) { e.preventDefault(); $('word').focus(); }
 });
 
@@ -2069,17 +2199,31 @@ async function penTitle() {
   sub.style.transition = 'opacity 1.6s'; sub.style.opacity = 1;
 }
 
+/* ── « Au commencement était le verbe », dans chaque langue, toutes les 4 secondes, en fondu lent (Jean 1, 1) ── */
+const ADAGES = [['fr', 'français', 'Au commencement était le verbe'], ['la', 'latin', 'In principio erat Verbum'], ['it', 'italien', 'In principio era il Verbo'], ['es', 'espagnol', 'En el principio era el Verbo'],
+  ['pt', 'portugais', 'No princípio era o Verbo'], ['ca', 'catalan', 'Al principi era el Verb'], ['oc', 'occitan', 'Al començament èra lo Verb'], ['ro', 'roumain', 'La început era Cuvântul'],
+  ['co', 'corse', 'À principiu ci era a Parola'], ['br', 'breton', 'Er penn-kentañ e oa ar Ger'], ['eu', 'basque', 'Hasieran bazen Hitza'], ['en', 'anglais', 'In the beginning was the Word'], ['de', 'allemand', 'Im Anfang war das Wort']];
+(function adage() {
+  const box = $('adage'), tx = $('adageTxt'), lg = $('adageLg'); let k = 0;
+  const show = () => {
+    const a = ADAGES[k++ % ADAGES.length]; tx.textContent = a[2]; tx.lang = a[0]; lg.textContent = a[1];
+    requestAnimationFrame(() => box.classList.add('on'));
+    setTimeout(() => box.classList.remove('on'), 2500);
+  };
+  show(); setInterval(() => { if (!document.hidden) show(); }, 4000);
+})();
+
 /* ═════════════ Galexico · 5b. Le dé « Quizz » ═════════════
-   Un cube orange à arêtes arrondies, en vraie 3D (second petit rendu WebGL), qui roule au hasard. Ses six faces portent la même lettre,
-   la première de l'alphabet, dans six écritures : phénicien (aleph), hébreu (alef), arabe (alif), grec (alpha), latin (A) et cyrillique (А).
+   Un cube orange à arêtes arrondies, en vraie 3D (second petit rendu WebGL), qui roule au hasard. Ses six faces portent le son « a »
+   dans six écritures : latin (A), grec (α), arabe (alif), chinois (阿), guèze d'Éthiopie (አ, Afrique subsaharienne) et devanagari (अ, Inde).
    Les contours viennent de Noto Sans (SIL OFL), convertis en tracés vectoriels : aucune police à charger. */
 const DIE_FACES = [
-  { k: 'latin', n: 'latin', k2: 1, d: 'M752.4 1000 675.7 765.7H324.3L247.6 1000H17.4L367.5 -0H629.7L982.6 1000ZM557.2 371Q551.6 350.1 539.7 308.2Q527.9 266.4 516.7 222.5Q505.6 178.5 498.6 150.6Q493 182.7 482.6 224.5Q472.1 266.4 462.3 305.4Q452.6 344.5 445.6 371L374.5 587.2H626.9Z' },
-  { k: 'greek', n: 'grec', k2: 1, d: 'M752.4 1000 675.7 765.7H324.3L247.6 1000H17.4L367.5 -0H629.7L982.6 1000ZM557.2 371Q551.6 350.1 539.7 308.2Q527.9 266.4 516.7 222.5Q505.6 178.5 498.6 150.6Q493 182.7 482.6 224.5Q472.1 266.4 462.3 305.4Q452.6 344.5 445.6 371L374.5 587.2H626.9Z' },
-  { k: 'cyrillic', n: 'cyrillique', k2: 1, d: 'M752.4 1000 675.7 765.7H324.3L247.6 1000H17.4L367.5 -0H629.7L982.6 1000ZM557.2 371Q551.6 350.1 539.7 308.2Q527.9 266.4 516.7 222.5Q505.6 178.5 498.6 150.6Q493 182.7 482.6 224.5Q472.1 266.4 462.3 305.4Q452.6 344.5 445.6 371L374.5 587.2H626.9Z' },
-  { k: 'hebrew', n: 'hébreu', k2: 1, d: 'M717.9 983.2Q647.4 861.4 580.9 756.4Q514.4 651.4 446.3 554.5Q378.2 457.5 301.3 364.6Q269.2 324.5 230 274Q190.7 223.6 151.4 173.9Q112.2 124.2 80.1 82.5Q48.1 40.9 27.2 16.8H325.3Q355.8 53.7 392.6 104.2Q429.5 154.6 467.1 205.9Q504.8 257.2 533.7 298.9Q607.4 409.5 685.9 520.8Q764.4 632.2 844.6 746.8Q924.7 861.4 1000 983.2ZM0 983.2 38.5 725.2Q52.9 637 81.7 559.3Q110.6 481.6 171.5 420.7Q232.4 359.8 339.7 329.3L411.9 486.4Q363.8 504 338.1 542.5Q312.5 580.9 301.3 631.4Q290.1 681.9 280.4 739.6L243.6 983.2ZM658.7 592.1 586.5 435.1Q642.6 415.9 670.7 377.4Q698.7 338.9 712.3 287.7Q726 236.4 730.8 181.9L751.6 16.8H993.6L974.4 196.3Q966.3 282.9 933.5 361.4Q900.6 439.9 833.3 499.2Q766 558.5 658.7 592.1Z' },
-  { k: 'arabic', n: 'arabe', k2: .78, d: 'M418.7 1000 390 0H581.3L610 1000Z' },
-  { k: 'phoenician', n: 'phénicien', k2: 1, d: 'M562.4 1000Q547.5 918.6 531.2 843.3Q514.9 768 495.9 697.4Q368.4 701.5 270.7 702.8Q173 704.2 124.2 704.2Q3.4 704.2 3.4 621.4Q3.4 580.7 29.2 550.2Q55 519.7 101.1 487.1Q166.2 442.3 233.4 396.2Q300.5 350.1 371.1 303.9Q348 240.2 322.3 177.7Q296.5 115.3 269.3 51.6L377.9 0Q403.7 58.3 428.8 116.7Q453.9 175 475.6 234.7Q544.8 190 616.7 145.2Q688.6 100.4 763.2 57L812.1 156Q733.4 200.8 658.8 245.6Q584.1 290.4 512.2 335.1Q535.3 397.6 555.6 461.3Q576 525.1 593.6 588.9Q691.3 584.8 789 579.4Q886.7 573.9 981.7 568.5L996.6 675.7Q900.3 681.1 805.3 685.9Q710.3 690.6 622.1 693.4Q639.8 759.8 653.3 827.7Q666.9 895.5 679.1 964.7ZM132.3 602.4Q216.4 601.1 300.5 598.4Q384.7 595.7 467.4 594.3Q453.9 545.5 438.3 498Q422.7 450.5 406.4 404.3Q263.9 498 129.6 595.7Z' }
+  { k: 'latin', n: 'latin', k2: 1, d: 'M815.2 1000 695.3 691.8H300.6L182 1000H55.1L444.2 -0H557.2L944.9 1000ZM546 278.9Q541.8 267.8 532.1 238.5Q522.3 209.2 513.2 177.8Q504.2 146.4 498.6 129.7Q488.8 172.9 476.3 214.1Q463.7 255.2 455.4 278.9L342.4 580.2H657.6Z' },
+  { k: 'greek', n: 'grec', k2: 1, d: 'M401.1 1000Q228.4 1000 118.7 875Q9 750 9 503.6Q9 259 116 129.5Q223 0 408.3 0Q509 0 584.5 41.4Q660.1 82.7 706.8 149.3H714L737.4 18H863.3V769.8Q863.3 825.5 884.9 848Q906.5 870.5 937.1 870.5Q951.4 870.5 967.6 866.9Q983.8 863.3 991 861.5V976.6Q978.4 983.8 949.6 991.9Q920.9 1000 890.3 1000Q823.7 1000 779.7 967.6Q735.6 935.3 715.8 852.5H703.2Q658.3 917.3 583.6 958.6Q509 1000 401.1 1000ZM433.5 868.7Q582.7 868.7 644.8 783.3Q706.8 697.8 706.8 512.6V501.8Q706.8 321.9 646.6 226.6Q586.3 131.3 431.7 131.3Q300.4 131.3 236.5 227.5Q172.7 323.7 172.7 505.4Q172.7 868.7 433.5 868.7Z' },
+  { k: 'arabic', n: 'arabe', k2: 0.78, d: 'M418.7 1000 390 0H581.3L610 1000Z' },
+  { k: 'zh', n: 'chinois', k2: 0.94, d: 'M340.1 32.9V113.4H820.9V892.3C820.9 915 812.9 921.8 788 921.8C764.2 924 680.3 924 590.7 920.6C602 943.3 614.5 977.3 619 997.7C735.8 998.9 805 998.9 845.8 985.3C885.5 973.9 902.5 950.1 902.5 892.3V113.4H1000V32.9ZM378.7 273.2V771H452.4V684.8H699.5V273.2ZM452.4 348.1H623.6V611.1H452.4ZM0 4.5V998.9H76V81.6H226.8C201.8 157.6 168.9 257.4 136.1 337.9C217.7 428.6 238.1 506.8 238.1 569.2C238.1 603.2 232.4 636.1 214.3 648.5C205.2 654.2 192.7 657.6 179.1 658.7C161 659.9 138.3 658.7 113.4 656.5C125.9 679.1 133.8 712 133.8 732.4C159.9 733.6 188.2 733.6 210.9 730.2C233.6 727.9 254 721.1 269.8 709.8C301.6 685.9 314.1 638.3 314.1 577.1C314.1 505.7 295.9 424 213.2 328.8C251.7 238.1 292.5 127 325.4 34L271 1.1L257.4 4.5Z' },
+  { k: 'geez', n: 'guèze', k2: 1, d: 'M168.3 1000 432 359Q304.3 354.8 240.5 293.8Q176.7 232.8 176.7 106.6V0H304.3V95.4Q304.3 186.5 339.4 217.4Q374.5 248.2 447.4 248.2H611.5L527.3 458.6Q605.9 488.1 670.4 550.5Q734.9 612.9 777 721.6Q819.1 830.3 831.7 1000H704.1Q697.1 872.4 666.2 788.2Q635.3 704.1 587.7 652.9Q540 601.7 481.1 572.2L310 1000Z' },
+  { k: 'deva', n: 'devanagari', k2: 1, d: 'M594.7 633.3Q594.7 730.7 530.7 784.7Q466.7 838.7 368 838.7Q288 838.7 224.7 803.3Q161.3 768 106.7 686Q52 604 0 462.7L94.7 424Q149.3 580 210.7 660.7Q272 741.3 358.7 741.3Q417.3 741.3 453.3 710Q489.3 678.7 489.3 621.3Q489.3 574.7 462 538.7Q434.7 502.7 396 474.7Q345.3 489.3 277.3 494.7L256 400Q340 389.3 385.3 372.7Q430.7 356 448.7 330.7Q466.7 305.3 466.7 269.3Q466.7 225.3 438.7 199.3Q410.7 173.3 356 173.3Q310.7 173.3 267.3 186.7Q224 200 181.3 226.7L146.7 133.3Q193.3 106.7 246 92.7Q298.7 78.7 360 78.7Q436 78.7 483.3 105.3Q530.7 132 552 175.3Q573.3 218.7 573.3 270.7Q573.3 322.7 553.3 364Q533.3 405.3 488 434.7L490.7 437.3Q522.7 445.3 556.7 448.7Q590.7 452 621.3 452Q652 452 685.3 448Q718.7 444 753.3 436V186.7H656V92H1000V186.7H861.3V921.3H753.3V534.7Q726.7 541.3 698.7 544Q670.7 546.7 642.7 546.7Q609.3 546.7 570.7 541.3Q594.7 586.7 594.7 633.3Z' }
 ];
 (function () {
   const cv = $('dieCv'), fb = document.querySelector('.die-fb'); if (!cv) return;
@@ -2098,7 +2242,7 @@ const DIE_FACES = [
     const S = 256, c = document.createElement('canvas'); c.width = c.height = S; const x = c.getContext('2d');
     const gr = x.createLinearGradient(0, 0, S, S); gr.addColorStop(0, '#ffb25a'); gr.addColorStop(.55, '#f58a2d'); gr.addColorStop(1, '#e26b22'); x.fillStyle = gr; x.fillRect(0, 0, S, S);
     const nz = x.getImageData(0, 0, S, S), d = nz.data; for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - .5) * 9; d[i] += n; d[i + 1] += n; d[i + 2] += n; } x.putImageData(nz, 0, 0);
-    const box = 138 * F.k2 * (F.k === 'arabic' ? 1 : 1), p = new Path2D(F.d), ox = (S - box) / 2, oy = (S - box) / 2 - 10;
+    const box = 138 * F.k2, p = new Path2D(F.d), ox = (S - box) / 2, oy = (S - box) / 2 - 10;
     x.save(); x.translate(ox, oy + 1.6); x.scale(box / 1000, box / 1000); x.fillStyle = 'rgba(255,226,180,.55)'; x.fill(p); x.restore();
     x.save(); x.translate(ox, oy); x.scale(box / 1000, box / 1000); x.fillStyle = '#3b1805'; x.fill(p); x.restore();
     x.fillStyle = 'rgba(59,24,5,.62)'; x.font = '500 17px "DM Mono",ui-monospace,monospace'; x.textAlign = 'center'; x.fillText(F.n, S / 2, S - 26);
@@ -2111,7 +2255,7 @@ const DIE_FACES = [
     let nx = px - qx, ny = py - qy, nz = pz - qz; const L = Math.hypot(nx, ny, nz) || 1; nx /= L; ny /= L; nz /= L;
     P.setXYZ(i, qx + nx * .15, qy + ny * .15, qz + nz * .15); N.setXYZ(i, nx, ny, nz);
   }
-  const FACE_ORDER = [1, 2, 4, 3, 0, 5];   /* +x grec, -x cyrillique, +y hébreu, -y arabe, +z latin, -z phénicien */
+  const FACE_ORDER = [1, 3, 5, 2, 0, 4];   /* +x grec, -x chinois, +y devanagari, -y arabe, +z latin, -z guèze */
   const mats = FACE_ORDER.map(k => new THREE.MeshPhysicalMaterial({ map: faceTex(DIE_FACES[k]), roughness: .34, metalness: 0, clearcoat: .85, clearcoatRoughness: .18 }));
   const die = new THREE.Mesh(geo, mats); die.scale.setScalar(1.62); sc.add(die);
   die.quaternion.setFromEuler(new THREE.Euler(-.45, .6, .1));
@@ -2156,7 +2300,7 @@ const gmFoundEl = $('gmFound');
 /* ── choix du mot ── */
 function pickGameWord(level) {
   const need = Math.ceil(level * 1.25);
-  if (LX.mini) { const c = []; for (let i = 0; i < LX.n; i++) if (isNative(i) && nbrs(i).length >= need) c.push(i); if (c.length) return c[Math.floor(Math.random() * c.length)]; }
+  if (LX.mini) { const c = []; for (let i = 0; i < LX.n; i++) if (isNative(i) && nbrs(i).length >= need) c.push(i); if (c.length) { const common = c.filter(i => LX.zipf[i] >= 90); const pool = common.length >= 20 ? common : c; return pool[Math.floor(Math.random() * pool.length)]; } }
   for (let t = 0; t < 3000; t++) {
     const id = randomId({ minDeg: Math.min(need, 40), maxId: level >= 16 ? 60000 : 30000 });
     if (nbrs(id).length >= need) return id;
@@ -2165,16 +2309,20 @@ function pickGameWord(level) {
   return randomId();
 }
 
+/* ── langue du jeu ── */
+const gameWhere = () => LX.id === 'arg' ? ' dans l’argot des années 90' : LX.id === 'fro' ? ' en ancien français' : LX.id === 'gaul' ? ' en gaulois' : COUSIN[LX.id] ? ' en ' + COUSIN[LX.id][1] : '';
+const gameLang = () => LX.id === 'fro' || LX.id === 'gaul' ? ' (en français d’aujourd’hui)' : COUSIN[LX.id] ? ' (en ' + COUSIN[LX.id][1] + ')' : '';
+
 /* ── fenêtre de niveau ── */
 function openGameModal() {
   if (STATE.mode !== 'field' || STATE.game) return;
   GXA.start();
-  if (LX.mini && !LX.maxLevel) { say('Le <b>Quizz</b> se joue à voix haute : il marche en français et en argot. Ici, on explore.', 5200); return; }
+  if (!LX.maxLevel) { say('Ce dictionnaire est encore trop petit pour un <b>Quizz</b> : pas assez de mots avec plusieurs synonymes. Ici, on explore.', 5200); return; }
   const LV = LEVELS.filter(l => l[0] <= (LX.maxLevel || 32));
   let sel = LV.some(l => l[0] === GM.level) ? GM.level : LV[Math.min(1, LV.length - 1)][0];
   $gm.modal.innerHTML = `<div class="gm-card" role="dialog" aria-labelledby="gmT">
     <h3 id="gmT">Le jeu</h3>
-    <p>Un mot tiré au sort${LX.id === 'arg' ? ' dans l’argot des années 90' : ''}. Une minute. Dites à voix haute autant de ses synonymes que possible : chaque mot juste allume une étoile de sa constellation. Ceux qui manquent deviennent des devinettes de vingt secondes.</p>
+    <p>Un mot tiré au sort${gameWhere()}. Une minute. Dites à voix haute autant de ses synonymes que possible${gameLang()} : chaque mot juste allume une étoile de sa constellation. Ceux qui manquent deviennent des devinettes de vingt secondes.</p>
     <div class="lvls">${LV.map(l => `<button class="lvl ${l[0] === sel ? 'sel' : ''}" data-n="${l[0]}" aria-label="${l[0]} synonymes, ${l[1]}">${l[0]}</button>`).join('')}</div>
     <div class="lvlname" id="gmLvlName"></div>
     <p>Combien de synonymes à trouver ? Le navigateur va demander l’accès au micro : parlez à voix haute, à tour de rôle ou tous ensemble. Sans micro, on tape les réponses.</p>
@@ -2217,8 +2365,8 @@ const gkey = s => norm(s).replace(/['’\-]/g, ' ').replace(/[^a-z0-9 ]+/g, '').
 function micUI(on, txt) { if (txt) GM.micMsg = txt; $('gmMic').classList.toggle('on', on); $('gmMicTxt').textContent = txt || (on ? 'le micro écoute' : (GM.noMic && GM.micMsg) || 'micro coupé'); }
 function startRec(onStart) {
   if (!SRC) { micUI(false, 'pas de dictée ici : tapez les réponses'); GM.noMic = true; return false; }
-  const r = GM.rec = new SRC(); r.lang = 'fr-FR'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
-  r.onstart = () => { GM.micOn = true; micUI(true); onStart && onStart(); };
+  const r = GM.rec = new SRC(); r.lang = voiceLang(); r.continuous = true; r.interimResults = true; r.maxAlternatives = 3;
+  r.onstart = () => { GM.micOn = true; micUI(true, voiceNote() ? 'le micro écoute (reconnaisseur ' + voiceNote() + ')' : ''); onStart && onStart(); };
   r.onresult = ev => {
     const line = []; let last = '';
     for (let i = 0; i < ev.results.length; i++) { const res = ev.results[i];
@@ -2310,7 +2458,8 @@ function maskDef(def, label) {
 }
 function clueFor(m) {
   const nu = NUANCE[gkey(GM.label) + '>' + gkey(m.label)];
-  const d = defSync(m.id); const dd = d ? maskDef(d.s, m.label) : '';
+  const d = defSync(m.id); let dd = d ? maskDef(d.s, m.label) : '';
+  if (d && /^≈/.test(d.s)) dd = 'En français : « ' + d.s.replace(/^≈\s*/, '') + ' ».';
   if (nu) return { clue: nu, sub: dd };
   if (dd) {
     const weak = dd.length < 16 || gkey(dd).split(' ').includes(gkey(GM.label));
